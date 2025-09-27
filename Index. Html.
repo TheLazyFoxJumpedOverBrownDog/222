@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Up Complete! (Finally)</title>
+    <style>
+        /* Basic Reset for Mobile */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffe0f0; /* Light Pink Background */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        /* Container for Mobile Centering */
+        .container {
+            max-width: 600px; /* Standard mobile width */
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #ff69b4; /* Hot Pink Header */
+            color: white;
+            padding: 30px 10px;
+            border-bottom: 5px solid #ff1493;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 25px 15px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            color: #ff69b4;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-bottom: 2px dashed #ffb6c1;
+            padding-bottom: 10px;
+        }
+
+        /* Wisdom List Styling */
+        .wisdom-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .wisdom-list li {
+            background-color: #fff0f5; /* Very Light Pink */
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 1.1em;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .wisdom-list li::before {
+            content: '✅'; /* Checkmark icon */
+            position: absolute;
+            left: 5px;
+        }
+
+        /* Sincere Message Styling */
+        .sincere-message {
+            background-color: #ffb6c1; /* Light Salmon/Pink */
+            color: #8b0000; /* Dark Red Text */
+            padding: 30px;
+            font-size: 1.4em;
+            font-weight: bold;
+            line-height: 1.4;
+            border: 3px solid #ff1493;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            padding: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>[GF's Name], Level Up Complete (Finally)</h1>
+        <p>This is a mobile-optimized website because you're already obsessed with your phone.</p>
+    </header>
+
+    <div class="container">
+
+        <section>
+            <h2>Proof You're Getting Wiser</h2>
+            <ul class="wisdom-list">
+                <li>Has only complained about doing the dishes <strong>4</strong> times this week.</li>
+                <li>Managed to not lose your keys <strong>2 days</strong> in a row.</li>
+                <li>Now (mostly) knows the difference between a badger and a raccoon.</li>
+                <li>Figured out that 'low battery' means "plug it in *now*."</li>
+                <li>Successfully went **3 hours** without mentioning the dog/cat/pet.</li>
+                <li>Finally, after all these years, achieved <strong>Max Level Cuddler</strong>.</li>
+            </ul>
+        </section>
+
+        <section class="sincere-message">
+            <p>Wait, No, Seriously...</p>
+            <p>You are, without a doubt, the most incredible person I've ever met. Every year with you is an adventure I never want to end. Happy Birthday, my love. **Now go eat some cake.**</p>
+        </section>
+
+        <section>
+            <h2>Your Birthday Mission (The Final Level)</h2>
+            <img src="https://via.placeholder.com/200x200/ff69b4/ffffff?text=FAKE+GIFT+BOX" alt="Placeholder for a funny gift box image" style="width: 150px; height: 150px; border-radius: 5px; margin: 10px 0;">
+            <p style="font-size: 1.1em;">The box above contains your first hint. Open it and then follow the next instructions carefully...</p>
+            <p style="font-weight: bold; color: #ff1493;">(Check your favorite spot in the living room for the *real* mission!)</p>
+        </section>
+
+    </div>
+
+    <footer>
+        Proudly Designed & Hosted by Your Adoring, Yet Sarcastic, Boyfriend.
+        <br>
+        © [Current Year] | All rights reserved (especially the sarcasm).
+    </footer>
+
+</body>
+</html>
