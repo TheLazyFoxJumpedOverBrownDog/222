@@ -1,56 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giới thiệu phim Inception</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #0b0c10;
+      color: #f5f5f5;
+    }
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
+    header {
+      background: linear-gradient(90deg, #141e30, #243b55);
+      padding: 20px;
+      text-align: center;
+    }
 
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
 
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
 
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+    .poster {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .poster img {
+      width: 60%;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+    }
+
+    .info {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 12px;
+    }
+
+    footer {
+      background: #111;
+      text-align: center;
+      padding: 10px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+
+    @media (max-width: 600px) {
+      .poster img {
+        width: 100%;
+      }
+      iframe {
+        height: 250px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
+  <header>
+    <h1>🎬 Inception (2010)</h1>
+    <p>Hành trình vào trong những giấc mơ</p>
+  </header>
 
-      </div>
+  <div class="container">
+    <div class="poster">
+      <img src="https://m.media-amazon.com/images/I/51A6JdZHm9L._AC_.jpg" alt="Poster phim Inception">
+    </div>
 
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
+    <div class="info">
+      <h2>Tóm tắt nội dung</h2>
+      <p>
+        *Inception* (Kẻ Đánh Cắp Giấc Mơ) là một bộ phim khoa học viễn tưởng của đạo diễn Christopher Nolan.  
+        Phim kể về Dom Cobb, một "kẻ trộm" đặc biệt có khả năng xâm nhập vào tiềm thức của người khác để đánh cắp bí mật.  
+        Nhiệm vụ lần này không phải là đánh cắp, mà là **gieo một ý tưởng vào tâm trí đối phương** – điều tưởng chừng không thể.
+      </p>
+      <p><strong>Thể loại:</strong> Khoa học viễn tưởng, Hành động, Tâm lý</p>
+      <p><strong>Thời lượng:</strong> 148 phút</p>
+      <p><strong>Đạo diễn:</strong> Christopher Nolan</p>
+      <p><strong>Diễn viên chính:</strong> Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page, Tom Hardy</p>
+    </div>
+
+    <div class="trailer">
+      <h2>Trailer chính thức</h2>
+      <iframe src="https://www.youtube.com/embed/YoHD9XEInc0" allowfullscreen></iframe>
     </div>
   </div>
-</body>
 
+  <footer>
+    <p>&copy; 2025 - Trang web demo giới thiệu phim Inception</p>
+  </footer>
+</body>
 </html>
