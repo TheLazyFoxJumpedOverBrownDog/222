@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Endless Runner</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+</head>
+<body>
+<script>
+class RunnerGame extends Phaser.Scene {
+    constructor() {
+        super('runner');
+    }
+
+    preload() {
+        // Simple shapes if no images
+        this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
+        this.load.image('player', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
+        this.load.image('obstacle', 'https://labs.phaser.io/assets/sprites/red.png');
+    }
+
+    create() {
+        // Ground
+        this.grounds = this.physics.add.staticGroup();
+        for (let i = 0; i < 800; i += 200) {
+            this.grounds.create(i, 580, 'ground').setScale(1, 0.5).refreshBody();
+        }
+
+        // Player
+        this.player = this.physics.add.sprite(100, 450, 'player').setScale(0.5);
+        this.player.setCollideWorldBounds(true);
+        this.physics.add.collider(this.player, this.grounds);
+
+        // Controls
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.input.on('pointerdown', () => this.jump());
+
+        // Obstacles
+        this.obstacles = this.physics.add.group();
+        this.time.addEvent({
+            delay: 1500,
+            callback: this.spawnObstacle,
+            callbackScope: this,
+            loop: true
+        });
+
+        // Collision
+        this.physics.add.collider(this.player, this.obstacles, this.gameOver, null, this);
+
+        // Score
+        this.score = 0;
+        this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '24px', fill: '#fff' });
+        this.time.addEvent({
+            delay: 200,
+            callback: () => { this.score++; this.scoreText.setText('Score: ' + this.score); },
+            loop: true
+        });
+    }
+
+    jump() {
+        if (this.player.body.touching.down) {
+            this.player.setVelocityY(-400);
+        }
+    }
+
+    spawnObstacle() {
+        const obstacle = this.obstacles.create(800, 530, 'obstacle');
+        obstacle.setVelocityX(-200);
+        obstacle.setCollideWorldBounds(false);
+        obstacle.setImmovable(true);
+    }
+
+    gameOver() {
+        this.physics.pause();
+        this.player.setTint(0xff0000);
+        this.add.text(300, 300, 'Game Over', { fontSize: '40px', fill: '#f00' });
+    }
+
+    update() {
+        if (this.cursors.up.isDown) {
+            this.jump();
+        }
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    backgroundColor: '#87CEEB',
+    physics: { default: 'arcade', arcade: { gravity: { y: 600 }, debug: false } },
+    scene: RunnerGame
+};
+
+new Phaser.Game(config);
+</script>
+</body>
+</html>
