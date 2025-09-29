@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PVZ Mini</title>
+<style>
+  body{margin:0;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;padding:10px;background:#e6f7df}
+  #top{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  button{padding:6px 10px;border-radius:6px;border:0;background:#4caf50;color:#fff;font-weight:600}
+  canvas{background:#a7d37a;border-radius:10px;box-shadow:0 6px 14px rgba(0,0,0,.12)}
+</style>
+</head>
+<body>
+  <div id="top">
+    <button id="plantBtn">Tanam 🌻</button>
+    <div>Sun: <span id="sun">5</span></div>
+  </div>
+  <canvas id="board" width="720" height="200"></canvas>
+<script>
+const canvas=document.getElementById('board'),ctx=canvas.getContext('2d');
+const cols=9,cellW=canvas.width/cols;let sun=5;document.getElementById('sun').textContent=sun;
+const grid=Array(cols).fill(null),zombies=[];let tick=0,gameOver=false;
+function rng(){return Math.random();}
+function spawnZombie(){zombies.push({x:canvas.width+20,hp:3,speed:0.5+Math.random()*0.4});}
+function update(dt){if(gameOver)return;tick+=dt;if(tick>1){if(rng()<0.4)spawnZombie();tick=0;}
+for(let z of zombies)z.x-=z.speed*(dt*60);
+for(let c=0;c<cols;c++){if(!grid[c])continue;if(Math.random()<0.15){for(let z of zombies){if(z.x>c*cellW){z.hp--;break;}}}}
+for(let i=zombies.length-1;i>=0;i--){if(zombies[i].hp<=0){zombies.splice(i,1);sun++;document.getElementById('sun').textContent=sun;}}
+for(let z of zombies)if(z.x<20)gameOver=true;}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);
+for(let i=0;i<cols;i++){ctx.fillStyle='#cfe8b7';ctx.fillRect(i*cellW,0,cellW,canvas.height);ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.strokeRect(i*cellW,0,cellW,canvas.height);}
+for(let i=0;i<cols;i++){if(grid[i]){ctx.font='32px serif';ctx.fillText('🌻',i*cellW+cellW/2-12,canvas.height/2+12);}}
+ctx.font='36px serif';for(let z of zombies)ctx.fillText('🧟',z.x,canvas.height/2+12);
+if(gameOver){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#fff';ctx.font='28px sans-serif';ctx.fillText('Game Over — Refresh!',canvas.width/2-160,canvas.height/2);}}
+let last=performance.now();function loop(now){const dt=(now-last)/1000;last=now;update(dt);draw();requestAnimationFrame(loop);}requestAnimationFrame(loop);
+canvas.addEventListener('pointerdown',e=>{if(gameOver)return;const r=canvas.getBoundingClientRect();
+const x=(e.clientX-r.left)*(canvas.width/r.width);const col=Math.floor(x/cellW);
+if(col<0||col>=cols)return;if(grid[col])return;if(sun<1)return alert('Sun kurang');
+grid[col]={};sun--;document.getElementById('sun').textContent=sun;});
+document.getElementById('plantBtn').addEventListener('click',()=>{for(let i=0;i<cols;i++){if(!grid[i]&&sun>0){grid[i]={};sun--;document.getElementById('sun').textContent=sun;break;}}});
+</script>
+</body>
+</html>
