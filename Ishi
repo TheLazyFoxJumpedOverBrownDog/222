@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ishi's Fun Website</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      color: #333;
+      padding: 40px;
+      transition: background-color 0.3s;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    img {
+      width: 160px;
+      margin: 15px;
+    }
+    button, a {
+      background-color: #ff80ab;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button:hover, a:hover {
+      background-color: #f50057;
+    }
+    .hidden { display: none; }
+    .footer { margin-top: 30px; font-size: 1em; }
+    p { line-height: 1.6em; white-space: pre-line; }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1 -->
+  <div id="page1">
+    <h1>🌸 Heyyyy! 🌸</h1>
+    <p>
+      heyyyy if you have come to this website,<br>
+      that means Ishi has sent you the link.<br>
+      Am I right ????
+    </p>
+    <img src="https://cdn-icons-png.flaticon.com/512/742/742751.png" alt="Cute Sticker">
+    <div>
+      <button onclick="sayYes()">Yes 💖</button>
+      <button onclick="sayNo()">No 😜</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div id="page2" class="hidden">
+    <h1>💜 Are you Sakshamm ???? 💜</h1>
+    <div>
+      <button onclick="askPassword()">Yes 💖</button>
+      <button onclick="notSakshamm()">No 😕</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div id="page3" class="hidden">
+    <h1>🤔 Do you want to know a secret ?????????? 🤔</h1>
+    <img src="https://cdn-icons-png.flaticon.com/512/2957/2957830.png" alt="Secret Sticker">
+    <div>
+      <button onclick="yesSecret()">Yes 🤫</button>
+      <button onclick="noSecret()">No 😁</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4 -->
+  <div id="page4" class="hidden">
+    <h1>😁 You are stuck with me forever!</h1>
+    <p>
+      You are stuck with me forever 😁 aur ab tumko mere nakhre uthane padege samjhe<br>
+      aur tumko mujhse pyaar karna padega aur tum mujhse apna picha nahi churwa sakte ho<br>
+      YOU DON'T HAVE ANY OPTIONS tumko mere sath rahna padega by hook or cook<br>
+      aur mujhe pe cheat karne ki sochna bhi mat<br>
+      And now if you have no problem with this so we can move to next page
+    </p>
+    <img src="https://cdn-icons-png.flaticon.com/512/2920/2920080.png" alt="Fun Sticker">
+    <div>
+      <button onclick="yesFun()">Yes 💖</button>
+      <button onclick="noFun()">No 😜</button>
+    </div>
+  </div>
+
+  <!-- PAGE 5 -->
+  <div id="page5" class="hidden">
+    <h1>🎉 YAYYYYYY !! you are finallyyy here yesssss 🫠🫠 🎉</h1>
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712029.png" alt="Celebration Sticker">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Heart Sticker">
+    <p>
+      Chalo ab tum aagye ho to main bata deti hu ki main ne tumko ye link kyu send kiya      
+      accutally 👉👈 wo na wo naa mujhe tumse kehna tha ki ki      
+      HAPPYYYYYYYY BOYFRIEND DAYYYY 🥳🥳      
+      Wase Jada khush mat ho abhi new new hai na to bf day wish kar rahi hu baad main nahi karugi samjhe hehehe 😁      
+      Tumne to new new tha abhi tabhi gf day wish nahi kiya tha but baad main kiya tha mere yaad dilane ke baad      
+      ab main ya cheez ka taana shadi tak marugi 😏      
+      You 🫵 beta wait and watch main bolti hu na ki bohot toxic hu 😚 main  hehehehe      
+      Chalo chalooo bf dayy khatam hua byee byeeeee      
+      but wait ek cheez bolna bhul gyi yrr      
+      Sachi muchi tum boht acche ho bas mere liya kabhi change mat hona      
+      I know insaan change hota hai but main ya bol rahi hu ki mere liya apna pyar kabhi change mat karna 👉👈 plss      
+      aur you are the best best bestest BF,BFF,meri lugai,Mera behan ka Laddu,      
+      meri cutie little baby 🐣, my baby girl in the world 🌎      
+      Agar kuch name bhul gyi to maaf karna      
+      aareeee ek name to Rahe gaya meri pyaari si nibbi 😂      
+      and and andddddd      
+      I love youuu 🙈🫶      
+      aur pls 🙏 Jada bhav mat khana warna baat nahi karugi 😤 Samjhee!!!!!
+    </p>
+    <div class="footer">
+      <img src="https://cdn-icons-png.flaticon.com/512/833/833472.png" alt="Love Sticker">
+      <br>
+      <a href="#" onclick="restart()">💖 Restart the Journey 💖</a>
+    </div>
+  </div>
+
+<script>
+  // PAGE 1
+  function sayYes() {
+    showPage('page2');
+  }
+  function sayNo() {
+    alert("You are lying 😁 I know that Ishi has sent you the link!");
+  }
+
+  // PAGE 2
+  function askPassword() {
+    let password = prompt("Enter the password 💬");
+    if (password === "I LoVe uu") {
+      alert("Correct password 💘");
+      showPage('page3');
+    } else {
+      alert("Wrong password 😢 Going back to Page 1...");
+      showPage('page1');
+    }
+  }
+  function notSakshamm() {
+    alert("Ohhh 😕");
+    showPage('page1');
+  }
+
+  // PAGE 3
+  function yesSecret() {
+    alert("But don't tell anyone 🤫");
+    showPage('page4');
+  }
+  function noSecret() {
+    alert("But I want to tell you so you don't have any option 😁 CHOOSE YESSS ");
+    showPage('page3');
+  }
+
+  // PAGE 4
+  function yesFun() {
+    alert("Awww I knew it tumko koi problem nahi hogi 💕");
+    showPage('page5');
+  }
+  function noFun() {
+    alert("Maine bola tha you don't have any options 🤪 choose YESS ");
+    showPage('page4');
+  }
+
+  // RESTART
+  function restart() {
+    showPage('page1');
+  }
+
+  // SHOW PAGE FUNCTION
+  function showPage(pageId) {
+    const pages = ['page1','page2','page3','page4','page5'];
+    pages.forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(pageId).classList.remove('hidden');
+
+    // Optional: change background colors dynamically
+    const bgColors = {
+      page1: '#fff0f5',
+      page2: '#f3e5f5',
+      page3: '#fff3e0',
+      page4: '#fff8e1',
+      page5: '#f3e5f5'
+    };
+    document.body.style.backgroundColor = bgColors[pageId];
+  }
+</script>
+
+</body>
+</html>
