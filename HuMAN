@@ -1,0 +1,130 @@
+# Updating the existing /mnt/data/human_project bundle to add PWA files (manifest, service-worker, icons),
+# update templates to include manifest registration, and repackage ZIP.
+# This runs in the notebook environment and writes files the user can download.
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+import json, zipfile, os, textwrap
+
+BASE = Path("/mnt/data/human_project")
+if not BASE.exists():
+    raise SystemExit("Base project not found at /mnt/data/human_project.")
+
+# Create static/icons directory
+icons_dir = BASE / "app" / "static" / "icons"
+icons_dir.mkdir(parents=True, exist_ok=True)
+
+# Create simple placeholder icons (192x192 and 512x512) with "Human" text
+def create_icon(path, size, bg="#2f2f2f", text="Human"):
+    img = Image.new("RGBA", (size, size), bg)
+    draw = ImageDraw.Draw(img)
+    try:
+        # try to use a common font
+        font = ImageFont.truetype("DejaVuSans-Bold.ttf", int(size/6))
+    except Exception:
+        font = ImageFont.load_default()
+    w, h = draw.textsize(text, font=font)
+    draw.text(((size-w)/2, (size-h)/2), text, fill="white", font=font)
+    img.save(path)
+
+create_icon(icons_dir / "icon-192.png", 192)
+create_icon(icons_dir / "icon-512.png", 512)
+
+# Write manifest.json with name "Human"
+manifest = {
+  "name": "Human",
+  "short_name": "Human",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2f2f2f",
+  "description": "Le réseau social humain, authentique et créatif.",
+  "icons": [
+    {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
+manifest_path = BASE / "app" / "static" / "manifest.json"
+manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+# Write service-worker.js
+sw_code = textwrap.dedent("""\
+const CACHE_NAME = 'human-cache-v1';
+const urlsToCache = [
+  '/',
+  '/static/chat.js',
+  '/static/manifest.json',
+  '/static/icons/icon-192.png',
+  '/static/icons/icon-512.png'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  // cleanup old caches if needed
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+    ))
+  );
+});
+""")
+sw_path = BASE / "app" / "static" / "service-worker.js"
+sw_path.write_text(sw_code, encoding="utf-8")
+
+# Update index.html to include manifest link and service worker registration if not already present
+index_path = BASE / "app" / "templates" / "index.html"
+index_html = index_path.read_text(encoding="utf-8")
+
+injection = textwrap.dedent("""\
+<link rel="manifest" href="/static/manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js')
+      .then(() => console.log('Service worker enregistré ✅'))
+      .catch((err) => console.error('Erreur SW:', err));
+  }
+</script>
+""")
+
+if injection.strip() not in index_html:
+    # Insert before closing </head> or after <head> if no head close found
+    if "</head>" in index_html:
+        index_html = index_html.replace("</head>", injection + "</head>")
+    else:
+        # simply prepend
+        index_html = injection + index_html
+    index_path.write_text(index_html, encoding="utf-8")
+
+# Also ensure feed.html has registration script (so PWA works when landing on feed)
+feed_path = BASE / "app" / "templates" / "feed.html"
+feed_html = feed_path.read_text(encoding="utf-8")
+if "navigator.serviceWorker.register" not in feed_html:
+    # add script near top of <head>
+    if "<head>" in feed_html:
+        feed_html = feed_html.replace("<head>", "<head>\n" + injection)
+    else:
+        feed_html = injection + feed_html
+    feed_path.write_text(feed_html, encoding="utf-8")
+
+# Recreate zip
+zip_path = Path("/mnt/data/human_project_bundle_pwa.zip")
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, _, files in os.walk(BASE):
+        for fname in files:
+            fpath = Path(root) / fname
+            arcname = str(fpath.relative_to("/mnt/data"))
+            zf.write(fpath, arcname)
+
+
