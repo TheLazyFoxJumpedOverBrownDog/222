@@ -1,0 +1,568 @@
+# Creating a complete project bundle for "HUMAN" including:
+# - FastAPI + SQLite prototype (with WebSocket chat)
+# - Onboarding pages + templates
+# - README with instructions
+# - Pitch deck in Markdown and (attempt) PPTX
+# - A zip archive for download
+#
+# The outputs will be saved under /mnt/data/human_project
+# If python-pptx is unavailable, a Markdown pitch deck will still be provided.
+
+import os, json, textwrap, zipfile, sys
+from pathlib import Path
+
+BASE = Path("/mnt/data/human_project")
+BASE.mkdir(parents=True, exist_ok=True)
+
+# Files to create
+files = {}
+
+# requirements
+files["requirements.txt"] = "\n".join([
+    "fastapi==0.95.2",
+    "uvicorn[standard]==0.22.0",
+    "SQLAlchemy==2.0.20",
+    "databases==0.6.2",
+    "jinja2==3.1.2",
+    "python-multipart==0.0.6",
+    "aiofiles==23.1.0",
+    "python-dateutil==2.8.2",
+    # optional for websockets (uvicorn handles it), and for pptx:
+    "python-pptx==0.6.22"
+])
+
+# README
+files["README.md"] = textwrap.dedent("""\
+# HUMAN - Project Bundle (FastAPI prototype + WebSocket chat + Onboarding + Pitch deck)
+
+This bundle contains a working **FastAPI** prototype of the HUMAN social network MVP, a simple WebSocket chat, onboarding pages and a pitch deck.
+
+## What's included
+- `app/main.py` - FastAPI app (API endpoints + templates + WebSocket)
+- `app/db.py` - DB setup (SQLite, SQLAlchemy)
+- `app/models.py` - SQLAlchemy models (User, Post, Story, Group, Message)
+- `app/templates/` - Jinja2 templates (feed, onboarding, onboarding flow)
+- `app/static/` - static JS for WebSocket chat + CSS
+- `seed_demo.py` - helper script to populate demo data
+- `pitch_deck.md` - 5-slide pitch deck in Markdown
+- `pitch_deck.pptx` - attempt at a PPTX version (may require python-pptx)
+- `requirements.txt` - Python requirements
+
+## How to run (recommended dev flow)
+1. Create a virtual env:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate      # macOS / Linux
+   venv\\Scripts\\activate       # Windows
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the app:
+   ```bash
+   uvicorn app.main:app --reload --port 8000
+   ```
+4. Open `http://127.0.0.1:8000` and follow onboarding.
+
+## Notes
+- This is a prototype intended for local testing and iteration.
+- Media upload is simulated (use external links) — extend with S3 or local storage for real uploads.
+- WebSocket chat is minimal: it demonstrates rooms and broadcast for a demo group.
+- RealMeter is a simple integer score updated by reaction endpoints.
+
+## Next steps / suggestions
+- Add proper authentication (OAuth2 / JWT)
+- File uploads + CDN (S3)
+- Background tasks for media processing
+- Expand RealMeter with qualitative signals
+- Production-ready deployment (Docker, CORS, HTTPS, rate-limits)
+
+Enjoy — and good luck building HUMAN! 🌱
+""")
+
+# app/main.py
+files["app/main.py"] = textwrap.dedent("""\
+from fastapi import FastAPI, Request, Form, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy import select
+from .db import database, metadata, engine, SessionLocal
+from .models import users, posts, stories
+from datetime import datetime, timedelta
+import asyncio
+import json
+
+app = FastAPI(title='HUMAN Prototype')
+
+app.mount('/static', StaticFiles(directory='app/static'), name='static')
+templates = Jinja2Templates(directory='app/templates')
+
+@app.on_event('startup')
+async def startup():
+    await database.connect()
+    # create tables in engine (sync) if not exist
+    metadata.create_all(engine)
+
+@app.on_event('shutdown')
+async def shutdown():
+    await database.disconnect()
+
+# Simple home -> onboarding selector
+@app.get('/', response_class=HTMLResponse)
+async def index(request: Request):
+    query = select(users).limit(10)
+    rows = await database.fetch_all(query)
+    return templates.TemplateResponse('index.html', {'request': request, 'users': rows})
+
+# Feed
+@app.get('/feed/{user_id}', response_class=HTMLResponse)
+async def feed(request: Request, user_id: int, mood: str = None):
+    # simplistic feed: recent posts first, mood filter optional
+    q = select(posts).order_by(posts.c.created_at.desc()).limit(100)
+    rows = await database.fetch_all(q)
+    if mood:
+        rows = [r for r in rows if r['mood_tag'] == mood]
+    user = await database.fetch_one(select(users).where(users.c.id == user_id))
+    stories_rows = await database.fetch_all(select(stories).order_by(stories.c.created_at.desc()).limit(10))
+    return templates.TemplateResponse('feed.html', {'request': request, 'posts': rows, 'user': user, 'stories': stories_rows})
+
+# Create post (form)
+@app.post('/post')
+async def create_post(author_id: int = Form(...), content: str = Form(''), media_url: str = Form(''), mood_tag: str = Form('neutral')):
+    query = posts.insert().values(author_id=author_id, content=content, media_url=media_url, mood_tag=mood_tag, created_at=datetime.utcnow(), realmeter=0)
+    await database.execute(query)
+    return RedirectResponse(url=f'/feed/{author_id}', status_code=303)
+
+# Reactions endpoint (adjust realmeter)
+@app.post('/react')
+async def react(post_id: int = Form(...), kind: str = Form(...)):
+    p = await database.fetch_one(select(posts).where(posts.c.id == post_id))
+    if not p:
+        return {'ok': False}
+    delta = 1
+    if kind == 'inspire': delta = 3
+    elif kind == 'help': delta = 5
+    new_rm = p['realmeter'] + delta
+    await database.execute(posts.update().where(posts.c.id == post_id).values(realmeter=new_rm))
+    return {'ok': True, 'realmeter': new_rm}
+
+# Simple API feed JSON
+@app.get('/api/feed/{user_id}')
+async def api_feed(user_id: int, mood: str = None):
+    q = select(posts).order_by(posts.c.created_at.desc()).limit(100)
+    rows = await database.fetch_all(q)
+    if mood:
+        rows = [r for r in rows if r['mood_tag'] == mood]
+    # convert datetimes to isoformat
+    for r in rows:
+        r['created_at'] = r['created_at'].isoformat()
+    return rows
+
+# --------------------
+# WebSocket Chat (rooms)
+# --------------------
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[str, list[WebSocket]] = {}
+
+    async def connect(self, room: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.setdefault(room, []).append(websocket)
+
+    def disconnect(self, room: str, websocket: WebSocket):
+        if room in self.active_connections and websocket in self.active_connections[room]:
+            self.active_connections[room].remove(websocket)
+
+    async def broadcast(self, room: str, message: dict):
+        if room not in self.active_connections: return
+        living = []
+        for conn in self.active_connections[room]:
+            try:
+                await conn.send_text(json.dumps(message))
+                living.append(conn)
+            except:
+                pass
+        self.active_connections[room] = living
+
+manager = ConnectionManager()
+
+@app.websocket('/ws/{room}')
+async def websocket_endpoint(websocket: WebSocket, room: str):
+    await manager.connect(room, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            try:
+                msg = json.loads(data)
+            except:
+                msg = {'text': data}
+            # broadcast to room
+            await manager.broadcast(room, msg)
+    except WebSocketDisconnect:
+        manager.disconnect(room, websocket)
+""")
+
+# app/db.py
+files["app/db.py"] = textwrap.dedent("""\
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker
+from databases import Database
+
+DATABASE_URL = 'sqlite:///human_fastapi.db'
+engine = create_engine(DATABASE_URL, connect_args={'check_same_thread': False})
+metadata = MetaData()
+database = Database(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+""")
+
+# app/models.py
+files["app/models.py"] = textwrap.dedent("""\
+from sqlalchemy import Table, Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from .db import metadata
+from datetime import datetime
+
+users = Table(
+    'users', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('username', String(80), unique=True, nullable=False),
+    Column('display_name', String(120)),
+    Column('about', String(300))
+)
+
+posts = Table(
+    'posts', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('author_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('content', Text),
+    Column('media_url', String(400)),
+    Column('created_at', DateTime, default=datetime.utcnow),
+    Column('realmeter', Integer, default=0),
+    Column('is_public', Boolean, default=True),
+    Column('mood_tag', String(50), default='neutral')
+)
+
+stories = Table(
+    'stories', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('author_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('media_url', String(400)),
+    Column('created_at', DateTime, default=datetime.utcnow)
+)
+
+groups = Table(
+    'groups', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(140)),
+    Column('description', String(400))
+)
+
+messages = Table(
+    'messages', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('from_id', Integer, ForeignKey('users.id')),
+    Column('to_id', Integer, ForeignKey('users.id')),
+    Column('content', String(800)),
+    Column('created_at', DateTime, default=datetime.utcnow)
+)
+""")
+
+# templates: index.html, feed.html, onboarding.html, onboarding_flow.html
+templates_dir = BASE / "app" / "templates"
+templates_dir.mkdir(parents=True, exist_ok=True)
+
+files["app/templates/index.html"] = textwrap.dedent("""\
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>HUMAN - Demo (FastAPI)</title></head>
+<body>
+  <h1>HUMAN - Demo (FastAPI)</h1>
+  <p>Choisis ton utilisateur (demo) :</p>
+  <ul>
+  {% for u in users %}
+    <li><a href="{{ url_for('feed', user_id=u.id) }}">{{ u.display_name or u.username }}</a></li>
+  {% endfor %}
+  </ul>
+  <p><a href="/onboarding">Lancer l'onboarding</a></p>
+</body>
+</html>
+""")
+
+files["app/templates/feed.html"] = textwrap.dedent("""\
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><title>HUMAN - Feed</title>
+  <script src="/static/chat.js"></script>
+</head>
+<body>
+  <h2>Feed de {{ user.display_name or user.username }}</h2>
+  <p><a href="/">Retour</a> — <a href="/onboarding_flow">Onboarding flow (demo)</a></p>
+
+  <h4>Stories</h4>
+  <div style="display:flex; gap:10px;">
+  {% for s in stories %}
+    <div style="border:1px solid #ddd; padding:8px;">
+      <small>{{ s.author.display_name or s.author.username }}</small><br>
+      <em>{{ s.media_url or 'story media' }}</em><br>
+      <small>{{ s.created_at }}</small>
+    </div>
+  {% endfor %}
+  </div>
+
+  <hr>
+  <h4>Créer un post</h4>
+  <form method="post" action="/post">
+    <input type="hidden" name="author_id" value="{{ user.id }}">
+    <textarea name="content" placeholder="Ton texte..." rows="2" cols="60"></textarea><br>
+    <input name="media_url" placeholder="lien image/vidéo (optionnel)"><br>
+    <label>Mood:</label>
+    <select name="mood_tag">
+      <option value="neutral">Neutre</option>
+      <option value="happy">Heureux</option>
+      <option value="inspired">Inspiré</option>
+      <option value="help">Besoin d'aide</option>
+    </select>
+    <button>Poster</button>
+  </form>
+
+  <hr>
+  <h4>Posts</h4>
+  {% for p in posts %}
+    <div style="border:1px solid #ccc; padding:8px; margin-bottom:8px;">
+      <strong>{{ p.author_id }}</strong> · <small>{{ p.created_at }}</small><br>
+      <p>{{ p.content }}</p>
+      {% if p.media_url %}<div><em>{{ p.media_url }}</em></div>{% endif %}
+      <div>RealMeter: <span id="rm{{ p.id }}">{{ p.realmeter }}</span></div>
+      <form method="post" action="/react" style="display:inline;">
+        <input type="hidden" name="post_id" value="{{ p.id }}">
+        <input type="hidden" name="kind" value="like">
+        <button>Like</button>
+      </form>
+      <form method="post" action="/react" style="display:inline;">
+        <input type="hidden" name="post_id" value="{{ p.id }}">
+        <input type="hidden" name="kind" value="inspire">
+        <button>Inspire</button>
+      </form>
+      <form method="post" action="/react" style="display:inline;">
+        <input type="hidden" name="post_id" value="{{ p.id }}">
+        <input type="hidden" name="kind" value="help">
+        <button>Help</button>
+      </form>
+    </div>
+  {% endfor %}
+
+  <hr>
+  <h4>Chat demo (room: general)</h4>
+  <div>
+    <input id="chatUser" placeholder="Ton nom"><button onclick="startWS()">Connect Chat</button><br>
+    <div id="chatLog" style="border:1px solid #ddd; height:200px; overflow:auto;"></div>
+    <input id="chatMsg" placeholder="Message..."><button onclick="sendWS()">Envoyer</button>
+  </div>
+
+</body>
+</html>
+""")
+
+files["app/templates/onboarding.html"] = textwrap.dedent("""\
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Onboarding - HUMAN</title></head>
+<body>
+  <h2>Bienvenue sur HUMAN</h2>
+  <p>Petit guide pour configurer ton profil et choisir ton mood.</p>
+  <form action="/onboarding_flow_start" method="post">
+    <label>Nom d'utilisateur: <input name="username"></label><br>
+    <label>Nom affiché: <input name="display_name"></label><br>
+    <label>Ton humeur préférée: 
+      <select name="mood">
+        <option value="neutral">Neutre</option>
+        <option value="happy">Heureux</option>
+        <option value="inspired">Inspiré</option>
+        <option value="help">Besoin d'aide</option>
+      </select>
+    </label><br>
+    <button>Commencer</button>
+  </form>
+</body>
+</html>
+""")
+
+files["app/templates/onboarding_flow.html"] = textwrap.dedent("""\
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Onboarding Flow - HUMAN</title></head>
+<body>
+  <h2>Onboarding Flow (démo interactif)</h2>
+  <ol>
+    <li>Choisis ta photo (lien) et ton mood.</li>
+    <li>Suis 5 sujets qui t'intéressent (ex: Art, Solidarité, Tech, Cuisine, Sport).</li>
+    <li>Rejoins un événement local ou crée-en un.</li>
+    <li>Poster ta première "Spark" (une idée courte à développer).</li>
+  </ol>
+  <p>Flow prêt — tu peux maintenant aller sur un feed demo et poster.</p>
+  <p><a href="/">Retour</a></p>
+</body>
+</html>
+""")
+
+# static files (chat.js)
+static_dir = BASE / "app" / "static"
+static_dir.mkdir(parents=True, exist_ok=True)
+files["app/static/chat.js"] = textwrap.dedent("""\
+let ws = null;
+function startWS() {
+  const user = document.getElementById('chatUser').value || 'anon';
+  ws = new WebSocket(`ws://${location.host}/ws/general`);
+  ws.onopen = () => {
+    appendLog('[connected]');
+    ws.send(JSON.stringify({user, text: user + ' rejoint le chat'}));
+  };
+  ws.onmessage = (ev) => {
+    const data = JSON.parse(ev.data);
+    appendLog((data.user?data.user+' : ':'') + (data.text||JSON.stringify(data)));
+  };
+  ws.onclose = () => appendLog('[déconnecté]');
+}
+function sendWS() {
+  const msg = document.getElementById('chatMsg').value;
+  if (!ws) { alert('Connecte le chat d’abord'); return; }
+  const user = document.getElementById('chatUser').value || 'anon';
+  ws.send(JSON.stringify({user, text: msg}));
+  document.getElementById('chatMsg').value = '';
+}
+function appendLog(txt) {
+  const el = document.getElementById('chatLog');
+  el.innerHTML += '<div>' + txt + '</div>';
+  el.scrollTop = el.scrollHeight;
+}
+""")
+
+# seed_demo.py for FastAPI
+files["seed_demo.py"] = textwrap.dedent("""\
+# Usage: python seed_demo.py
+from app.db import engine, metadata, database
+from app.models import users, posts, stories
+from datetime import datetime, timedelta
+import asyncio
+
+async def seed():
+    await database.connect()
+    conn = engine.connect()
+    metadata.create_all(engine)
+    # insert users if empty
+    existing = await database.fetch_one(users.select().limit(1))
+    if existing:
+        print('DB seems seeded already.')
+        await database.disconnect()
+        return
+    sample_users = [
+        {'username':'anais','display_name':'Anaïs'},
+        {'username':'moh','display_name':'Mohamed'},
+        {'username':'leo','display_name':'Léo'}
+    ]
+    for u in sample_users:
+        await database.execute(users.insert().values(**u))
+    # posts
+    rows = await database.fetch_all(users.select())
+    uids = [r['id'] for r in rows]
+    await database.execute(posts.insert().values(author_id=uids[0], content='Bonjour HUMAN (FastAPI)!', mood_tag='happy', created_at=datetime.utcnow()))
+    await database.execute(posts.insert().values(author_id=uids[1], content='On organise un clean-up samedi.', mood_tag='help', created_at=datetime.utcnow()-timedelta(hours=5)))
+    await database.execute(posts.insert().values(author_id=uids[2], content='Clip de balade au marché.', media_url='https://example.com/clip.mp4', mood_tag='inspired', created_at=datetime.utcnow()-timedelta(hours=2)))
+    await database.execute(stories.insert().values(author_id=uids[0], media_url='https://example.com/story1.jpg', created_at=datetime.utcnow()))
+    print('Seed done.')
+    await database.disconnect()
+
+if __name__ == '__main__':
+    asyncio.run(seed())
+""")
+
+# pitch deck markdown
+pitch_md = textwrap.dedent("""\
+# HUMAN - Pitch Deck (5 slides)
+
+## Slide 1 — Vision
+**HUMAN** — Le réseau qui élève la vie réelle.  
+Vision: un espace social centré sur l'authenticité, la créativité et l'impact local.
+
+## Slide 2 — Problème
+- Les réseaux actuels favorisent le sensationnalisme et la comparaison.
+- Les actions réelles et la créativité utile sont noyées.
+- Les utilisateurs veulent du sens, pas seulement du scroll passif.
+
+## Slide 3 — Solution
+- Feed humain: Mood + RealMeter + Spark
+- Stories éphémères et Reels créatifs faciles
+- Groupes locaux & événements intégrés
+- Chat et échanges authentiques (cercle proche)
+
+## Slide 4 — Business Model
+- Freemium pour créateurs (+ analytics, outils)
+- Commissions marketplace pour événements/ateliers
+- Sponsoring natif limité & abonnements community-boost
+
+## Slide 5 — Roadmap (12 mois)
+- M0–M3: MVP (auth, feed, posts, stories, chat)
+- M4–M6: Reels, RealMeter, Spark, groupes
+- M7–M12: Tests, modération, growth, monétisation soft
+
+Contact: (ton email) — prêt à construire HUMAN ensemble.
+""")
+files["pitch_deck.md"] = pitch_md
+
+# attempt to create PPTX
+pptx_path = BASE / "pitch_deck.pptx"
+pptx_created = False
+try:
+    from pptx import Presentation
+    prs = Presentation()
+    slides = [
+        ("HUMAN — Vision", "Le réseau qui élève la vie réelle.\nAuthenticité • Créativité • Impact local"),
+        ("Problème", "• Sensationnalisme & comparaison\n• Actions réelles noyées\n• Besoin de sens"),
+        ("Solution", "• Mood + RealMeter + Spark\n• Stories & Reels\n• Groupes locaux & événements"),
+        ("Business Model", "• Freemium créateurs\n• Commissions marketplace\n• Sponsoring natif limité"),
+        ("Roadmap 12 mois", "M0–M3: MVP\nM4–M6: Reels & RealMeter\nM7–M12: Tests & monétisation")
+    ]
+    for title, body in slides:
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = title
+        tx = slide.shapes.placeholders[1].text = body
+    prs.save(pptx_path)
+    pptx_created = True
+except Exception as e:
+    # fallback: write a text file explaining PPTX not created
+    files["pitch_deck.pptx.README.txt"] = f"Unable to create pitch_deck.pptx in this environment. Error: {e}\\nA Markdown version is provided as 'pitch_deck.md'. You can convert it to PPTX locally (PowerPoint or pandoc)."
+
+# Write all files to disk
+for path, content in files.items():
+    p = BASE / path
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+# If pptx was created by python-pptx, ensure it's in files already (saved)
+# Create zip archive
+zip_path = Path("/mnt/data/human_project_bundle.zip")
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, _, filenames in os.walk(BASE):
+        for fname in filenames:
+            fpath = Path(root) / fname
+            arcname = str(fpath.relative_to("/mnt/data"))
+            zf.write(fpath, arcname)
+
+# List created files for user
+created = []
+for root, _, filenames in os.walk(BASE):
+    for fname in filenames:
+        created.append(str(Path(root) / fname))
+
+result = {
+    "base_dir": str(BASE),
+    "zip": str(zip_path),
+    "pptx_created": pptx_created,
+    "created_files_count": len(created),
+    "sample_files": created[:30]
+}
+
+result
