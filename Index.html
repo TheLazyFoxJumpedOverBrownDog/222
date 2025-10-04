@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beuska Earn - Ingyenes Demo</title>
+<style>
+  body { font-family: Arial, sans-serif; background-color: #f2f2f2; margin: 0; padding: 0; }
+  header { background-color: #4CAF50; color: white; text-align: center; padding: 20px; }
+  main { padding: 20px; }
+  .task { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .task button { background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+  .task button:hover { background-color: #45a049; }
+  .referral { background: #ffeb3b; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Beuska Earn</h1>
+  <p>Gyűjts pontokat, nézd a reklámokat és keresd a jutalékot!</p>
+</header>
+<main>
+  <div class="referral">
+    <strong>Referral kódod:</strong> <span id="refCode">BEUSKA123</span>
+  </div>  <div class="task">
+    <h3>Feladat 1: Reklám megtekintése</h3>
+    <p>Kattints a gombra, hogy pontot szerezz!</p>
+    <button onclick="addPoint(1)">Pont szerzése</button>
+  </div>  <div class="task">
+    <h3>Feladat 2: Rövid kérdőív</h3>
+    <p>Töltsd ki a rövid kérdőívet, hogy pontot kapj.</p>
+    <button onclick="addPoint(2)">Pont szerzése</button>
+  </div>  <div class="task">
+    <h3>Feladat 3: App letöltése</h3>
+    <p>Töltsd le az appot a Google Play-ről és szerezz pontot!</p>
+    <button onclick="addPoint(3)">Pont szerzése</button>
+  </div>  <div style="margin-top:20px; background:white; padding:15px; border-radius:10px; text-align:center;">
+    <h3>Összes pontod: <span id="points">0</span></h3>
+  </div>
+</main>
+<script>
+let totalPoints = 0;
+function addPoint(taskId) {
+  totalPoints += 10; // minden feladat 10 pontot ad
+  document.getElementById('points').innerText = totalPoints;
+  alert('Sikeresen szereztél 10 pontot a feladattal #' + taskId);
+}
+</script>
+</body>
+</html>
