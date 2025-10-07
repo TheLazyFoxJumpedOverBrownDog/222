@@ -1,0 +1,151 @@
+{
+  "name": "Cartoon_Generator_Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "webhookPath": "generate_cartoon",
+        "method": "POST",
+        "responseMode": "On Received",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "operation": "synthesize",
+        "text": "={{$node[\"Webhook\"].json[\"text\"]}}",
+        "voice": "ar",
+        "outputFormat": "mp3"
+      },
+      "name": "GoogleTTS",
+      "type": "n8n-nodes-base.googleCloudTextToSpeech",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"SadTalker Config\"].json[\"apiUrl\"]}}/generate",
+        "method": "POST",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "image",
+              "value": "={{$node[\"Webhook\"].json[\"character_urls\"]}}"
+            },
+            {
+              "name": "audio",
+              "value": "={{$node[\"GoogleTTS\"].binary.data}}"
+            }
+          ]
+        },
+        "responseFormat": "file"
+      },
+      "name": "SadTalker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "binary",
+        "binaryPropertyName": "data",
+        "output": "base64"
+      },
+      "name": "Convert To Base64",
+      "type": "n8n-nodes-base.binaryToText",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "statusCode": 200,
+        "body": "={{{ \"video_url\": \"data:video/mp4;base64,\" + $node[\"Convert To Base64\"].data }}}"
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "prefix": "apiUrl",
+        "value": ""
+      },
+      "name": "SadTalker Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        150
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "GoogleTTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleTTS": {
+      "main": [
+        [
+          {
+            "node": "SadTalker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SadTalker": {
+      "main": [
+        [
+          {
+            "node": "Convert To Base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert To Base64": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}
