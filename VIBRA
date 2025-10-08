@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIBRA</title>
+  <style>
+    body {
+      background-color: #000;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .logo {
+      color: #9B4DFF;
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      margin-top: 80px;
+    }
+
+    .container {
+      margin-top: 40px;
+    }
+
+    input {
+      display: block;
+      margin: 12px auto;
+      padding: 12px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: none;
+      background-color: #111;
+      color: white;
+    }
+
+    button {
+      background-color: #9B4DFF;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #7C3AED;
+    }
+
+    .link {
+      margin-top: 20px;
+      color: grey;
+      cursor: pointer;
+    }
+
+    .feed {
+      margin-top: 60px;
+    }
+
+    .post {
+      background-color: #111;
+      padding: 20px;
+      margin: 12px auto;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">VIBRA</div>
+
+  <div class="container" id="login">
+    <input type="text" placeholder="Email">
+    <input type="password" placeholder="Parolă">
+    <button onclick="showFeed()">Conectează-te</button>
+    <div class="link">Creează un cont nou</div>
+  </div>
+
+  <div class="feed" id="feed" style="display:none;">
+    <div class="post">🔮 Bine ai venit pe VIBRA!</div>
+    <div class="post">✨ Aici poți împărtăși vibrațiile tale cu prietenii.</div>
+    <div class="post">💜 Construim împreună o lume mai conectată.</div>
+  </div>
+
+  <script>
+    function showFeed() {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('feed').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
