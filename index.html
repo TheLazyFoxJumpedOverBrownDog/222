@@ -1,56 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="tr">
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
-
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
-
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>Çift Sohbet</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    #chat { border: 1px solid #ccc; height: 400px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+    #message { width: 80%; }
+    #send { width: 15%; }
+  </style>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
+  <h1>Çift Sohbet</h1>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="Mesaj yaz..." />
+  <button id="send">Gönder</button>
 
-      </div>
+  <script>
+    const chat = document.getElementById('chat');
+    const messageInput = document.getElementById('message');
+    const sendButton = document.getElementById('send');
 
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
-    </div>
-  </div>
+    // Glitch'te çalışan bir sunucu için (örneğin, Glitch'in kendi WebSocket'ı)
+    // Glitch'te doğrudan WebSocket kullanamayız, ama basit bir alternatif kullanacağız
+    // Glitch'te sadece HTTP kullanılır, bu yüzden basit bir yöntemle yapalım
+
+    // Basit bir yöntem: Her 2 saniyede bir sayfayı yenile ve mesajları oku
+    const messages = [];
+    let lastMessageId = 0;
+
+    function fetchMessages() {
+      fetch('/messages')
+        .then(res => res.json())
+        .then(data => {
+          data.messages.forEach(msg => {
+            if (msg.id > lastMessageId) {
+              lastMessageId = msg.id;
+              chat.innerHTML += `<p>${msg.text}</p>`;
+            }
+          });
+        });
+    }
+
+    // Mesaj gönder
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (message !== '') {
+        fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: message })
+        });
+        messageInput.value = '';
+      }
+    });
+
+    // Sayfa yüklendiğinde mesajları çek
+    setInterval(fetchMessages, 2000);
+  </script>
 </body>
-
 </html>
