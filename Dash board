@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎨 Color Prediction Game</title>
+  <style>
+    body {
+      text-align: center;
+      background: linear-gradient(120deg, #f7f7f7, #e6f7ff);
+      font-family: Poppins, Arial;
+      padding: 40px;
+    }
+    h1 {
+      color: #333;
+      font-size: 2rem;
+    }
+    .buttons {
+      margin: 20px;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      margin: 10px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+    button:hover {
+      transform: scale(1.1);
+    }
+    .red { background-color: #e74c3c; }
+    .green { background-color: #27ae60; }
+    .violet { background-color: #8e44ad; }
+    #result {
+      margin-top: 25px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .win { color: green; }
+    .lose { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🎨 Color Prediction Game</h1>
+  <p>Choose a colour and test your luck!</p>
+  <div class="buttons">
+    <button class="red" onclick="predict('Red')">🔴 Red</button>
+    <button class="green" onclick="predict('Green')">🟢 Green</button>
+    <button class="violet" onclick="predict('Violet')">🟣 Violet</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    function predict(choice) {
+      const colors = ['Red', 'Green', 'Violet'];
+      const random = colors[Math.floor(Math.random() * colors.length)];
+
+      const resultDiv = document.getElementById('result');
+      if (choice === random) {
+        resultDiv.innerHTML = `Result: ${random} <br><span class='win'>🎉 You Win!</span>`;
+      } else {
+        resultDiv.innerHTML = `Result: ${random} <br><span class='lose'>😢 You Lose!</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
