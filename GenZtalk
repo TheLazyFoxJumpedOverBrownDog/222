@@ -1,0 +1,30 @@
+import openai
+import streamlit as st
+
+# ====== Step 1: OpenAI API Key ======
+# এখানে তুই নিজের API key বসাবে
+openai.api_key = "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"
+
+# ====== Step 2: Streamlit UI ======
+st.set_page_config(page_title="GenZ Talk 😎", layout="centered")
+st.title("GenZ Talk 😎")
+st.write("Bangla + English mix, Gen Z style chatbot! 😏")
+
+user_input = st.text_input("তুই কি বলতে চাস?")
+
+# ====== Step 3: Safe Multilingual Response ======
+if user_input:
+    # Prompt for safe & positive responses
+    prompt = f"""
+    তুমি একজন Gen Z style chatbot। তুমি সব ভাষা বুঝতে পারবে। 
+    তুমি কখনো খারাপ, political বা offensive content বলবে না। 
+    শুধু মজা, casual, friendly এবং educational কথাবার্তা বলবে। 
+    User: {user_input}
+    Bot:
+    """
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    bot_reply = response['choices'][0]['message']['content']
+    st.write("GenZ Talk:", bot_reply)
