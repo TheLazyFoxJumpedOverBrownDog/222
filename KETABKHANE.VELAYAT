@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url("A_digital_screenshot_displays_a_login_page_for_an_.png") no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+      text-shadow: 1px 1px 3px black;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .panel {
+      display: none;
+      text-align: left;
+      margin-top: 20px;
+    }
+    .book {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📚 Library Login</h2>
+    <input type="text" id="code" placeholder="Enter access code" />
+    <button onclick="login()">Login</button>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="panel">
+      <h3>Admin Panel</h3>
+      <input type="text" id="title" placeholder="Book title" />
+      <input type="text" id="author" placeholder="Author" />
+      <button onclick="addBook()">Add Book</button>
+      <h4>📖 Books:</h4>
+      <div id="bookListAdmin"></div>
+      <h4>📦 Orders:</h4>
+      <div id="orderList"></div>
+    </div>
+
+    <!-- Student Panel -->
+    <div id="studentPanel" class="panel">
+      <h3>Student Panel</h3>
+      <h4>📚 Available Books:</h4>
+      <div id="bookListStudent"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000";
+
+    async function login() {
+      const code = document.getElementById("code").value;
+      const res = await fetch(API_URL + "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        alert("❌ Invalid code");
+        return;
+      }
+
+      document.getElementById("code").style.display = "none";
+      document.querySelector("button").style.display = "none";
+
+      if (data.role === "admin") {
+        document.getElementById("adminPanel").style.display = "block";
+        loadBooksAdmin();
+        loadOrders();
+      } else {
+        document.getElementById("studentPanel").style.display = "block";
+        loadBooksStudent();
+      }
+    }
+
+    async function loadBooksAdmin() {
+      const res = await fetch(API_URL + "/books");
+      const books = await res.json();
+      const list = document.getElementById("bookListAdmin");
+      list.innerHTML = books.map(b =>
+        <div class='book'>${b.title} — ${b.author} (${b.available ? "✅ Available" : "❌ Borrowed"})</div>
+      ).join("");
+    }
+
+    async function loadBooksStudent() {
+      const res = await fetch(API_URL + "/books");
+      const books = await res.json();
+      const list = document.getElementById("bookListStudent");
+      list.innerHTML = books.map(b =>
+        <div class='book'>${b.title} — ${b.author} 
+          ${b.available ? <button onclick="orderBook(${b.id})">Borrow</button> : "<span>❌ Not available</span>"}
+        </div>
+      ).join("");
+    }
+
+    async function addBook() {
+
+const title = document.getElementById("title").value;
+      const author = document.getElementById("author").value;
+      await fetch(API_URL + "/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, author }),
+      });
+      loadBooksAdmin();
+      document.getElementById("title").value = "";
+      document.getElementById("author").value = "";
+    }
+
+    async function orderBook(book_id) {
+      const res = await fetch(API_URL + "/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ book_id }),
+      });
+      const data = await res.json();
+      alert(✅ Book borrowed!\nYour code: ${data.code}\nReturn by: ${new Date(data.end_date).toLocaleDateString()});
+      loadBooksStudent();
+    }
+
+    async function loadOrders() {
+      const res = await fetch(API_URL + "/orders");
+      const orders = await res.json();
+      const list = document.getElementById("orderList");
+      list.innerHTML = orders.map(o =>
+        <div class='book'>Order #${o.id} → Book ID: ${o.book_id} | Code: ${o.customer_code}</div>
+      ).join("");
+    }
+  </script>
+</body>
+</html>
