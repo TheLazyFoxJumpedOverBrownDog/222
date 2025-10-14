@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pesan buat Keke 💖</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #ffd3d3, #ffe9e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 30px 40px;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+    h1 {
+      color: #ff6b81;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #555;
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .yes {
+      background: #ff6b81;
+      color: white;
+    }
+    .no {
+      background: #eee;
+      color: #444;
+    }
+    .yes:hover {
+      background: #ff4f68;
+    }
+    .no:hover {
+      background: #ddd;
+    }
+    .heart {
+      font-size: 45px;
+      margin-bottom: 10px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% {transform: scale(1);}
+      50% {transform: scale(1.2);}
+      100% {transform: scale(1);}
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    #resp {
+      margin-top: 20px;
+      color: #444;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="heart">💗</div>
+    <h1>Hai, Keke Adelia ✨</h1>
+    <p>Aku, Fadhil, udah lama suka sama kamu.<br>
+    Tapi aku pengen tanya langsung nih...</p>
+    <h3>💬 Mau nggak jadi pacar aku? 💞</h3>
+    <div>
+      <button class="yes" onclick="yes()">Iyaaa 🥰</button>
+      <button class="no" onclick="no()">Belum deh 😅</button>
+    </div>
+    <div id="resp"></div>
+  </div>
+
+  <script>
+    function yes(){
+      document.getElementById('resp').innerHTML = "YEAY!!! 🥳💖 Makasih ya Keke! Aku janji bakal bikin kamu bahagia terus 😚";
+      document.querySelector(".card").style.background = "#fff0f5";
+    }
+    function no(){
+      document.getElementById('resp').innerHTML = "Gapapa kok 😅 Aku tetep kagum sama kamu, Keke 💐";
+    }
+  </script>
+</body>
+</html>
