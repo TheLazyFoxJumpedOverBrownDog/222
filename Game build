@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Builder - Free</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #0078ff, #00c6ff);
+      color: #fff;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 { margin-bottom: 20px; }
+    input, select, button {
+      width: 90%;
+      max-width: 400px;
+      margin: 10px auto;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      display: block;
+    }
+    button {
+      background: #fff;
+      color: #0078ff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #00ffb3; color: #000; }
+    #progress {
+      width: 80%;
+      height: 25px;
+      background: #fff;
+      border-radius: 20px;
+      margin: 20px auto;
+      overflow: hidden;
+      display: none;
+    }
+    #progress div {
+      height: 100%;
+      width: 0;
+      background: #00ffb3;
+      border-radius: 20px;
+      text-align: center;
+      color: #000;
+      font-weight: bold;
+    }
+    #result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🧩 App Builder</h1>
+  <input id="appName" placeholder="Enter App Name">
+  <input id="package" placeholder="Enter Package Name (e.g. com.game.app)">
+  <input id="website" placeholder="Enter Website URL">
+  <input id="banner" placeholder="Enter Banner Ad Unit ID (optional)">
+  <input id="interstitial" placeholder="Enter Interstitial Ad Unit ID (optional)">
+  
+  <select id="logic">
+    <option value="none">No Ads Logic</option>
+    <option value="start">Show Ad When Game Starts</option>
+    <option value="gameover">Show Ad When Game Over</option>
+    <option value="button">Show Ad When Button Click</option>
+  </select>
+
+  <button onclick="generateApp()">Generate App</button>
+  
+  <div id="progress"><div></div></div>
+  <div id="result"></div>
+
+  <script>
+    function generateApp() {
+      const appName = document.getElementById('appName').value.trim();
+      const packageName = document.getElementById('package').value.trim();
+      const website = document.getElementById('website').value.trim();
+      
+      if (!appName || !packageName || !website) {
+        alert("⚠️ Please fill App Name, Package Name and Website URL.");
+        return;
+      }
+
+      document.getElementById('progress').style.display = 'block';
+      const bar = document.querySelector('#progress div');
+      let percent = 0;
+      const timer = setInterval(() => {
+        percent += 10;
+        bar.style.width = percent + "%";
+        bar.textContent = percent + "%";
+        if (percent >= 100) {
+          clearInterval(timer);
+          document.getElementById('result').innerHTML = 
+            `<p>✅ App Ready! Click below to download:</p>
+             <a href="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-zip-file.zip" target="_blank">
+             ⬇️ Download APK</a>`;
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>const express = require("express");
+const app = express();
+const path = require("path");
+
+app.use(express.static("."));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.listen(3000, () => console.log("✅ App Builder Server Running on Port 3000"));
