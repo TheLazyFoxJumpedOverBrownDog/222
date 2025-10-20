@@ -1,0 +1,40 @@
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const app = express();
+
+app.set("view engine", "ejs");
+app.use(express.static("uploads"));
+app.use(express.urlencoded({ extended: true }));
+
+let uploads = [];
+
+// Cấu hình nơi lưu ảnh
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+// Trang chủ
+app.get("/", (req, res) => {
+  // Sắp xếp top 10
+  const top10 = uploads.sort((a, b) => b.likes - a.likes).slice(0, 10);
+  res.render("index", { uploads: top10 });
+});
+
+// Nhận ảnh gửi lên
+app.post("/upload", upload.single("image"), (req, res) => {
+  const { name } = req.body;
+  uploads.push({
+    name,
+    image: req.file.filename,
+    likes: Math.floor(Math.random() * 100),
+  });
+  res.redirect("/");
+});
+
+app.listen(3000, () => console.log("Website đang chạy!"));
