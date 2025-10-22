@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duerofy – Connect & Grow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #004aad;
+      --primary-dark: #00398a;
+      --secondary: #ff6b35;
+      --light: #f4f8fb;
+      --dark: #222;
+      --gray: #6c757d;
+      --white: #ffffff;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--white);
+      padding: 15px 20px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: white;
+    }
+
+    .logo img {
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+    }
+
+    nav li {
+      margin-left: 25px;
+    }
+
+    nav a {
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.3s;
+    }
+
+    nav a:hover {
+      opacity: 0.8;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(rgba(0, 74, 173, 0.85), rgba(0, 57, 138, 0.9)),
+        url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1350&q=80');
+      background-size: cover;
+      background-position: center;
+      color: var(--white);
+      text-align: center;
+      padding: 100px 20px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      opacity: 0.9;
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--secondary);
+      color: var(--white);
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--white);
+      margin-left: 15px;
+    }
+
+    .btn-outline:hover {
+      background: var(--white);
+      color: var(--primary);
+    }
+
+    section {
+      padding: 80px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+      color: var(--primary);
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 4px;
+      background: var(--secondary);
+      border-radius: 2px;
+    }
+
+    .section-title p {
+      color: var(--gray);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .feature-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 1.8rem;
+      margin: 0 auto 20px;
+    }
+
+    /* Join Form */
+    .form-container {
+      background: var(--white);
+      padding: 40px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    /* Footer */
+    footer {
+      background: #002a5e;
+      color: var(--white);
+      padding: 60px 20px 30px;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-column h3 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .footer-column h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--secondary);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: #b3c5e5;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--white);
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #b3c5e5;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      nav ul {
+        margin-top: 15px;
+        justify-content: center;
+      }
+
+      nav li {
+        margin: 0 10px;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-outline {
+        margin-left: 0;
+        margin-top: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-container">
+      <a href="#home" class="logo">
+        <!-- Replace this src with your actual logo file path -->
+        <img src="assets/duerofy-logo.png" alt="Duerofy Logo" onerror="this.style.display='none'" />
+        <span>Duerofy</span>
+      </a>
+      <nav>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#join">Join</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="home">
+    <h1>Connect & Grow with Duerofy</h1>
+    <p>Join our global network of forward-thinking businesses and unlock opportunities for growth, collaboration, and innovation.</p>
+    <a href="#join" class="btn">Get Started</a>
+    <a href="#features" class="btn btn-outline">Learn More</a>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <div class="section-title">
+        <h2>About Duerofy</h2>
+        <p>We're redefining how businesses connect, collaborate, and thrive in the digital era through powerful networking tools and partnerships.</p>
+      </div>
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Global Network</h3>
+          <p>Connect with innovative businesses across the globe and expand your reach beyond boundaries.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Growth Tools</h3>
+          <p>Access digital resources and insights designed to accelerate your business growth.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤝</div>
+          <h3>Strategic Partnerships</h3>
+          <p>Find ideal partners for collaboration and mutual business success.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="join">
+    <div class="container">
+      <div class="section-title">
+        <h2>Join Duerofy</h2>
+        <p>Fill in your details below to connect your business and instantly receive your membership certificate.</p>
+      </div>
+      <div class="form-container">
+        <form id="joinForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" placeholder="Your Full Name" required />
+            </div>
+            <div class="form-group">
+              <label for="business">Business Name</label>
+              <input type="text" id="business" placeholder="Business Name" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="Email Address" required />
+          </div>
+          <div class="form-group">
+            <label for="desc">Business Description</label>
+            <textarea id="desc" placeholder="Tell us about your business..." rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn">Generate Certificate</button>
+          <div id="successMessage" class="success-message">
+            Thank you for joining Duerofy! Your certificate has been generated and downloaded.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-column">
+        <h3>About Duerofy</h3>
+        <p>Empowering businesses to connect and grow through innovation, collaboration, and trusted partnerships.</p>
+      </div>
+      <div class="footer-column">
+        <h3>Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#join">Join Now</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h3>Contact</h3>
+        <ul class="footer-links">
+          <li>Email: info@duerofy.com</li>
+          <li>Phone: +1 (555) 123-4567</li>
+          <li>Address: 123 Business Avenue, Suite 100</li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright">
+      © 2025 Duerofy. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('joinForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const name = document.getElementById('name').value;
+      const business = document.getElementById('business').value;
+      const desc = document.getElementById('desc').value;
+      const date = new Date().toLocaleDateString();
+
+      // Add blue banner
+      doc.setFillColor(0, 74, 173);
+      doc.rect(0, 0, 210, 50, 'F');
+
+      // Add logo to PDF if available
+      try {
+        const logo = new Image();
+        logo.src = 'assets/duerofy-logo.png';
+        logo.onload = function () {
+          doc.addImage(logo, 'PNG', 160, 10, 35, 35);
+          completeCertificate();
+        };
+        logo.onerror = function() {
+          completeCertificate();
+        };
+      } catch (e) {
+        completeCertificate();
+      }
+
+      function completeCertificate() {
+        // Header text
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Duerofy', 20, 25);
+        doc.setFontSize(16);
+        doc.text('Membership Certificate', 20, 35);
+
+        // Certificate content
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(20);
+        doc.text('Certificate of Membership', 105, 80, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(`This certifies that ${name} from ${business} joined Duerofy on ${date}.`, 20, 110, { maxWidth: 170 });
+        doc.text('Business Description:', 20, 130);
+        doc.text(desc, 20, 140, { maxWidth: 170 });
+        doc.text('Welcome to the Duerofy community!', 20, 180, { maxWidth: 170 });
+
+        // Border and footer
+        doc.setDrawColor(0, 74, 173);
+        doc.setLineWidth(1);
+        doc.rect(15, 60, 180, 150);
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text('© 2025 Duerofy | www.duerofy.com', 20, 280);
+
+        // Save file
+        doc.save(`Duerofy_Certificate_${name.replace(/\s+/g, '_')}.pdf`);
+      }
+
+      // Success message
+      const msg = document.getElementById('successMessage');
+      msg.style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('joinForm').reset();
+        msg.style.display = 'none';
+      }, 3000);
+    });
+
+    // Smooth scrolling for navigation
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        window.scrollTo({
+          top: targetSection.offsetTop - 70,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
