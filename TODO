@@ -1,0 +1,787 @@
+https://b2f663f9-416f-43f5-9f7c-7580ae7ae1ad-00-1hu0dz3b2029t.riker.replit.dev/body {
+  background: radial-gradient(circle, #010101, #000);
+  color: #0ff;
+  font-family: "Courier New", monospace;
+  overflow-x: hidden;
+}
+
+.terminal {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+  text-shadow: 0 0 10px #0ff;
+}
+
+.glitch-title {
+  font-size: 3rem;
+  position: relative;
+  animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+  0% { text-shadow: 2px 0 red, -2px 0 blue; }
+  20% { text-shadow: -2px 0 lime, 2px 0 cyan; }
+  40% { text-shadow: 2px 2px purple, -2px -2px red; }
+  60% { text-shadow: -2px -2px yellow, 2px 2px blue; }
+  100% { text-shadow: 2px 0 red, -2px 0 blue; }
+}
+
+.divider {
+  text-align: center;
+  margin: 25px 0;
+  color: #0ff;
+  letter-spacing: 4px;
+  font-weight: bold;
+}
+
+#catalogoZKR, #catalogoEventos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.zkr-card {
+  background: rgba(0, 10, 10, 0.8);
+  border: 1px solid #0ff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ffff70;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.zkr-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px #00ffff;
+}
+
+/* PANEL DE ADMINISTRADOR */
+.panel-oculto {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #0ff;
+  padding: 20px;
+  border-radius: 10px;
+  display: none;
+  box-shadow: 0 0 25px #0ff;
+  animation: flicker 2s infinite;
+}
+
+.panel-oculto button {
+  background: black;
+  border: 1px solid #0ff;
+  color: #0ff;
+  font-family: monospace;
+  padding: 8px 15px;
+  margin: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.panel-oculto button:hover {
+  background: #0ff;
+  color: black;
+}
+
+.acceso-panel {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  background: #0ff;
+  color: black;<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZKR SYSTEM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="terminal">
+    <h1 class="glitch-title" data-text="ZKR SYSTEM">ZKR SYSTEM</h1>
+    <div class="divider">■■■   ■■■■   ■■■■</div>
+
+    <h2>📁 Catálogo Principal</h2>
+    <div id="catalogoZKR"></div>
+
+    <div class="divider">■■■   ■■■■   ■■■■</div>
+
+    <h2>🧬 Catálogo Anómalo (Eventos)</h2>
+    <div id="catalogoEventos"></div>
+
+    <div class="divider">■■■   ■■■■   ■■■■</div>
+
+    <!-- 🔐 PANEL OCULTO -->
+    <div id="panelAdmin" class="panel-oculto">
+      <h2>🧠 PANEL DE CONTROL ZKR</h2>
+      <button onclick="generarNuevoZKR()">➕ Generar Nuevo ZKR</button>
+      <button onclick="activarEvento()">⚠️ Activar Evento</button>
+      <button onclick="borrarTodo()">🧹 Borrar Todo</button>
+      <button onclick="cerrarPanel()">❌ Cerrar Panel</button>
+    </div>
+
+    <div id="accesoPanel" class="acceso-panel" onclick="abrirPanel()">🔒</div>
+  </div>
+
+  <audio id="alertSound" src="sounds/alert.mp3"></audio>
+  <audio id="glitchSound" src="sounds/glitch.mp3"></audio>
+
+  <script src="zkrData.js"></script>
+</body>
+</html>activarEvento()let zkrList = [
+  { id: "ZKR-001", nombre: "Abdorvio", nivel: "Ω", descripcion: "Absorbió todos los registros anteriores." },
+  { id: "ZKR-002", nombre: "Nemesis", nivel: "A", descripcion: "Entidad vinculada al protocolo perdido." },
+  { id: "ZKR-003", nombre: "Run 13", nivel: "B", descripcion: "Detectado cerca del Sector Run." }
+];
+
+let eventos = [];
+
+function generarNuevoZKR() {
+  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const num = Math.floor(Math.random() * 900 + 100);
+  const letra = letras[Math.floor(Math.random() * letras.length)];
+  const niveles = ["C", "B", "A", "S", "Ω"];
+  const nivel = niveles[Math.floor(Math.random() * niveles.length)];
+
+  const nuevoZKR = {
+    id: `ZKR-${num}${letra}`,
+    nombre: `Entidad ${letra}${num}`,
+    nivel: nivel,
+    descripcion: `Registro detectado automáticamente en ${new Date().toLocaleDateString()}.`
+  };
+
+  zkrList.push(nuevoZKR);
+  reproducirEfecto("Nuevo ZKR detectado");
+  guardarZKR();
+  actualizarCatalogo();
+}
+
+function reproducirEfecto(msg) {
+  const alertSound = document.getElementById("alertSound");
+  const glitchSound = document.getElementById("glitchSound");
+  glitchSound.play();
+
+  const overlay = document.createElement("div");
+  overlay.className = "flicker";
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "rgba(0,255,255,0.1)";
+  overlay.style.zIndex = 9999;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    document.body.removeChild(overlay);
+    alertSound.play();
+    alert(`⚠️ ${msg}`);
+  }, 2000);
+}
+
+function guardarZKR() {
+  localStorage.setItem("ZKR_Data", JSON.stringify(zkrList));
+}
+
+function cargarZKR() {
+  const data = localStorage.getItem("ZKR_Data");
+  if (data) zkrList = JSON.parse(data);
+}
+
+function actualizarCatalogo() {
+  const cont = document.getElementById("catalogoZKR");
+  cont.innerHTML = "";
+  zkrList.forEach(zkr => {
+    const card = document.createElement("div");
+    card.className = "zkr-card";
+    card.innerHTML = `
+      <h3>${zkr.id}</h3>
+      <p><strong>${zkr.nombre}</strong></p>
+      <p>Nivel: ${zkr.nivel}</p>
+      <p>${zkr.descripcion}</p>
+    `;
+    cont.appendChild(card);
+  });
+}
+
+function activarEvento() {
+  const eventosPosibles = [
+    "Eclipse del Sector Run",
+    "Anomalía en el Catálogo 2",
+    "ZKR-001 reactivado",
+    "Fallo total de conexión"
+  ];
+
+  const e = {
+    titulo: eventosPosibles[Math.floor(Math.random() * eventosPosibles.length)],
+    fecha: new Date().toLocaleString(),
+    efecto: "glitch"
+  };
+  eventos.push(e);
+  actualizarEventos();
+  reproducirEfecto(`Evento activado: ${e.titulo}`);
+}
+
+function actualizarEventos() {
+  const cont = document.getElementById("catalogoEventos");
+  cont.innerHTML = "";
+  eventos.forEach(ev => {
+    const div = document.createElement("div");
+    div.className = "zkr-card";
+    div.innerHTML = `<h3>${ev.titulo}</h3><p>${ev.fecha}</p>`;
+    cont.appendChild(div);
+  });
+}
+
+// Auto actualizador
+function checkForUpdates() {
+  cargarZKR();
+  const last = localStorage.getItem("ZKR_LastUpdate");
+  const now = Date.now();
+  const day = 1000 * 60 * 60 * 24;
+
+  if (!last || now - last > day) {
+    generarNuevoZKR();
+    localStorage.setItem("ZKR_LastUpdate", now);
+  }
+  actualizarCatalogo();
+}
+
+window.onload = checkForUpdates;body {
+  background: radial-gradient(circle, #010101, #000);
+  color: #0ff;
+  font-family: "Courier New", monospace;
+  overflow-x: hidden;
+}
+
+.terminal {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+  text-shadow: 0 0 10px #0ff;
+}
+
+.glitch-title {
+  font-size: 3rem;
+  position: relative;
+  animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+  0% { text-shadow: 2px 0 red, -2px 0 blue; }
+  20% { text-shadow: -2px 0 lime, 2px 0 cyan; }
+  40% { text-shadow: 2px 2px purple, -2px -2px red; }
+  60% { text-shadow: -2px -2px yellow, 2px 2px blue; }
+  100% { text-shadow: 2px 0 red, -2px 0 blue; }
+}
+
+.divider {
+  text-align: center;
+  margin: 25px 0;
+  color: #0ff;
+  letter-spacing: 4px;
+  font-weight: bold;
+}
+
+#catalogoZKR, #catalogoEventos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZKR SYSTEM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="terminal">
+    <h1 class="glitch-title" data-text="ZKR SYSTEM">ZKR SYSTEM</h1>
+    <div class="divider">■■■   ■■■■   ■■■■</div>
+    <h2>📁 Catálogo Principal</h2>
+    <div id="catalogoZKR"></div>
+
+    <div class="divider">■■■   ■■■■   ■■■■</div>
+    <h2>🧬 Catálogo Anómalo (Eventos)</h2>
+    <div id="catalogoEventos"></div>
+  </div>
+
+  <audio id="alertSound" src="sounds/alert.mp3"></audio>
+  <audio id="glitchSound" src="sounds/glitch.mp3"></audio>
+
+  <script src="zkrData.js"></script>
+</body>
+</html>index.html
+style.css
+zkrData.js
+sounds/
+   alert.mp3
+   glitch.mp3#catalogoZKR {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.zkr-card {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #0ff;
+  padding: 15px;
+  border-radius: 10px;
+  color: #0ff;
+  font-family: monospace;
+  box-shadow: 0 0 10px #0ff;
+  transition: 0.3s;
+}
+
+.zkr-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px #00ffff;
+}<h2>📁 Catálogo ZKR</h2>
+<div id="catalogoZKR"></div>
+
+<script src="zkrData.js"></script>// Lista base de ZKR conocidos
+let zkrList = [
+  { id: "ZKR-001", nombre: "Abdorvio", nivel: "Ω", descripcion: "Absorbió todos los registros anteriores." },
+  { id: "ZKR-002", nombre: "Nemesis", nivel: "A", descripcion: "Entidad vinculada al protocolo perdido." },
+  { id: "ZKR-003", nombre: "Run 13", nivel: "B", descripcion: "Entidad detectada cerca del Sector Run." }
+];
+
+// Función para generar nuevos ZKR aleatorios
+function generarNuevoZKR() {
+  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const num = Math.floor(Math.random() * 900 + 100);
+  const letra = letras[Math.floor(Math.random() * letras.length)];
+  const niveles = ["C", "B", "A", "S", "Ω"];
+  const nivel = niveles[Math.floor(Math.random() * niveles.length)];
+
+  const nuevoZKR = {
+    id: `ZKR-${num}${letra}`,
+    nombre: `Entidad ${letra}${num}`,
+    nivel: nivel,
+    descripcion: `Registro detectado automáticamente en ${new Date().toLocaleDateString()}.`
+  };
+
+  zkrList.push(nuevoZKR);
+  return nuevoZKR;
+}
+
+// Guardar nuevos ZKR en localStorage
+function guardarZKR() {
+  localStorage.setItem("ZKR_Data", JSON.stringify(zkrList));
+}
+
+// Cargar los ZKR guardados
+function cargarZKR() {
+  const data = localStorage.getItem("ZKR_Data");
+  if (data) zkrList = JSON.parse(data);
+}
+
+// Actualizar visualmente el catálogo
+function actualizarCatalogo() {
+  const contenedor = document.getElementById("catalogoZKR");
+  contenedor.innerHTML = "";
+  zkrList.forEach(zkr => {
+    const card = document.createElement("div");
+    card.className = "zkr-card";
+    card.innerHTML = `
+      <h3>${zkr.id}</h3>
+      <p><strong>Nombre:</strong> ${zkr.nombre}</p>
+      <p><strong>Nivel:</strong> ${zkr.nivel}</p>
+      <p>${zkr.descripcion}</p>
+    `;
+    contenedor.appendChild(card);
+  });
+}
+
+// Sistema de actualización automática
+function checkForUpdates() {
+  cargarZKR();
+
+  const lastUpdate = localStorage.getItem("ZKR_LastUpdate");
+  const now = Date.now();
+  const week = 1000 * 60 * 60 * 24 * 7; // una semana
+
+  if (!lastUpdate || now - lastUpdate > week) {
+    const nuevo = generarNuevoZKR();
+    guardarZKR();
+    localStorage.setItem("ZKR_LastUpdate", now);
+    alert(`🧬 Nuevo registro detectado: ${nuevo.id}`);
+  }
+
+  actualizarCatalogo();
+}
+
+window.onload = checkForUpdates;.hidden {
+  display: none;
+}
+
+#adminPanel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: #0ff;
+  border: 2px solid #0ff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #0ff;
+  z-index: 9999;
+}
+
+#adminPanel button {
+  display: block;
+  margin: 8px 0;
+  background: black;
+  border: 1px solid #0ff;
+  color: #0ff;
+  padding: 8px;
+  font-family: monospace;
+  cursor: pointer;
+}
+
+#adminPanel button:hover {
+  background: #0ff;
+  color: #000;
+}
+
+.glitch-mode {
+  background: repeating-linear-gradient(90deg, #000 0, #000 10px, #0ff 10px, #0ff 20px);
+  animation: glitchBg 0.5s infinite;
+}
+
+@keyframes glitchBg {
+  0% { transform: translate(0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-1px, 3px); }
+  75% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}// Mostrar/Ocultar panel secreto (con teclas Z + K + R)
+let keysPressed = {};
+
+document.addEventListener('keydown', (event) => {
+  keysPressed[event.key.toLowerCase()] = true;
+  if (keysPressed['z'] && keysPressed['k'] && keysPressed['r']) {
+    const panel = document.getElementById('adminPanel');
+    panel.classList.toggle('hidden');
+    alert('🔐 Panel ZKR desbloqueado');
+  }
+});
+
+document.addEventListener('keyup', (event) => {
+  delete keysPressed[event.key.toLowerCase()];
+});
+
+// Activador manual de eventos
+function activateEvent(eventType) {
+  const status = document.getElementById("eventStatus");
+
+  switch(eventType) {
+    case 'nemesis':
+      document.body.style.backgroundColor = "#1a0000";
+      document.body.style.color = "#ff0000";
+      status.textContent = "Evento actual: Nemesis Protocol";
+      alert("⚠️ Evento 'Nemesis Protocol' activado.");
+      break;
+
+    case 'glitch':
+      document.body.classList.add("glitch-mode");
+      status.textContent = "Evento actual: Glitch Wave";
+      alert("💀 Evento 'Glitch Wave' activado.");
+      break;
+
+    case 'awakening':
+      document.title = "███ ALERTA ██";
+      document.body.style.backgroundColor = "#000";
+      status.textContent = "Evento actual: Reawakening 001";
+      alert("🌀 Evento 'Reawakening 001' activado.");
+      break;
+  }
+}<!-- Panel secreto (invisible al principio) -->
+<div id="adminPanel" class="hidden">
+  <h2>🧩 Panel de Control ZKR</h2>
+  <button onclick="activateEvent('nemesis')">Activar Nemesis</button>
+  <button onclick="activateEvent('glitch')">Activar Glitch Wave</button>
+  <button onclick="activateEvent('awakening')">Activar Reawakening 001</button>
+  <p id="eventStatus">Evento actual: Ninguno</p>
+</div>
+
+<script src="events.js"></script>events[0].effect(); // Activa Nemesis
+events[1].effect(); // Activa Glitch Wave
+events[2].effect(); // Activa Reawakening 001activateRandomEvent();glitch.mp3alert.mp3.event-alert {
+  color: #ff0000;
+  background: black;
+  padding: 10px;
+  border: 2px solid red;
+  text-align: center;
+  font-size: 20px;
+  animation: flicker 1s infinite;
+}
+
+.glitch-mode {
+  background: repeating-linear-gradient(90deg, #000 0, #000 10px, #0ff 10px, #0ff 20px);
+  animation: glitchBg 0.5s infinite;
+}
+
+@keyframes glitchBg {
+  0% { transform: translate(0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-1px, 3px); }
+  75% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}// Lista de posibles eventos
+const events = [
+  {
+    name: "Nemesis Protocol",
+    effect: () => {
+      document.body.style.backgroundColor = "#1a0000";
+      document.body.style.color = "#ff0000";
+      document.body.innerHTML += `
+        <div class="event-alert">⚠️ ALERTA: PROTOCOLO NEMESIS ACTIVADO ⚠️</div>
+      `;
+      const audio = new Audio("../sounds/alert.mp3");
+      audio.play();
+    }
+  },
+  {
+    name: "Glitch Wave",
+    effect: () => {
+      document.body.classList.add("glitch-mode");
+      const audio = new Audio("../sounds/glitch.mp3");
+      audio.play();
+    }
+  },
+  {
+    name: "Reawakening 001",
+    effect: () => {
+      alert("ZKR-001 se ha reactivado. Archivos absorbidos.");
+      document.title = "███ ALERTA ██";
+      document.body.innerHTML += `
+        <div class="event-message">
+          <p>La entidad 001 está alterando los registros...</p>
+        </div>
+      `;
+    }
+  }
+];
+window.onload = function() {
+  alert("⚠️ ALERTA: ZKR-001 detectado. Archivos absorbidos. Proceda con precaución.");
+};function playGlitchSound() {
+  const audio = new Audio('sounds/glitch.mp3');
+  audio.play();
+}
+document.addEventListener('click', playGlitchSound);Publishing your app makes it available for anyone to use
+Your friends and users around the world can visit your app through your primary URL.What are you planning to build?
+We'll recommend templates and tools based on your choice.
+Website / Landing Page
+SaaS App
+Lifestyle App
+New Product
+Internal Tool
+Workflow / Automation
+AI Agent
+Design Prototype
+Game
+Otheimages/zkr001.pngsounds/alerta.mp3https://github.com/glitchdotcom/website-to-compute.git// Mensaje inicial
+console.log("Iniciando sistema ZKR...");
+
+// Efecto de sonido
+const sound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+setTimeout(() => sound.play(), 2000);
+
+// Evento aleatorio (simula los ZKR)
+setTimeout(() => {
+  alert("⚠️ ALERTA: Evento ZKR detectado en Sector RUN.");
+  document.body.style.backgroundColor = "red";
+  document.body.style.color = "#fff";
+}, 5000);body {
+  background-color: black;
+  color: #00ffcc;
+  font-family: monospace;
+  padding: 20px;
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+#terminal {
+  animation: flicker 2s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT ZKR // ARCHIVE ACCESS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="terminal">
+  <h1>PROJECT ZKR SYSTEM</h1>
+  <p>ALERTA: ZKR-001 absorbió todos los registros encontrados...</p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>ZKR_RunSystem/
+│
+├── index.html         ← la página principal
+├── sonidos/           ← carpeta con sonidos (glitch, alarma, etc.)
+├── catalogos/         ← textos de los ZKR
+└── media/             ← tus imágenes, portadas, etc.<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT ZAIKRON // ARCHIVE ACCESS</title>
+<style>
+body{
+  background:black;
+  color:#0ff;
+  font-family:"Courier New",monospace;
+  text-shadow:0 0 10px #0ff;
+  overflow:hidden;
+}
+#terminal{padding:20px;}
+.neon{
+  color:#0ff;
+  text-shadow:0 0 10px #0ff,0 0 20px #f0f,0 0 30px #0ff;
+}
+.glitch{
+  color:#f44;
+  text-shadow:2px 0 red,-2px 0 lime;
+  animation:glitch 1s infinite;
+}
+@keyframes glitch{
+  0%{text-shadow:2px 0 red;}
+  50%{text-shadow:-2px 0 lime;}
+  100%{text-shadow:2px 0 blue;}
+}
+button{
+  background:none;
+  border:1px solid #0ff;
+  color:#0ff;
+  padding:8px;
+  margin-top:15px;
+  cursor:pointer;
+}
+button:hover{color:#fff;border-color:#fff;}
+</style>
+</head>
+<body>
+<div id="terminal">
+  <h1 class="neon">PROJECT ZAIKRON // ARCHIVE ACCESS</h1>
+  <div id="log"></div>
+  <button id="start">Iniciar Sistema</button>
+</div>
+
+<!-- sonidos de muestra -->
+<audio id="glitchSound" src="https://actions.google.com/sounds/v1/ambiences/alien_signal.ogg"></audio>
+<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+<audio id="whisperSound" src="https://actions.google.com/sounds/v1/horror/ghost_whisper.ogg"></audio>
+
+<script>
+const log=document.getElementById('log');
+const startBtn=document.getElementById('start');
+const glitch=document.getElementById('glitchSound');
+const alertS=document.getElementById('alertSound');
+const whisper=document.getElementById('whisperSound');
+
+/* Catálogo base de ZKR */
+const zkrList=[
+  "ZKR-001 // The Eater",
+  "ZKR-002 // Smeli Cat",
+  "ZKR-003 // Ω",
+  "ZKR-004 // rkz",
+  "ZKR-005 // Omega",
+  "ZKR-006 // Hora de la Alegría (Death)",
+  "ZKR-007 // False God",
+  "ZKR-008 // [REDACTED]",
+  "ZKR-009 // Asteroid Rho",
+  "ZKR-010 // Luna Xh-3",
+  "ZKR-011 // The End",
+  "ZKR-012 // Corrupted Root"
+];
+
+/* Eventos periódicos */
+const eventos=[
+  {fecha:"2025-11-01",tipo:"RUN-CYCLE",mensaje:"Nueva señal en el Sector Run. [<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZKR SYSTEM // RUN MODE</title>
+<style>
+body {
+  background: black;
+  color: #00ffcc;
+  font-family: "Courier New", monospace;
+  text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+  overflow: hidden;
+}
+#terminal {
+  width: 100%;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.glitch {
+  color: #ff0040;
+  animation: glitch 1s infinite;
+}
+@keyframes glitch {
+  0% { text-shadow: 2px 0 red; }
+  50% { text-shadow: -2px 0 lime; }
+  100% { text-shadow: 2px 0 blue; }
+}
+.neon {
+  text-shadow: 0 0 10px #00fff2, 0 0 40pxPROC-COLAPSO {
+  INIT: AUD-001
+  LOOP: VIS-002 + AUD-002
+  OVERLOAD: MSG-003
+  FINAL: AUD-004 + VIS-004
+  END: apagado total
+}MSG-001 — [RUN_MODE ACTIVADO]
+MSG-002 — [DATOS CORRUPTOS DETECTADOS]
+MSG-003 — [ZKR-001: CONSUMIENDO REGISTROS]
+MSG-004 — [SISTEMA EN COLAPSO]
+MSG-005 — [ZKR-001 HA DESPERTADO]VIS-001 — NeonShift()  
+→ Cambia los colores del fondo entre azul, rojo y verde terminal.
+
+VIS-002 — GlitchFlash()  
+→ Parpadeo aleatorio de pantalla; usado en RUN_MODE y colapsos.
+
+VIS-003 — MatrixRain()  
+→ Efecto de letras cayendo al fondo del terminal (modo decorativo).
+
+VIS-004 — WarningPulse()  
+→ Parpadeo rojo que indica presencia de ZKR activo.AUD-001 — GlitchInit.wav  
+→ Se activa al abrir el sistema. Sonido distorsionado que imita error de arranque.
+
+AUD-002 — StaticPulse.mp3  
+→ Pulso digital que acompaña las transiciones de RUN_MODE.
+
+AUD-003 — NullWhisper.ogg  
+→ Voz lejana y distorsionada usada en ZKR-007 “Hora de la Alegría”.
+
+AUD-004 — CollapseTone.wav  
+→ Sonido de colapso final al activarse [ZKR-001 ha despertado].SR-04.19.55 — Lumen-5 (Luna artificial)
+SR-05.77.42 — Astehr (Asteroide activo)
+SR-17.66.02 — Casa E-17 (Nodo terrestre)
+SR-23.90.81 — Bosque R-12 (Zona prohibida)
+SR-29.50.00 — Ruinas ϟ-Kron (Sitio colapsado)
+// Activación automática cada cierto tiempo o fecha
+function activateRandomEvent() {
+  const now = new Date();
+  if (now.getDate() === 1) { // Cada 1° del mes
+    const event = events[Math.floor(Math.random() * events.length)];
+    event.effect();
+  }
+}
+
+// Ejecutar al cargar la página
+window.onload = activateRandomEvent;<div id="terminal">
+  <p>> Cargando registros ZKR...</p>
+  <p>> Acceso parcial concedido...</p>
+  <p>> ██████ ERROR: ZKR-001 detectado ██████</p>
+</div>
