@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasi Property Plug</title>
+<style>
+  body {font-family: Arial, sans-serif; margin:0; padding:0; background:#f7f7f7;}
+  header {background:#4CAF50; color:white; padding:20px; text-align:center;}
+  nav {padding:10px; background:#333;}
+  nav a {color:white; margin:0 15px; text-decoration:none;}
+  nav a:hover {text-decoration:underline;}
+  .container {padding:20px;}
+  input, select, textarea {width:100%; padding:10px; margin:5px 0;}
+  button {padding:10px 20px; background:#4CAF50; color:white; border:none; cursor:pointer;}
+  button:hover {background:#45a049;}
+  .listing {border:1px solid #ccc; padding:10px; margin:10px 0; background:white;}
+</style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>Kasi Property Plug</h1>
+</header>
+
+<nav>
+  <a href="#" onclick="showTab('home')">Home</a>
+  <a href="#" onclick="showTab('signup')">Sign Up</a>
+  <a href="#" onclick="showTab('login')">Login</a>
+  <a href="#" onclick="showTab('listings')">Search Listings</a>
+</nav>
+
+<div class="container">
+
+  <!-- HOME TAB -->
+  <div id="home">
+    <h2>Welcome to Kasi Property Plug</h2>
+    <p>Your connection to verified tenants and landlords in your township.</p>
+  </div>
+
+  <!-- SIGN UP TAB -->
+  <div id="signup" style="display:none;">
+    <h2>Sign Up</h2>
+    <label>User Type</label>
+    <select id="userType">
+      <option value="customer">Customer</option>
+      <option value="landlord">Landlord</option>
+    </select>
+    <input type="text" id="signupName" placeholder="Full Name" required>
+    <input type="email" id="signupEmail" placeholder="Email" required>
+    <input type="password" id="signupPassword" placeholder="Password" required>
+    <button onclick="signup()">Sign Up</button>
+  </div>
+
+  <!-- LOGIN TAB -->
+  <div id="login" style="display:none;">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- LANDLORD LISTING TAB -->
+  <div id="landlordPanel" style="display:none;">
+    <h2>Add Property Listing</h2>
+    <input type="text" id="propTitle" placeholder="Listing Title">
+    <input type="text" id="propLocation" placeholder="Location (Section/Street)">
+    <input type="number" id="propRent" placeholder="Monthly Rent">
+    <input type="number" id="propDeposit" placeholder="Deposit">
+    <select id="propType">
+      <option value="backroom">Backroom</option>
+      <option value="flat">Flat</option>
+      <option value="shared">Shared Accommodation</option>
+    </select>
+    <textarea id="propDesc" placeholder="Property Description"></textarea>
+    <button onclick="addListing()">Add Listing</button>
+  </div>
+
+  <!-- SEARCH TAB -->
+  <div id="listings" style="display:none;">
+    <h2>Search Listings</h2>
+    <label>Location:</label>
+    <input type="text" id="searchLocation" placeholder="Preferred location">
+    <label>Budget Max:</label>
+    <input type="number" id="searchBudget" placeholder="Max Rent">
+    <label>Type:</label>
+    <select id="searchType">
+      <option value="">Any</option>
+      <option value="backroom">Backroom</option>
+      <option value="flat">Flat</option>
+      <option value="shared">Shared Accommodation</option>
+    </select>
+    <button onclick="searchListings()">Search</button>
+    <div id="results"></div>
+  </div>
+
+</div>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  // Show tab
+  function showTab(tab) {
+    ['home','signup','login','listings','landlordPanel'].forEach(t => document.getElementById(t).style.display='none');
+    document.getElementById(tab).style.display='block';
+  }
+
+  // Sign Up
+  function signup(){
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const type = document.getElementById('userType').value;
+
+    auth.createUserWithEmailAndPassword(email,password)
+      .then(userCredential => {
+        const userId = userCredential.user.uid;
+        db.ref('users/' + userId).set({name:name,type:type});
+        alert('Sign Up Successful');
+        if(type==='landlord'){ showTab('landlordPanel'); }
+      })
+      .catch(err => alert(err.message));
+  }
+
+  // Login
+  function login(){
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    auth.signInWithEmailAndPassword(email,password)
+      .then(userCredential => {
+        const userId = userCredential.user.uid;
+        db.ref('users/' + userId).once('value').then(snapshot => {
+          const type = snapshot.val().type;
+          if(type==='landlord'){ showTab('landlordPanel'); }
+          else{ showTab('listings'); }
+        });
+      })
+      .catch(err => alert(err.message));
+  }
+
+  // Add Listing
+  function addListing(){
+    const title = document.getElementById('propTitle').value;
+    const location = document.getElementById('propLocation').value;
+    const rent = document.getElementById('propRent').value;
+    const deposit = document.getElementById('propDeposit').value;
+    const type = document.getElementById('propType').value;
+    const desc = document.getElementById('propDesc').value;
+
+    const userId = auth.currentUser.uid;
+    const newListingKey = db.ref().child('listings').push().key;
+    db.ref('listings/' + newListingKey).set({
+      landlord:userId,
+      title:title,
+      location:location,
+      rent:rent,
+      deposit:deposit,
+      type:type,
+      desc:desc
+    }).then(()=>alert('Listing Added!'));
+  }
+
+  // Search Listings
+  function searchListings(){
+    const loc = document.getElementById('searchLocation').value.toLowerCase();
+    const budget = parseInt(document.getElementById('searchBudget').value) || Infinity;
+    const type = document.getElementById('searchType').value;
+
+    db.ref('listings').once('value', snapshot=>{
+      const data = snapshot.val();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      for(let key in data){
+        const l = data[key];
+        if((l.location.toLowerCase().includes(loc) || loc==='') &&
+           (parseInt(l.rent) <= budget) &&
+           (l.type===type || type==='')){
+             resultsDiv.innerHTML += `<div class="listing">
+               <h3>${l.title}</h3>
+               <p><strong>Location:</strong> ${l.location}</p>
+               <p><strong>Rent:</strong> R${l.rent} | Deposit: R${l.deposit}</p>
+               <p><strong>Type:</strong> ${l.type}</p>
+               <p>${l.desc}</p>
+             </div>`;
+        }
+      }
+    });
+  }
+</script>
+
+</body>
+</html> 
