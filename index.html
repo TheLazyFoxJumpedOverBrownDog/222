@@ -1,56 +1,342 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html>
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
-
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
+  <title>Trading Chart Reader (Prototype)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
-
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
-
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 12px; background:#f7f8fb; color:#111; }
+    header { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+    .card { background:white; border-radius:10px; padding:12px; box-shadow:0 6px 18px rgba(12,20,30,0.06); margin-bottom:12px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button { background:#0b5fff; color:white; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    input[type="file"] { display:block; }
+    .small { font-size:13px; color:#666; }
+    .indicator { display:flex; gap:12px; flex-wrap:wrap; }
+    .indicator .stat { min-width:140px; padding:10px; background:#f2f6ff; border-radius:8px; }
+    #chart-container { max-width:900px; margin:0 auto; }
+    textarea { width:100%; height:84px; border-radius:8px; padding:8px; border:1px solid #e6e9ef; }
+    .pred-badge { font-weight:700; padding:6px 10px; border-radius:999px; display:inline-block; }
+    .bull { background:#e6f5ea; color:#067a34; }
+    .bear { background:#fdeceb; color:#a4161a; }
+  </style>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
+  <header>
+    <h2>Trading Chart Reader — Prototype</h2>
+    <div class="small">Upload CSV (timestamp,close) or use sample. Predicts next step and shows indicators. Share chart image.</div>
+  </header>
 
-      </div>
-
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
+  <div class="card">
+    <div class="row">
+      <input id="csvFile" type="file" accept=".csv" />
+      <button id="loadSample">Load Sample Data</button>
+      <button id="analyzeBtn">Analyze / Predict</button>
+      <button id="exportPng">Export Chart Image</button>
+      <button id="shareBtn">Share Chart (mobile)</button>
+    </div>
+    <div class="small" style="margin-top:8px">
+      Quick tips: CSV format: `timestamp,close` (timestamp optional). You can paste numeric closes into the textarea below (comma or newline separated).
+    </div>
+    <div style="margin-top:8px">
+      <textarea id="manualData" placeholder="Or paste closes (comma or newline) — e.g. 100,101,99,102"></textarea>
     </div>
   </div>
-</body>
 
+  <div id="chart-container" class="card">
+    <canvas id="priceChart" height="300"></canvas>
+  </div>
+
+  <div class="card indicator" id="indicators">
+    <!-- dynamic indicator boxes -->
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+  // ---------- Utilities: indicators & simple prediction ----------
+  function sma(values, period) {
+    const out = [];
+    for (let i=0;i<values.length;i++){
+      if (i+1 < period) { out.push(null); continue; }
+      let sum = 0;
+      for (let j = i+1-period; j<=i; j++) sum += values[j];
+      out.push(sum/period);
+    }
+    return out;
+  }
+
+  function ema(values, period) {
+    const out = [];
+    const k = 2/(period+1);
+    let prev = values[0];
+    out[0] = prev;
+    for (let i=1;i<values.length;i++){
+      const v = values[i];
+      const cur = v * k + prev * (1-k);
+      out.push(cur);
+      prev = cur;
+    }
+    // pad to align length with nulls for early entries (optional)
+    const pad = new Array(values.length - out.length).fill(null);
+    return out;
+  }
+
+  function rsi(values, period = 14) {
+    if (values.length < period+1) return Array(values.length).fill(null);
+    const deltas = [];
+    for (let i=1;i<values.length;i++) deltas.push(values[i]-values[i-1]);
+    let gains = 0, losses = 0;
+    for (let i=0;i<period;i++){
+      const d = deltas[i];
+      if (d>0) gains += d; else losses += Math.abs(d);
+    }
+    let avgGain = gains/period, avgLoss = losses/period;
+    const out = [ ...Array(period).fill(null) , 100 - 100/(1 + (avgGain/(avgLoss||1e-8))) ];
+    for (let i=period;i<deltas.length;i++){
+      const d = deltas[i];
+      const gain = d>0?d:0;
+      const loss = d<0?Math.abs(d):0;
+      avgGain = (avgGain*(period-1) + gain)/period;
+      avgLoss = (avgLoss*(period-1) + loss)/period;
+      out.push(100 - 100/(1 + (avgGain/(avgLoss||1e-8))));
+    }
+    // align to values length
+    out.unshift(null); // because deltas length = values.length-1
+    return out.slice(0, values.length);
+  }
+
+  // very simple MACD (12/26/9)
+  function macd(values){
+    const ema12 = ema(values, 12);
+    const ema26 = ema(values, 26);
+    const macdLine = values.map((v,i)=> (ema12[i] && ema26[i]) ? (ema12[i]-ema26[i]) : null);
+    // signal = 9-period EMA of macdLine (skip nulls)
+    const cleaned = macdLine.map(x=> x===null?0:x);
+    const signal = ema(cleaned, 9);
+    return { macdLine, signal };
+  }
+
+  // simple linear regression predict next point
+  function linearPredictNext(values) {
+    const n = values.length;
+    if (n < 2) return values[n-1] || null;
+    // x = 0..n-1
+    let sumX=0,sumY=0,sumXY=0,sumXX=0;
+    for (let i=0;i<n;i++){
+      const x=i, y=values[i];
+      sumX += x; sumY += y; sumXY += x*y; sumXX += x*x;
+    }
+    const slope = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX || 1e-8);
+    const intercept = (sumY - slope*sumX)/n;
+    const nextX = n;
+    return intercept + slope*nextX;
+  }
+
+  // rule-based "probability" (toy example): combine SMA slope, RSI, MACD sign
+  function rulePredict(values) {
+    const last = values[values.length-1];
+    const smaShort = sma(values, 5).filter(x=>x!==null).slice(-1)[0];
+    const smaLong = sma(values, 20).filter(x=>x!==null).slice(-1)[0];
+    const r = rsi(values).filter(x=>x!==null).slice(-1)[0];
+    const m = macd(values);
+    const macdLast = m.macdLine.filter(x=>x!==null).slice(-1)[0];
+    let score = 50; // neutral 50%
+    if (smaShort && smaLong) {
+      if (smaShort > smaLong) score += 12; else score -= 12;
+    }
+    if (r !== undefined && r !== null) {
+      if (r < 30) score += 10; else if (r > 70) score -= 10;
+    }
+    if (macdLast !== undefined && macdLast!==null) {
+      score += Math.sign(macdLast) * 8;
+    }
+    // slope of last few closes
+    const recentSlope = (values[values.length-1] - values[Math.max(0, values.length-6)]) / (Math.min(5, values.length-1) || 1);
+    score += Math.max(Math.min(recentSlope*50, 10), -10); // amplify small slope
+    score = Math.max(0, Math.min(100, score));
+    return { score, interpretation: score>55? 'Bullish' : score<45? 'Bearish' : 'Neutral' };
+  }
+
+  // parse CSV (simple)
+  function parseCSV(text){
+    const rows = text.trim().split(/\r?\n/).map(r=>r.trim()).filter(r=>r);
+    const closes = [];
+    for (const row of rows){
+      const parts = row.split(/,|\t/).map(p=>p.trim());
+      if (parts.length === 1) {
+        const v = parseFloat(parts[0]);
+        if (!isNaN(v)) closes.push(v);
+      } else {
+        // try to find last numeric
+        for (let i=parts.length-1;i>=0;i--){
+          const v = parseFloat(parts[i]);
+          if (!isNaN(v)) { closes.push(v); break; }
+        }
+      }
+    }
+    return closes;
+  }
+
+  // ---------- Chart & UI ----------
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  let chart = null;
+  function createChart(labels, prices, overlays = []) {
+    if (chart) chart.destroy();
+    const datasets = [
+      {
+        label: 'Close',
+        data: prices,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.15,
+        parsing: false,
+      },
+    ];
+    overlays.forEach(o=>{
+      datasets.push({
+        label: o.label,
+        data: o.data,
+        borderDash: o.dash? [6,4] : undefined,
+        pointRadius: 0,
+        borderWidth: 1,
+      });
+    });
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { display: true },
+          y: { display: true, beginAtZero: false }
+        }
+      }
+    });
+  }
+
+  function updateIndicatorsDisplay(values) {
+    const container = document.getElementById('indicators');
+    container.innerHTML = '';
+    if (values.length === 0) {
+      container.innerHTML = '<div class="small">No data</div>'; return;
+    }
+    const ma5 = sma(values,5).filter(x=>x!==null).slice(-1)[0];
+    const ma20 = sma(values,20).filter(x=>x!==null).slice(-1)[0];
+    const ema20 = ema(values,20).slice(-1)[0];
+    const lastRsi = rsi(values).filter(x=>x!==null).slice(-1)[0];
+    const m = macd(values);
+    const macdLast = m.macdLine.filter(x=>x!==null).slice(-1)[0];
+    const signalLast = m.signal.filter(x=>x!==null).slice(-1)[0];
+    const lrNext = linearPredictNext(values);
+    const rule = rulePredict(values);
+
+    const blocks = [
+      { title: 'Last Close', val: values[values.length-1].toFixed(4) },
+      { title: 'SMA(5)', val: ma5 ? ma5.toFixed(4) : '—' },
+      { title: 'SMA(20)', val: ma20 ? ma20.toFixed(4) : '—' },
+      { title: 'EMA(20)', val: ema20 ? ema20.toFixed(4) : '—' },
+      { title: 'RSI(14)', val: lastRsi ? lastRsi.toFixed(2) : '—' },
+      { title: 'MACD', val: macdLast ? macdLast.toFixed(4) : '—' },
+      { title: 'Signal', val: signalLast ? signalLast.toFixed(4) : '—' },
+      { title: 'LR next', val: lrNext ? lrNext.toFixed(4) : '—' },
+      { title: 'Prediction score', val: `${rule.score.toFixed(1)}% — ${rule.interpretation}`, style: rule.interpretation === 'Bullish' ? 'bull' : rule.interpretation==='Bearish' ? 'bear' : '' }
+    ];
+
+    for (const b of blocks){
+      const el = document.createElement('div');
+      el.className = 'stat';
+      el.innerHTML = `<div style="font-size:13px;color:#555">${b.title}</div><div style="margin-top:6px;font-weight:700">${b.val}</div>`;
+      if (b.style) el.classList.add(b.style);
+      container.appendChild(el);
+    }
+  }
+
+  // ---------- UI actions ----------
+  document.getElementById('loadSample').addEventListener('click', ()=> {
+    // sample — synthetic price time series
+    const n=200;
+    let price = 100;
+    const closes = [];
+    for (let i=0;i<n;i++){
+      price = price * (1 + (Math.random()-0.48)*0.02 + (i>150?0.001:0));
+      closes.push(parseFloat(price.toFixed(4)));
+    }
+    document.getElementById('manualData').value = closes.join(',');
+    renderFromManual();
+  });
+
+  document.getElementById('csvFile').addEventListener('change', (ev)=>{
+    const f = ev.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = (e)=>{
+      const text = e.target.result;
+      const parsed = parseCSV(text);
+      if (parsed.length===0) { alert('No numeric closes found in CSV'); return; }
+      document.getElementById('manualData').value = parsed.join(',');
+      renderFromManual();
+    };
+    r.readAsText(f);
+  });
+
+  function renderFromManual() {
+    const txt = document.getElementById('manualData').value;
+    const arr = txt.split(/,|\n/).map(s=>s.trim()).filter(s=>s!=='').map(s=>parseFloat(s)).filter(x=>!isNaN(x));
+    if (arr.length === 0) { alert('No numeric closes provided'); return; }
+    const labels = arr.map((_,i)=>i+1);
+    // overlays: sma(5) & sma(20)
+    const sma5 = sma(arr,5);
+    const sma20 = sma(arr,20);
+    createChart(labels, arr, [
+      { label: 'SMA(5)', data: sma5 },
+      { label: 'SMA(20)', data: sma20, dash: true }
+    ]);
+    updateIndicatorsDisplay(arr);
+  }
+
+  document.getElementById('analyzeBtn').addEventListener('click', ()=>{
+    renderFromManual();
+    // show a small toast-like info (using console here)
+    console.log('Analyzed');
+  });
+
+  // Export chart as PNG
+  document.getElementById('exportPng').addEventListener('click', ()=>{
+    if (!chart) { alert('No chart to export'); return; }
+    const url = chart.toBase64Image();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chart.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  // Share via Web Share API (mobile)
+  document.getElementById('shareBtn').addEventListener('click', async ()=>{
+    if (!chart) { alert('No chart to share'); return; }
+    try {
+      const url = chart.toBase64Image();
+      // convert to blob
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const filesArray = [ new File([blob], 'chart.png', { type: blob.type }) ];
+      if (navigator.canShare && navigator.canShare({ files: filesArray })) {
+        await navigator.share({ files: filesArray, title: 'Chart', text: 'Sharing chart image' });
+      } else {
+        alert('Sharing not supported on this device — downloading instead.');
+        const a = document.createElement('a'); a.href = url; a.download = 'chart.png'; a.click();
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Share failed: ' + e.message);
+    }
+  });
+
+  // initialize with sample automatically
+  document.getElementById('loadSample').click();
+
+  </script>
+</body>
 </html>
