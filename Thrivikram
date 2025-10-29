@@ -1,0 +1,60 @@
+I'll paste it here, then you copy to the site you chose:
+**HTML**
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ChatPlan</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body { 
+  font-family: 'Open Sans', sans-serif; 
+  background-color: #f2f2f2; 
+}
+.container { 
+  max-width: 500px; 
+  margin: 50px auto; 
+  background-color: #fff; 
+  padding: 20px; 
+  border-radius: 10px; 
+  box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+}
+.quote { 
+  font-size: 18px; 
+  color: #666; 
+  margin-bottom: 20px; 
+}
+.quote-author { 
+  font-size: 14px; 
+  color: #999; 
+}
+.chat-window { 
+  background-color: #f2f2f2; 
+  padding: 20px; 
+  border-radius: 10px; 
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="quote">
+    I watch you from afar, silently hoping you'll see, 
+    Every smile I hide, every tear that follows me. 
+    I give my heart where it may never belong, 
+    Whispering love in a world where I feel wrong. 
+    Yet in this quiet ache, I find my own truth— 
+    Loving without return still shapes the soul of youth.
+    <div class="quote-author">— Your Quote</div>
+  </div>
+  <div class="chat-window">
+    <!-- chat code will go here -->
+  </div>
+</div>
+<script>
+// JavaScript code will go here
+</script>
+</body>
+</html>
+```
+**CSS/JS**
