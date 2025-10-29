@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAMPEONATO OFC - ADM Online</title>
+<style>
+body{margin:0;font-family:Arial;background:#0a0a0a;color:white;}
+h1{color:#0ff;text-align:center;margin-bottom:10px;}
+#chatBox{width:90%;max-width:400px;height:200px;background:#111;border:1px solid #0ff;border-radius:5px;padding:5px;overflow-y:auto;margin:10px auto;}
+#tacoGame{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:999;justify-content:center;align-items:center;flex-direction:column;color:white;}
+#tacoGame canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;}
+#tacoGame #info{text-align:center;font-size:1.2em;margin-bottom:10px;}
+#tacoGame #counter{font-size:1.5em;margin-bottom:10px;}
+#tacoGame #timer{font-size:1.2em;margin-bottom:10px;}
+#tacoGame #eventIndicator{position:absolute;top:10px;right:10px;font-size:2em;}
+#tacoGame #exitBtn{position:absolute;bottom:20px;right:20px;padding:10px 20px;background:#f33;border:none;color:white;border-radius:5px;cursor:pointer;}
+#molhoEmoji{position:absolute;font-size:3em;top:50%;left:50%;transform:translate(-50%,-50%);display:none;}
+#loginDiv{display:flex;justify-content:center;margin-top:20px;}
+#loginDiv input{padding:5px;margin-right:5px;}
+#loginDiv button{padding:5px 10px;}
+#panel{display:none;flex-direction:column;background:#111;border:1px solid #0ff;border-radius:5px;padding:10px;width:90%;max-width:400px;margin:10px auto;}
+#eventList li{cursor:pointer;padding:5px;margin-bottom:5px;background:#1a1a1a;border-left:3px solid #0ff;}
+#chatInput{width:70%;padding:5px;margin-right:5px;}
+#sendBtn{padding:5px 10px;background:#05f;border:none;color:white;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>CAMPEONATO OFC - Público + ADM</h1>
+
+<div id="chatBox"></div>
+
+<div id="loginDiv">
+    <input type="password" id="senha" placeholder="Digite a senha">
+    <button onclick="login()">Entrar ADM</button>
+</div>
+
+<div id="panel">
+    <h2>Painel ADM</h2>
+    <input type="text" id="chatInput" placeholder="Digite algo">
+    <button id="sendBtn">Enviar</button>
+    <h3>Eventos</h3>
+    <ul id="eventList">
+        <li onclick="ativarEvento('Tacos 🌮')">Ativar Tacos 🌮</li>
+        <li onclick="ativarEvento('Molho 🥫')">Ativar Molho 🥫</li>
+    </ul>
+    <button onclick="startTacoGame()">Testar Mini-jogo Tacos 🌮</button>
+</div>
+
+<!-- Mini-jogo -->
+<div id="tacoGame">
+  <canvas id="tCanvas"></canvas>
+  <div id="info">Lucas está com muita fome! Ajude ele com tacos para ter energia.</div>
+  <div id="counter">0 / 10 tacos</div>
+  <div id="timer">Tempo: 2:50</div>
+  <div id="eventIndicator"></div>
+  <button id="exitBtn">Sair do jogo</button>
+  <div id="molhoEmoji">🥫</div>
+</div>
+
+<!-- Música -->
+<audio id="tacoAudio" src="https://cdn.pixabay.com/download/audio/2023/03/12/audio_2d5e43a18b.mp3?filename=fun-music-14629.mp3" preload="auto"></audio>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ==== CONFIGURAÇÃO FIREBASE ====
+const firebaseConfig = {
+  apiKey: "COLOQUE_AQUI",
+  authDomain: "COLOQUE_AQUI",
+  databaseURL: "COLOQUE_AQUI",
+  projectId: "COLOQUE_AQUI",
+  storageBucket: "COLOQUE_AQUI",
+  messagingSenderId: "COLOQUE_AQUI",
+  appId: "COLOQUE_AQUI"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ==== CHAT GLOBAL ====
+const chatBox=document.getElementById("chatBox");
+const chatInput=document.getElementById("chatInput");
+const sendBtn=document.getElementById("sendBtn");
+
+sendBtn.onclick=()=>{if(chatInput.value!=""){firebase.database().ref('chat').push({msg:`Davizinho ADM falou: ${chatInput.value}`});chatInput.value="";}}
+
+// Atualiza chat em tempo real
+firebase.database().ref('chat').on('child_added', snapshot=>{
+  const data = snapshot.val();
+  const div=document.createElement("div");
+  div.textContent = data.msg;
+  chatBox.appendChild(div);
+  chatBox.scrollTop=chatBox.scrollHeight;
+});
+
+// ==== LOGIN ADM ====
+function login(){
+    const senha=document.getElementById("senha").value;
+    if(senha==="1234"){
+        document.getElementById("loginDiv").style.display="none";
+        document.getElementById("panel").style.display="flex";
+        firebase.database().ref('chat').push({msg:"Davizinho ADM entrou no painel"});
+    } else { alert("Senha incorreta!"); }
+}
+
+// ==== MINI-JOGO TACO ====
+const tacoGameDiv=document.getElementById("tacoGame");
+const tCanvas=document.getElementById("tCanvas");
+const tCtx=tCanvas.getContext("2d");
+const counterDiv=document.getElementById("counter");
+const timerDiv=document.getElementById("timer");
+const molhoEmoji=document.getElementById("molhoEmoji");
+const exitBtn=document.getElementById("exitBtn");
+const eventIndicator=document.getElementById("eventIndicator");
+const tacoAudio=document.getElementById("tacoAudio");
+
+exitBtn.onclick=()=>{tacoGameDiv.style.display="none";eventosAtivos={taco:false,molho:false};atualizarIndicador();stopMusic();};
+
+let eventosAtivos={taco:false,molho:false};
+function atualizarIndicador(){let str="";if(eventosAtivos.taco) str+="🌮";if(eventosAtivos.molho) str+="🥫";eventIndicator.textContent=str;}
+
+// ==== FUNÇÕES MINI-JOGO ====
+function startTacoGame(){startTaco({molhoAtivo:false});}
+function startMolhoTacos(){startTaco({molhoAtivo:true});}
+function startTaco({molhoAtivo}){
+  tacoGameDiv.style.display="flex";
+  if(!molhoAtivo){playMusic();}
+  let collected=0; let tacos=[]; let timeLeft=170;
+  function resize(){tCanvas.width=window.innerWidth;tCanvas.height=window.innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  const lucas={x:tCanvas.width/2,y:tCanvas.height-100,r:40,happy:false};
+  function createTaco(){tacos.push({x:Math.random()*(tCanvas.width-30)+15,y:0,r:15,molho:molhoAtivo});}
+  const tacoInterval=setInterval(createTaco,5000);
+  const timerInterval=setInterval(()=>{timeLeft--;let min=Math.floor(timeLeft/60);let sec=timeLeft%60;timerDiv.textContent=`Tempo: ${min}:${sec<10?'0'+sec:sec}`;if(timeLeft<=0) endGame();},1000);
+  tCanvas.onclick=(e)=>{const rect=tCanvas.getBoundingClientRect();const mx=e.clientX-rect.left;const my=e.clientY-rect.top;for(let i=tacos.length-1;i>=0;i--){const t=tacos[i];const dx=mx-t.x;const dy=my-t.y;if(Math.sqrt(dx*dx+dy*dy)<t.r){tacos.splice(i,1);collected+=t.molho?2:1;counterDiv.textContent=`${collected}/10 tacos`;if(molhoAtivo && collected>=2){molhoEmoji.style.display="block";setTimeout(()=>molhoEmoji.style.display="none",2000);}if(collected>=10){lucas.happy=true;endGame();}}}};  
+  function endGame(){clearInterval(tacoInterval);clearInterval(timerInterval);tacos=[];tacoGameDiv.style.display="none";eventosAtivos={taco:false,molho:false};atualizarIndicador();stopMusic();firebase.database().ref('chat').push({msg:"Evento de tacos concluído!"});}
+  function draw(){tCtx.clearRect(0,0,tCanvas.width,tCanvas.height);tCtx.fillStyle="white";tCtx.beginPath();tCtx.arc(lucas.x,lucas.y,lucas.r,0,Math.PI*2);tCtx.fill();tCtx.fillStyle="black";if(!lucas.happy){tCtx.beginPath();tCtx.arc(lucas.x-15,lucas.y-10,5,0,Math.PI*2);tCtx.fill();tCtx.beginPath();tCtx.arc(lucas.x+15,lucas.y-10,5,0,Math.PI*2);tCtx.fill();}else{tCtx.beginPath();tCtx.arc(lucas.x,lucas.y,10,0,Math.PI,true);tCtx.strokeStyle="black";tCtx.lineWidth=2;tCtx.stroke();}tacos.forEach(t=>{t.y+=2;tCtx.fillStyle=t.molho?"red":"orange";tCtx.beginPath();tCtx.arc(t.x,t.y,t.r,0,Math.PI*2);tCtx.fill();});requestAnimationFrame(draw);}
+  draw();
+}
+
+// ==== EVENTOS ====
+function ativarEvento(nome){
+    if(nome==="Tacos 🌮"){eventosAtivos.taco=true;startTacoGame();}
+    if(nome==="Molho 🥫"){eventosAtivos.molho=true;startMolhoTacos();}
+    atualizarIndicador();
+    firebase.database().ref('eventos').push({nome:eventosAtivos.taco?"Tacos 🌮":"Molho 🥫"});
+}
+
+// ==== MÚSICA ====
+function playMusic(){tacoAudio.currentTime=0;tacoAudio.play();}
+function stopMusic(){tacoAudio.pause();tacoAudio.currentTime=0;}
+</script>
+</body>
+</html>
