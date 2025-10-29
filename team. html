@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فريق المشروع</title>
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-image: linear-gradient(to bottom right, #e3f2fd, #ffffff);
+      text-align: center;
+      padding-top: 50px;
+    }
+    h1 { color: #0078d7; }
+    .member {
+      background-color: #eef5ff;
+      margin: 20px auto;
+      padding: 15px;
+      width: 80%;
+      border-radius: 10px;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #0078d7;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>👥 فريق مشروع STEM</h1>
+
+  <div class="member">
+    <h2>مروة حمدان</h2>
+    <p>مسؤولة تصميم الموقع وعرض المشروع</p>
+  </div>
+
+  <div class="member">
+    <h2>اسم زميلتك 1</h2>
+    <p>المهام / الدور في المشروع</p>
+  </div>
+
+  <div class="member">
+    <h2>اسم زميلتك 2</h2>
+    <p>المهام / الدور في المشروع</p>
+  </div>
+
+  <a href="index.html">⬅️ العودة للصفحة الرئيسية</a>
+</body>
+</html>
