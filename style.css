@@ -86,7 +86,7 @@ h2,
 h3,
 h4,
 h5 {
-  color: var(--color-text-main);
+  color: red;
 }
 h1 {
   display: inline-flex;
