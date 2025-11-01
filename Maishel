@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🌍 Planeta de Amor Virtual 💖</title>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #ffb6c1, #ff69b4, #8b008b);
+      color: white;
+      text-align: center;
+      font-family: "Comic Sans MS", cursive;
+      overflow: hidden;
+    }
+    .planeta {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle at 30% 30%, #ffebcd, #ff1493);
+      border-radius: 50%;
+      margin: 100px auto;
+      box-shadow: 0 0 60px #ff69b4;
+      animation: girar 10s linear infinite;
+    }
+    @keyframes girar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .mensaje {
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+    button {
+      background: #ff1493;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #ff69b4;
+    }
+  </style>
+</head>
+<body>
+  <h1>💞 Bienvenido a mi Planeta de Amor Virtual 💞</h1>
+  <div class="planeta"></div>
+  <p class="mensaje" id="mensaje">Haz clic para recibir amor 💌</p>
+  <button onclick="mostrarMensaje()">💖 Mensaje de amor 💖</button>
+
+  <script>
+    const mensajes = [
+      "Eres luz en este planeta 💫",
+      "Tu sonrisa hace girar mi mundo 🌍",
+      "El amor florece donde tú estás 🌸",
+      "Eres mi universo y mintodo 💞",
+      "Te mando mil abrazos estelares 💫"
+    ];
+    function mostrarMensaje() {
+      const m = mensajes[Math.floor(Math.random() * mensajes.length)];
+      document.getElementById('mensaje').textContent = m;
+    }
+  </script>
+</body>
+</html>
