@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My FX Replay Pro</title>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0e1114;
+      color: #d1d4dc;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background-color: #131722;
+      border-bottom: 1px solid #222;
+    }
+    select, button {
+      background-color: #1e222d;
+      color: #d1d4dc;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #2a2e39;
+      cursor: pointer;
+    }
+    #chart {
+      flex: 1;
+      height: 100%;
+      width: 100%;
+    }
+    footer {
+      background-color: #131722;
+      border-top: 1px solid #222;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .buttons button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <strong>My FX Replay Pro</strong>
+    <label>Pair
+      <select id="pair">
+        <option>EUR/USD</option>
+        <option>GBP/USD</option>
+        <option>USD/JPY</option>
+      </select>
+    </label>
+    <label>TF
+      <select id="timeframe">
+        <option>1m</option>
+        <option>5m</option>
+        <option selected>15m</option>
+        <option>4h</option>
+      </select>
+    </label>
+    <button id="prev">⏮ Prev</button>
+    <button id="play">▶ Play</button>
+    <button id="pause">⏸ Pause</button>
+    <button id="next">⏭ Next</button>
+    <label>Speed
+      <select id="speed">
+        <option value="1000">1x</option>
+        <option value="500">2x</option>
+        <option value="250">4x</option>
+        <option value="100">10x</option>
+      </select>
+    </label>
+    <button id="replayStart">↻ Restart</button>
+  </header>
+
+  <div id="chart"></div>
+
+  <footer>
+    <div>
+      <strong>Trading Controls</strong><br>
+      <div class="buttons">
+        <button id="buy">Buy</button>
+        <button id="sell">Sell</button>
+        <button id="closeAll">Close All</button>
+        <button id="modeToggle">Live</button>
+      </div>
+    </div>
+    <div>
+      <p>Balance: <strong id="balance">$10,000</strong></p>
+      <p>Open P/L: <span id="openPL">0.00</span> | Closed P/L: <span id="closedPL">0.00</span></p>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Chart Setup =====
+    const chartContainer = document.getElementById('chart');
+    const chart = LightweightCharts.createChart(chartContainer, {
+      layout: {
+        background: { color: '#0e1114' },
+        textColor: '#d1d4dc',
+      },
+      grid: {
+        vertLines: { color: '#1c1f26' },
+        horzLines: { color: '#1c1f26' },
+      },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+      width: chartContainer.clientWidth,
+      height: chartContainer.clientHeight,
+    });
+
+    const candleSeries = chart.addCandlestickSeries();
+
+    // Dummy candle data
+    const data = [
+      { time: '2025-10-25', open: 1.08, high: 1.10, low: 1.06, close: 1.09 },
+      { time: '2025-10-26', open: 1.09, high: 1.11, low: 1.08, close: 1.10 },
+      { time: '2025-10-27', open: 1.10, high: 1.12, low: 1.09, close: 1.11 },
+      { time: '2025-10-28', open: 1.11, high: 1.13, low: 1.10, close: 1.12 },
+      { time: '2025-10-29', open: 1.12, high: 1.14, low: 1.11, close: 1.13 },
+      { time: '2025-10-30', open: 1.13, high: 1.15, low: 1.12, close: 1.14 },
+      { time: '2025-10-31', open: 1.14, high: 1.16, low: 1.13, close: 1.15 },
+    ];
+
+    let index = 2;
+    let replayInterval = null;
+    let speed = 1000;
+    candleSeries.setData(data.slice(0, index));
+
+    // ===== Functions =====
+    function playReplay() {
+      if (replayInterval) return;
+      replayInterval = setInterval(() => {
+        if (index < data.length) {
+          index++;
+          candleSeries.setData(data.slice(0, index));
+        } else {
+          clearInterval(replayInterval);
+        }
+      }, speed);
+    }
+
+    function pauseReplay() {
+      clearInterval(replayInterval);
+      replayInterval = null;
+    }
+
+    function restartReplay() {
+      pauseReplay();
+      index = 2;
+      candleSeries.setData(data.slice(0, index));
+    }
+
+    function nextCandle() {
+      if (index < data.length) {
+        index++;
+        candleSeries.setData(data.slice(0, index));
+      }
+    }
+
+    function prevCandle() {
+      if (index > 2) {
+        index--;
+        candleSeries.setData(data.slice(0, index));
+      }
+    }
+
+    // ===== Controls =====
+    document.getElementById('play').onclick = playReplay;
+    document.getElementById('pause').onclick = pauseReplay;
+    document.getElementById('replayStart').onclick = restartReplay;
+    document.getElementById('next').onclick = nextCandle;
+    document.getElementById('prev').onclick = prevCandle;
+    document.getElementById('speed').onchange = e => speed = parseInt(e.target.value);
+
+    // ===== Demo Trading Logic =====
+    let balance = 10000, openPL = 0, closedPL = 0, position = null;
+
+    const updateStats = () => {
+      document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
+      document.getElementById('openPL').textContent = openPL.toFixed(2);
+      document.getElementById('closedPL').textContent = closedPL.toFixed(2);
+    };
+
+    document.getElementById('buy').onclick = () => {
+      if (position) { alert('Close existing trade first!'); return; }
+      position = { type: 'buy', entry: data[index - 1].close };
+      alert('BUY at ' + position.entry);
+    };
+
+    document.getElementById('sell').onclick = () => {
+      if (position) { alert('Close existing trade first!'); return; }
+      position = { type: 'sell', entry: data[index - 1].close };
+      alert('SELL at ' + position.entry);
+    };
+
+    document.getElementById('closeAll').onclick = () => {
+      if (!position) { alert('No open trades.'); return; }
+      const exit = data[index - 1].close;
+      const diff = position.type === 'buy' ? exit - position.entry : position.entry - exit;
+      const profit = diff * 10000;
+      balance += profit;
+      closedPL += profit;
+      position = null;
+      alert('Trade closed with P/L: ' + profit.toFixed(2));
+      updateStats();
+    };
+
+    document.getElementById('modeToggle').onclick = () => {
+      alert('Live mode (real data) feature coming soon.');
+    };
+
+    // ===== Resize =====
+    window.addEventListener('resize', () => {
+      chart.applyOptions({ width: chartContainer.clientWidth, height: chartContainer.clientHeight });
+    });
+
+    updateStats();
+  </script>
+
+</body>
+</html>
