@@ -1,0 +1,9 @@
+fafgo-web/
+  ├─ package.json
+  ├─ tailwind.config.js
+  ├─ postcss.config.js
+  ├─ src/
+      ├─ App.jsx
+      ├─ index.js
+      ├─ components/
+  ├─ README.md
