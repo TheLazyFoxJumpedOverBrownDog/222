@@ -1,56 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
-
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
-
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lissie & Kira</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(to bottom, #ffd6ec, #fff0f8);
+    overflow: hidden;
+  }
+  .hearts {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .heart {
+    position: absolute;
+    color: #ff5fa2;
+    font-size: 20px;
+    animation: float 6s linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) scale(1); opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+  }
+  .book {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    height: 80vh;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(255,105,180,0.4);
+    overflow: hidden;
+    text-align: center;
+    padding: 20px;
+  }
+  .page {
+    display: none;
+    animation: fade 1s;
+  }
+  .page.active {
+    display: block;
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  img {
+    width: 120px;
+    margin: 10px 0;
+  }
+  button {
+    background-color: #ff9dcf;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 25px;
+    margin: 10px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+  button:hover {
+    background-color: #ff6bb5;
+  }
+  h1 {
+    color: #ff5fa2;
+    margin-bottom: 10px;
+  }
+  p {
+    color: #444;
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 10px 0;
+  }
+</style>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
-
-      </div>
-
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
-    </div>
+<div class="hearts"></div>
+<div class="book">
+  <div id="page1" class="page active">
+    <img src="https://i.imgur.com/2Y0h5wC.png" alt="Hello Kitty feliz">
+    <h1>Lissie & Kira 💕</h1>
+    <p>
+    Desde aquel primer ciclo en que nos conocimos, supe que nuestra amistad sería especial.  
+    Hemos pasado por tantas cosas juntas — las buenas, las locas y también las peores —  
+    pero siempre una al lado de la otra.  
+    Gracias por ser esa persona que me entiende, me apoya y me hace reír incluso cuando todo parece estar en contra.  
+    Te quiero muchísimo, y no cambiaría por nada todos los momentos que hemos compartido.  
+    Eres mi amiga del alma, mi compañera de vida y mi hermana elegida.
+    </p>
+    <button onclick="nextPage()">Siguiente 💖</button>
   </div>
-</body>
 
+  <div id="page2" class="page">
+    <img src="https://i.imgur.com/7kx4dJ1.png" alt="Hello Kitty abrazando un osito">
+    <p>
+    Para mi mejor amiga del alma 💌  
+    No sabes cuánto te quiero y lo agradecida que estoy por tenerte en mi vida.  
+    Eres esa persona que siempre está, en las risas, en los enojos, en los días buenos y en los difíciles también.  
+    Gracias por tu cariño, tu paciencia y por entenderme sin que tenga que decir nada.  
+    Eres más que una amiga, eres mi hermana del corazón. 💕  
+    </p>
+    <p><strong>Con mucho amor, Lissie 💖</strong></p>
+    <button onclick="prevPage()">Atrás 🌸</button>
+  </div>
+</div>
+
+<audio id="music" loop autoplay>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c4e93d36c.mp3?filename=kawaii-cute-happy-11365.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  let currentPage = 1;
+  function nextPage() {
+    document.getElementById('page' + currentPage).classList.remove('active');
+    currentPage++;
+    document.getElementById('page' + currentPage).classList.add('active');
+  }
+  function prevPage() {
+    document.getElementById('page' + currentPage).classList.remove('active');
+    currentPage--;
+    document.getElementById('page' + currentPage).classList.add('active');
+  }
+
+  // corazones flotando
+  const heartsContainer = document.querySelector('.hearts');
+  setInterval(() => {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.textContent = '❤';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDuration = (4 + Math.random() * 3) + 's';
+    heartsContainer.appendChild(heart);
+    setTimeout(() => heart.remove(), 6000);
+  }, 400);
+</script>
+</body>
 </html>
