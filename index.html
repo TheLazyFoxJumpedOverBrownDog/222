@@ -1,56 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manshi Birthday Surprise</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #ffe6f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #page1, #page2 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease;
+  }
+  #page2 {opacity: 0; pointer-events: none;}
+  .hidden {opacity: 0; pointer-events: none;}
+  
+  /* Speaker */
+  #speaker {
+    width: 100px;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  #speaker:hover {
+    transform: scale(1.1);
+  }
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
+  /* Candle */
+  #candle {
+    width: 50px;
+    margin-top: 20px;
+  }
+  .blow {
+    animation: blow 1s forwards;
+  }
+  @keyframes blow {
+    0% {opacity:1; transform: translateY(0);}
+    100% {opacity:0; transform: translateY(-30px);}
+  }
 
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
+  /* Birthday message */
+  #wish {
+    font-size: 2em;
+    color: #ff0066;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+  }
+  @keyframes fadeIn {
+    to {opacity:1;}
+  }
 
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+  /* Cake */
+  #cake {
+    width: 150px;
+    margin-top: 20px;
+    position: relative;
+  }
+  .slice {
+    width: 0;
+    height: 0;
+    border-left: 75px solid transparent;
+    border-right: 75px solid transparent;
+    border-bottom: 100px solid #ff6699;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: bottom center;
+    transition: transform 1s;
+  }
+  .cut {transform: rotate(20deg);}
+</style>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
 
-      </div>
+<!-- Page 1: Speaker and Candle -->
+<div id="page1">
+  <img src="https://cdn-icons-png.flaticon.com/512/727/727240.png" id="speaker" alt="Speaker">
+  <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" id="candle" alt="Candle">
+  <p>Click the speaker to blow the candle!</p>
+</div>
 
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
-    </div>
+<!-- Page 2: Birthday Wish -->
+<div id="page2">
+  <div id="wish">Happy Birthday, Manshi! 💖</div>
+  <div id="cake">
+    <div class="slice"></div>
   </div>
-</body>
+</div>
 
+<!-- Romantic tune -->
+<audio id="music" src="https://www.bensound.com/bensound-music/bensound-romantic.mp3"></audio>
+
+<script>
+  const speaker = document.getElementById('speaker');
+  const candle = document.getElementById('candle');
+  const page1 = document.getElementById('page1');
+  const page2 = document.getElementById('page2');
+  const music = document.getElementById('music');
+  const slice = document.querySelector('.slice');
+
+  speaker.addEventListener('click', () => {
+    candle.classList.add('blow');
+    setTimeout(() => {
+      page1.classList.add('hidden');
+      page2.style.opacity = 1;
+      page2.style.pointerEvents = 'auto';
+      music.play();
+      // Cake cut animation after 2 sec
+      setTimeout(() => {
+        slice.classList.add('cut');
+      }, 2000);
+    }, 1000);
+  });
+</script>
+
+</body>
 </html>
