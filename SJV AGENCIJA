@@ -1,0 +1,465 @@
+import express from "express";
+import cors from "cors";
+import nodemailer from "nodemailer";
+import OpenAI from "openai";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// nastavi svoje spremenljivke okolja
+const owner = "patrikgojic2015@gmail.com";
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+});
+
+app.post("/send-code", async (req, res) => {
+  const { email } = req.body;
+  const code = "10411041";
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Tvoja koda za SJV AGENCIJA",
+    text: `Tvoja koda za prijavo: ${code}`,
+  });
+  res.json({ success: true });
+});
+
+app.post("/notify-owner", async (req, res) => {
+  const { userEmail } = req.body;
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: owner,
+    subject: "Nov uporabnik želi dostop",
+    text: `Uporabnik ${userEmail} je vpisal pravilno kodo.`,
+  });
+  res.json({ success: true });
+});
+
+// ChatGPT-asistent Pikij
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+app.post("/pikij", async (req, res) => {
+  const { message } = req.body;
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: message }],
+  });
+  res.json({ reply: completion.choices[0].message.content });
+});
+
+app.listen(3000, () => console.log("Server teče na http://localhost:3000"));// lib/main.dart
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_cube/flutter_cube.dart';
+
+void main() {
+  runApp(const SJVApp());
+}
+
+class SJVApp extends StatelessWidget {
+  const SJVApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SJV AGENCIJA',
+      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
+      home: const HomePage(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController codeController = TextEditingController();
+  final TextEditingController agencyController = TextEditingController();
+  final TextEditingController pikijController = TextEditingController();
+
+  static const String expectedCode = '10411041'; // za kompatibilnost z backendom
+  bool codeSent = false;
+  bool codeVerified = false;
+  bool saving = false;
+  bool sending = false;
+
+  late SharedPreferences prefs;
+  List<String> usedAgencyNames = [];
+
+  // Konfiguriraj URL svojega backend-a (za lokalni dev: http://10.0.2.2:3000 na Android emulatorju)
+  // Če testiraš na fizični napravi, uporabi IP stroja: e.g. http://192.168.1.20:3000
+  String backendBaseUrl = "http://10.0.2.2:3000";
+
+  // animacija za globe (samo za enak vizual)
+  late final AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+    _rotationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 24))
+          ..repeat();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    codeController.dispose();
+    agencyController.dispose();
+    pikijController.dispose();
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    usedAgencyNames = prefs.getStringList('usedNames') ?? [];
+    setState(() {});
+  }
+
+  // POŠLJI KODO preko backend
+  Future<void> _sendCode() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      _showMessage('Najprej vpiši email.');
+      return;
+    }
+    setState(() => sending = true);
+    try {
+      final resp = await http.post(
+        Uri.parse('$backendBaseUrl/send-code'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      final body = jsonDecode(resp.body);
+      if (resp.statusCode == 200 && body['success'] == true) {
+        setState(() {
+          codeSent = true;
+        });
+        _showMessage('Koda poslana. Preveri svoj email.');
+      } else {
+        _showMessage('Napaka pri pošiljanju kode: ${body['error'] ?? resp.body}');
+      }
+    } catch (e) {
+      _showMessage('Napaka povezave do backend: $e');
+    } finally {
+      setState(() => sending = false);
+    }
+  }
+
+  // PREVERI KODO lokalno (lahko tudi preveriš na backend če želiš)
+  Future<void> _verifyCode() async {
+    final entered = codeController.text.trim();
+    if (!codeSent) {
+      _showMessage('Najprej pošlji kodo.');
+      return;
+    }
+    if (entered == expectedCode) {
+      setState(() {
+        codeVerified = true;
+      });
+      _showMessage('Koda potrjena. Obveščam lastnika...');
+      await _notifyOwner();
+    } else {
+      _showMessage('Napačna koda.');
+    }
+  }
+
+  // POŠLJI obvestilo lastniku preko backend
+  Future<void> _notifyOwner() async {
+    try {
+      final resp = await http.post(
+        Uri.parse('$backendBaseUrl/notify-owner'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'userEmail': emailController.text.trim()}),
+      );
+      if (resp.statusCode == 200) {
+        _showMessage('Lastnik obveščen prek e-pošte.');
+      } else {
+        _showMessage('Ni mogoče obvestiti lastnika: ${resp.body}');
+      }
+    } catch (e) {
+      _showMessage('Napaka ob obveščanju lastnika: $e');
+    }
+  }
+
+  Future<void> _saveAgencyName() async {
+    final name = agencyController.text.trim();
+    if (!codeVerified) {
+      _showMessage('Najprej potrdi kodo.');
+      return;
+    }
+    if (name.isEmpty) {
+      _showMessage('Vpiši ime agencije.');
+      return;
+    }
+    if (usedAgencyNames.contains(name.toLowerCase())) {
+      _showMessage('To ime je že zasedeno — izberi drugo.');
+      return;
+    }
+    setState(() => saving = true);
+    usedAgencyNames.add(name.toLowerCase());
+    await prefs.setStringList('usedNames', usedAgencyNames);
+    setState(() => saving = false);
+    _showMessage('Ime agencije shranjeno.');
+  }
+
+  void _showMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), backgroundColor: Colors.white12, behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  // Pikij: pošlji vprašanje na backend -> /pikij
+  Future<void> _askPikij(String message) async {
+    if (message.trim().isEmpty) return;
+    try {
+      final resp = await http.post(
+        Uri.parse('$backendBaseUrl/pikij'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'message': message}),
+      );
+      if (resp.statusCode == 200) {
+        final b = jsonDecode(resp.body);
+        final reply = b['reply'] ?? 'Brez odgovora';
+        // prikažemo odgovor
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            backgroundColor: Colors.black,
+            title: const Text('Pikij odgovarja', style: TextStyle(color: Colors.white)),
+            content: Text(reply, style: const TextStyle(color: Colors.white70)),
+            actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Zapri', style: TextStyle(color: Colors.white)))],
+          ),
+        );
+      } else {
+        _showMessage('Pikij ni dosegljiv: ${resp.body}');
+      }
+    } catch (e) {
+      _showMessage('Napaka pri klicu Pikija: $e');
+    }
+  }
+
+  // Numerična tipkovnica
+  Widget _numericKeyboard() {
+    Widget key(String value) {
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.white12, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 18)),
+            onPressed: () {
+              if (value == '⌫') {
+                final text = codeController.text;
+                if (text.isNotEmpty) {
+                  codeController.text = text.substring(0, text.length - 1);
+                }
+              } else if (value == 'OK') {
+                _verifyCode();
+              } else {
+                codeController.text = '${codeController.text}$value';
+              }
+              setState(() {});
+            },
+            child: Text(value, style: const TextStyle(fontSize: 18, color: Colors.white)),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(children: [key('1'), key('2'), key('3')]),
+        Row(children: [key('4'), key('5'), key('6')]),
+        Row(children: [key('7'), key('8'), key('9')]),
+        Row(children: [key('⌫'), key('0'), key('OK')]),
+      ],
+    );
+  }
+
+  Widget _leftAppsColumn() {
+    final apps = [
+      Icons.settings, Icons.shopping_cart, Icons.phone, Icons.contacts, Icons.camera_alt, Icons.photo_library, Icons.phone_android
+    ];
+    final labels = ['Nastavitve', 'Play', 'Telefon', 'Stiki', 'Fotoaparat', 'Galerija', 'Galaxy U25'];
+
+    return Container(
+      width: 90,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      child: Column(
+        children: [
+          for (int i = 0; i < apps.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(children: [
+                IconButton(iconSize: 34, color: Colors.white, onPressed: () => _showMessage('${labels[i]} (demo)'), icon: Icon(apps[i])),
+                Text(labels[i], style: const TextStyle(fontSize: 11, color: Colors.white))
+              ]),
+            )
+        ],
+      ),
+    );
+  }
+
+  Widget _centerArea() {
+    return Expanded(
+      flex: 5,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            const Text('SJV AGENCIJA', style: TextStyle(fontSize: 46, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: emailController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(hintText: 'Vpiši svoj e-mail', hintStyle: const TextStyle(color: Colors.white54), filled: true, fillColor: Colors.white12, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 8),
+            Row(children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white12, foregroundColor: Colors.white),
+                  onPressed: sending ? null : _sendCode,
+                  child: sending ? const CircularProgressIndicator() : const Text('Pošlji kodo'),
+                ),
+              )
+            ]),
+            const SizedBox(height: 18),
+
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(8)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('Pikij — tvoj asistent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  const Text('Vpiši kodo (nad tipkovnico). Pikij lahko odgovori na osnovna vprašanja (demo).', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: codeController,
+                    readOnly: true,
+                    style: const TextStyle(color: Colors.white, letterSpacing: 2),
+                    decoration: InputDecoration(hintText: 'Vpiši kodo tukaj', hintStyle: const TextStyle(color: Colors.white54), filled: true, fillColor: Colors.transparent, border: OutlineInputBorder(borderRadius: BorderRadius.circular(6))),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+            _numericKeyboard(),
+
+            const SizedBox(height: 18),
+
+            if (codeVerified) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(8)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text('Izmisli si agencijsko ime', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    TextField(controller: agencyController, style: const TextStyle(color: Colors.white), decoration: InputDecoration(hintText: 'Ime agencije', hintStyle: const TextStyle(color: Colors.white54), filled: true, fillColor: Colors.transparent, border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)))),
+                    const SizedBox(height: 8),
+                    ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.white12, foregroundColor: Colors.white), onPressed: saving ? null : _saveAgencyName, child: saving ? const CircularProgressIndicator() : const Text('Shrani ime agencije')),
+                    const SizedBox(height: 6),
+                    const Text('Če ime že obstaja ali niso izpolnjena polja, te ne shranimo.', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  ],
+                ),
+              )
+            ] else ...[
+              const SizedBox(height: 8),
+              const Text('Koda še ni potrjena. Po potrditvi se prikaže polje za ime agencije.', style: TextStyle(color: Colors.white54)),
+              const SizedBox(height: 8),
+            ],
+
+            const SizedBox(height: 18),
+
+            // Pikij chat demo
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(8)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                const Text('Pogovor s Pikijem (živo)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                TextField(controller: pikijController, style: const TextStyle(color: Colors.white), decoration: InputDecoration(hintText: 'Vprašaj Pikija...', hintStyle: const TextStyle(color: Colors.white54), filled: true, fillColor: Colors.transparent, border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)))),
+                const SizedBox(height: 8),
+                ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.white12, foregroundColor: Colors.white), onPressed: () => _askPikij(pikijController.text.trim()), child: const Text('Pošlji Pikiju')),
+              ]),
+            ),
+
+            const SizedBox(height: 36),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _rightGlobeArea() {
+    return Expanded(
+      flex: 3,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 280,
+              child: Cube(
+                onSceneCreated: (Scene scene) {
+                  scene.world.add(Object(
+                    // pot do obj datoteke v assets/earth/
+                    fileName: 'assets/earth/earth.obj',
+                    // po potrebi nastavi material in teksturo v OBJ/MTL
+                  ));
+                  scene.camera.zoom = 10;
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text('Zemlja — vrti se', style: TextStyle(color: Colors.white)),
+            const SizedBox(height: 16),
+            const Text('Dodatne aplikacije spodaj (demo).', style: TextStyle(color: Colors.white54)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(6, (i) {
+                return ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.white12, foregroundColor: Colors.white), onPressed: () => _showMessage('Aplikacija ${i + 1} (demo).'), child: Text('App ${i + 1}'));
+              }),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _leftAppsColumn(),
+          _centerArea(),
+          _rightGlobeArea(),
+        ]),
+      ),
+    );
+  }
+}
