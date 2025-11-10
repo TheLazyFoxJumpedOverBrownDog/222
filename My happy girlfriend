@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💝 Surprise 💝</title>
+<style>
+  body {
+    background: linear-gradient(135deg, #ffb6c1, #ffc3a0);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: "Prompt", sans-serif;
+    overflow: hidden;
+  }
+  button {
+    background-color: #ff6b81;
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background-color: #ff4757;
+    transform: scale(1.05);
+  }
+  h1 {
+    color: white;
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+  .show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+  <button id="giftBtn">กดดูของขวัญ 💝</button>
+  <h1 id="message">Happy birthday na 😚<br>มีของมาส่งหน้าบ้านน 🎁</h1>
+
+  <script>
+    const btn = document.getElementById('giftBtn');
+    const msg = document.getElementById('message');
+    btn.addEventListener('click', () => {
+      msg.classList.add('show');
+      btn.style.display = 'none';
+      playMusic();
+    });
+
+    function playMusic() {
+      const audio = document.createElement('iframe');
+      audio.width = 0;
+      audio.height = 0;
+      audio.src = "https://www.youtube.com/embed/mVT1SNc_t2Q?autoplay=1";
+      document.body.appendChild(audio);
+    }
+  </script>
+</body>
+</html>
