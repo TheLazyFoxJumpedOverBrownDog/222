@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Base de animación — Stickman</title>
+  <style>
+    html,body{height:100%;margin:0;font-family:sans-serif;background:#111;color:#eee}
+    .wrap{display:flex;height:100%}
+    canvas{flex:1;background:linear-gradient(#222,#111);display:block}
+    .panel{width:320px;padding:16px;background:#0f0f0f;border-left:1px solid #222;box-sizing:border-box}
+    .panel h3{margin-top:0;font-size:18px}
+    .row{margin:8px 0}
+    button, input[type=range]{width:100%}
+    .small{font-size:13px;color:#bbb}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <canvas id="c"></canvas>
+    <div class="panel">
+      <h3>Base de animación — Stickman</h3>
+      <div class="row">
+        <button id="btnPlay">Iniciar</button>
+      </div>
+      <div class="row">
+        <label class="small">Velocidad</label>
+        <input id="speed" type="range" min="0.1" max="3" step="0.1" value="1">
+      </div>
+      <div class="row">
+        <label class="small">Tamaño (escala)</label>
+        <input id="scale" type="range" min="0.5" max="2" step="0.1" value="1">
+      </div>
+      <div class="row">
+        <button id="btnWalk">Modo: Caminar</button>
+      </div>
+      <div class="row">
+        <button id="btnIdle">Modo: Idle</button>
+      </div>
+      <div class="row">
+        <button id="btnJump">Acción: Salto</button>
+      </div>
+      <p class="small">Controles: usa los botones. Puedes editar las longitudes y la función <code>update()</code> para crear nuevas animaciones.</p>
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth - 320; // account for panel
+let H = canvas.height = innerHeight;
+window.addEventListener('resize', ()=>{W = canvas.width = innerWidth - 320; H = canvas.height = innerHeight});
+
+// Parameters
+const params = {
+  speed: 1,
+  scale: 1,
+  mode: 'walk', // 'idle', 'walk'
+  playing: false
+};
+
+// Stickman rig (relative lengths)
+const rig = {
+  torso: 80,
+  head: 24,
+  upperArm: 40,
+  lowerArm: 36,
+  upperLeg: 48,
+  lowerLeg: 44
+};
+
+// Pose state
+const state = {
+  hip: {x: W/2, y: H*0.65},
+  time: 0,
+  jump: {active:false, t:0}
+};
+
+// UI
+document.getElementById('btnPlay').onclick = ()=>{params.playing = !params.playing; document.getElementById('btnPlay').textContent = params.playing ? 'Pausar' : 'Iniciar'};
+document.getElementById('speed').oninput = (e)=> params.speed = parseFloat(e.target.value);
+document.getElementById('scale').oninput = (e)=> params.scale = parseFloat(e.target.value);
+document.getElementById('btnWalk').onclick = ()=> params.mode='walk';
+document.getElementById('btnIdle').onclick = ()=> params.mode='idle';
+document.getElementById('btnJump').onclick = ()=> { if(!state.jump.active){ state.jump.active = true; state.jump.t = 0; } };
+
+// Utility functions
+function lerp(a,b,t){return a + (b-a)*t}
+function drawCircle(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+function drawLine(x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+
+function polarOffset(x,y,angle,len){return {x:x + Math.cos(angle)*len, y:y + Math.sin(angle)*len}}
+
+// Compose stickman from hip position
+function computePose(t){
+  const s = params.scale;
+  const hip = {...state.hip};
+  // simple horizontal bob for walk/idle
+  const speed = 2 * params.speed;
+  let bob = 0;
+  if(params.mode === 'walk') bob = Math.sin(t*speed)*6*s;
+  else bob = Math.sin(t*0.8)*2*s;
+  hip.y += bob;
+
+  // Jump handling
+  let yOffset = 0;
+  if(state.jump.active){
+    const T = 0.8; state.jump.t += 0.02 * params.speed; const tt = state.jump.t;
+    // parabola
+    yOffset = -200 * Math.max(0, 1 - (tt/T)) * (tt/T) * s; // simplified
+    if(state.jump.t >= 1) { state.jump.active = false; state.jump.t = 0 }
+    hip.y += yOffset;
+  }
+
+  // Legs swing
+  const legSwing = (params.mode === 'walk') ? Math.sin(t*speed)*0.9 : Math.sin(t*0.6)*0.2;
+  const shoulderSwing = legSwing * 0.6;
+
+  // Torso top (neck)
+  const neck = {x: hip.x, y: hip.y - rig.torso*s};
+  const head = {x: neck.x, y: neck.y - rig.head*s - 6*s};
+
+  // Left leg
+  const leftHipAngle = Math.PI/2 + legSwing;
+  const leftKnee = polarOffset(hip.x, hip.y, leftHipAngle, rig.upperLeg*s);
+  const leftFoot = polarOffset(leftKnee.x, leftKnee.y, leftHipAngle + 0.25, rig.lowerLeg*s);
+
+  // Right leg
+  const rightHipAngle = Math.PI/2 - legSwing;
+  const rightKnee = polarOffset(hip.x, hip.y, rightHipAngle, rig.upperLeg*s);
+  const rightFoot = polarOffset(rightKnee.x, rightKnee.y, rightHipAngle - 0.25, rig.lowerLeg*s);
+
+  // Arms from neck
+  const leftShoulderAngle = -Math.PI/2 + shoulderSwing;
+  const leftElbow = polarOffset(neck.x, neck.y, leftShoulderAngle, rig.upperArm*s);
+  const leftHand = polarOffset(leftElbow.x, leftElbow.y, leftShoulderAngle + 0.2, rig.lowerArm*s);
+
+  const rightShoulderAngle = -Math.PI/2 - shoulderSwing;
+  const rightElbow = polarOffset(neck.x, neck.y, rightShoulderAngle, rig.upperArm*s);
+  const rightHand = polarOffset(rightElbow.x, rightElbow.y, rightShoulderAngle - 0.2, rig.lowerArm*s);
+
+  return {
+    hip, neck, head,
+    leftKnee, leftFoot, rightKnee, rightFoot,
+    leftElbow, leftHand, rightElbow, rightHand
+  };
+}
+
+function drawStick(pose){
+  ctx.lineWidth = 4*params.scale; ctx.lineCap='round'; ctx.strokeStyle = '#ddd'; ctx.fillStyle = '#ddd';
+  // legs
+  drawLine(pose.hip.x, pose.hip.y, pose.leftKnee.x, pose.leftKnee.y);
+  drawLine(pose.leftKnee.x, pose.leftKnee.y, pose.leftFoot.x, pose.leftFoot.y);
+  drawLine(pose.hip.x, pose.hip.y, pose.rightKnee.x, pose.rightKnee.y);
+  drawLine(pose.rightKnee.x, pose.rightKnee.y, pose.rightFoot.x, pose.rightFoot.y);
+  // torso
+  drawLine(pose.hip.x, pose.hip.y, pose.neck.x, pose.neck.y);
+  // arms
+  drawLine(pose.neck.x, pose.neck.y, pose.leftElbow.x, pose.leftElbow.y);
+  drawLine(pose.leftElbow.x, pose.leftElbow.y, pose.leftHand.x, pose.leftHand.y);
+  drawLine(pose.neck.x, pose.neck.y, pose.rightElbow.x, pose.rightElbow.y);
+  drawLine(pose.rightElbow.x, pose.rightElbow.y, pose.rightHand.x, pose.rightHand.y);
+  // head
+  ctx.lineWidth = 3*params.scale; ctx.beginPath(); ctx.arc(pose.head.x, pose.head.y, rig.head*params.scale, 0, Math.PI*2); ctx.stroke();
+  // simple joints
+  ctx.fillStyle = '#999'; drawCircle(pose.hip.x, pose.hip.y, 3*params.scale);
+}
+
+// Ground line
+function drawGround(){ctx.lineWidth=2; ctx.strokeStyle='#2f2f2f'; drawLine(0, H*0.75 + 20, W, H*0.75 + 20)}
+
+// Main loop
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  // background grid
+  ctx.save(); ctx.globalAlpha=0.06; for(let i=0;i<W;i+=40) drawLine(i,0,i,H); for(let j=0;j<H;j+=40) drawLine(0,j,W,j); ctx.restore();
+  drawGround();
+
+  if(params.playing){ state.time += 0.02 * params.speed }
+  const pose = computePose(state.time);
+  drawStick(pose);
+  requestAnimationFrame(loop);
+}
+
+// Start
+loop();
+
+// Helpful note for hackers: edit the `computePose` function to add new behaviors or create new modes like 'run' or 'dance'.
+</script>
+</body>
+</html>
+
+
+Listo — creé una base de animación de stickman como un archivo HTML de una sola página (canvas + controles). En ese archivo encontrarás:
+
+Un canvas que dibuja un stickman usando un rig simple (longitudes de torso, brazos, piernas).
+
+Control de modo: idle y walk, botón para saltar.
+
+Sliders para velocidad y escala.
+
+Código fácil de editar: la animación está en la función computePose() para que puedas añadir más modos (run, dance, etc.) o ajustar las longitudes del rig.
+
+
+Si quieres que modifique algo (por ejemplo: añadir export de frames, grabar GIF, más controles, física más realista o un sistema de keyframes), dime qué quieres y lo ajusto. También puedo convertirlo en un proyecto React, en Python (Pygame) o en GIF/PNG sequence si prefieres. ¿Qué te gustaría mejorar o añadir?
