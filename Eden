@@ -1,0 +1,2347 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eden Ultimate AI - 5 Levels of Intelligence</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Rajdhani', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+      color: #00ffea;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    /* Animated holographic grid background */
+    .holo-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        repeating-linear-gradient(0deg, rgba(0, 255, 234, 0.08) 0px, transparent 1px, transparent 40px),
+        repeating-linear-gradient(90deg, rgba(0, 255, 234, 0.08) 0px, transparent 1px, transparent 40px);
+      background-size: 40px 40px;
+      animation: gridFlow 20s linear infinite;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    @keyframes gridFlow {
+      0% { transform: perspective(800px) rotateX(60deg) translateY(0) translateZ(0); }
+      100% { transform: perspective(800px) rotateX(60deg) translateY(40px) translateZ(0); }
+    }
+
+    /* Floating particles */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #00ffea;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #00ffea;
+      animation: float 15s infinite ease-in-out;
+      opacity: 0.6;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-100%) translateX(50px); opacity: 0; }
+    }
+
+    .ai-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 20px;
+      padding-left: 40px;
+      padding-top: 60px;
+      z-index: 1;
+    }
+
+    /* Holographic AI head with multiple layers */
+    .holo-head-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin-bottom: 25px;
+    }
+
+    .holo-head {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, rgba(0, 255, 234, 0.2), rgba(0, 255, 234, 0.05));
+      border: 3px solid #00ffea;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 40px rgba(0, 255, 234, 0.6),
+        0 0 80px rgba(0, 255, 234, 0.4) inset,
+        0 0 120px rgba(0, 255, 234, 0.2);
+      animation: headPulse 3s infinite ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+    }
+
+    .holo-head.speaking {
+      animation: headPulse 0.5s infinite ease-in-out, speakGlow 0.3s infinite;
+    }
+
+    .holo-head.thinking {
+      animation: headPulse 1.5s infinite ease-in-out, thinkGlow 2s infinite;
+    }
+
+    .holo-head.learning {
+      animation: headPulse 1s infinite ease-in-out, learnGlow 1.5s infinite;
+    }
+
+    @keyframes headPulse {
+      0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 40px rgba(0, 255, 234, 0.6), 0 0 80px rgba(0, 255, 234, 0.4) inset;
+      }
+      50% { 
+        transform: translate(-50%, -50%) scale(1.08);
+        box-shadow: 0 0 60px rgba(0, 255, 234, 0.9), 0 0 120px rgba(0, 255, 234, 0.6) inset;
+      }
+    }
+
+    @keyframes speakGlow {
+      0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 234, 0.8), 0 0 80px rgba(0, 255, 234, 0.5) inset; }
+      50% { box-shadow: 0 0 80px rgba(0, 255, 234, 1), 0 0 140px rgba(0, 255, 234, 0.8) inset; }
+    }
+
+    @keyframes thinkGlow {
+      0%, 100% { 
+        border-color: #8a2be2;
+        box-shadow: 0 0 40px rgba(138, 43, 226, 0.8), 0 0 80px rgba(138, 43, 226, 0.5) inset;
+      }
+      50% { 
+        border-color: #9d4edd;
+        box-shadow: 0 0 80px rgba(138, 43, 226, 1), 0 0 140px rgba(138, 43, 226, 0.8) inset;
+      }
+    }
+
+    @keyframes learnGlow {
+      0%, 100% { 
+        border-color: #00ff88;
+        box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), 0 0 80px rgba(0, 255, 136, 0.5) inset;
+      }
+      50% { 
+        border-color: #00ffaa;
+        box-shadow: 0 0 80px rgba(0, 255, 136, 1), 0 0 140px rgba(0, 255, 136, 0.8) inset;
+      }
+    }
+
+    /* Rotating rings around the head */
+    .holo-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 2px solid rgba(0, 255, 234, 0.3);
+      border-radius: 50%;
+      transform-style: preserve-3d;
+    }
+
+    .ring-1 {
+      width: 160px;
+      height: 160px;
+      transform: translate(-50%, -50%) rotateX(70deg);
+      animation: rotateRing1 8s linear infinite;
+    }
+
+    .ring-2 {
+      width: 180px;
+      height: 180px;
+      transform: translate(-50%, -50%) rotateX(70deg);
+      animation: rotateRing2 12s linear infinite reverse;
+      border-color: rgba(0, 255, 234, 0.2);
+    }
+
+    @keyframes rotateRing1 {
+      from { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
+    }
+
+    @keyframes rotateRing2 {
+      from { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
+    }
+
+    /* Holographic panel for text */
+    .holo-panel {
+      position: relative;
+      max-width: 50%;
+      min-height: 100px;
+      background: linear-gradient(135deg, rgba(0, 20, 40, 0.7), rgba(0, 10, 30, 0.8));
+      padding: 20px 30px;
+      border-radius: 20px;
+      border: 2px solid #00ffea;
+      box-shadow: 
+        0 0 30px rgba(0, 255, 234, 0.4),
+        inset 0 0 30px rgba(0, 255, 234, 0.1);
+      margin-bottom: 25px;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .holo-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 234, 0.1), transparent);
+      animation: panelShine 4s infinite;
+    }
+
+    @keyframes panelShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .ai-text {
+      position: relative;
+      font-size: 18px;
+      text-align: left;
+      color: #00ffea;
+      line-height: 1.6;
+      text-shadow: 0 0 15px rgba(0, 255, 234, 0.6);
+      letter-spacing: 0.5px;
+      z-index: 1;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    /* Chat history */
+    .chat-history {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 350px;
+      max-height: 80%;
+      background: linear-gradient(135deg, rgba(0, 20, 40, 0.6), rgba(0, 10, 30, 0.7));
+      border: 1px solid rgba(0, 255, 234, 0.4);
+      border-radius: 15px;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0, 255, 234, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .self-learn-panel {
+      background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(157, 78, 221, 0.1));
+      border: 1px solid rgba(138, 43, 226, 0.5);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .self-learn-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      color: #9d4edd;
+      text-align: center;
+    }
+
+    .self-learn-item {
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 8px;
+      margin-bottom: 8px;
+      background: rgba(138, 43, 226, 0.1);
+      border-left: 2px solid #8a2be2;
+      border-radius: 5px;
+      animation: selfLearnSlide 0.4s ease-out;
+    }
+
+    @keyframes selfLearnSlide {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .self-learn-label {
+      font-size: 9px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+      color: #9d4edd;
+    }
+
+    .chat-history::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-history::-webkit-scrollbar-track {
+      background: rgba(0, 20, 40, 0.5);
+      border-radius: 10px;
+    }
+
+    .chat-history::-webkit-scrollbar-thumb {
+      background: #00ffea;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 234, 0.5);
+    }
+
+    .chat-message {
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      animation: messageSlide 0.3s ease-out;
+    }
+
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .chat-message.user {
+      background: rgba(0, 255, 234, 0.15);
+      border-left: 3px solid #00ffea;
+      text-align: right;
+    }
+
+    .chat-message.eden {
+      background: rgba(0, 150, 255, 0.15);
+      border-left: 3px solid #0096ff;
+    }
+
+    .message-label {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Control buttons */
+    .controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      padding: 16px 35px;
+      font-size: 18px;
+      font-weight: 600;
+      border: 2px solid #00ffea;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 255, 234, 0.1), rgba(0, 150, 255, 0.15));
+      color: #00ffea;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 255, 234, 0.4);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(0, 255, 234, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .button:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+
+    .button:hover {
+      background: rgba(0, 255, 234, 0.3);
+      box-shadow: 0 0 45px rgba(0, 255, 234, 0.8);
+      transform: translateY(-3px);
+    }
+
+    .button:active {
+      transform: translateY(-1px);
+    }
+
+    .button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .button.listening {
+      background: linear-gradient(135deg, rgba(255, 0, 102, 0.3), rgba(255, 51, 102, 0.4));
+      border-color: #ff0066;
+      box-shadow: 0 0 25px rgba(255, 0, 102, 0.6);
+      animation: listenPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes listenPulse {
+      0%, 100% { box-shadow: 0 0 25px rgba(255, 0, 102, 0.6); }
+      50% { box-shadow: 0 0 45px rgba(255, 0, 102, 1); }
+    }
+
+    /* Input field */
+    .input-container {
+      display: flex;
+      gap: 15px;
+      max-width: 450px;
+      width: 50%;
+      margin-bottom: 15px;
+    }
+
+    #textInput {
+      flex: 1;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(0, 20, 40, 0.7), rgba(0, 10, 30, 0.8));
+      border: 2px solid #00ffea;
+      border-radius: 12px;
+      color: #00ffea;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 255, 234, 0.3);
+    }
+
+    #textInput:focus {
+      box-shadow: 0 0 35px rgba(0, 255, 234, 0.6);
+      border-color: #00ffea;
+    }
+
+    #textInput::placeholder {
+      color: rgba(0, 255, 234, 0.5);
+    }
+
+    /* Status indicators */
+    .status-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 14px;
+      color: #00ffea;
+      text-shadow: 0 0 10px rgba(0, 255, 234, 0.6);
+    }
+
+    .knowledge-indicator {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+
+    /* Training Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 700px;
+      background: linear-gradient(135deg, rgba(0, 20, 40, 0.95), rgba(0, 10, 30, 0.95));
+      border: 2px solid #00ffea;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 0 50px rgba(0, 255, 234, 0.6);
+    }
+
+    .modal-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #00ffea;
+      text-shadow: 0 0 20px rgba(0, 255, 234, 0.8);
+      letter-spacing: 2px;
+    }
+
+    .modal-description {
+      font-size: 14px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    textarea {
+      width: 100%;
+      height: 250px;
+      background: rgba(0, 20, 40, 0.7);
+      border: 2px solid #00ffea;
+      border-radius: 12px;
+      color: #00ffea;
+      font-size: 15px;
+      font-family: inherit;
+      padding: 20px;
+      resize: vertical;
+      box-shadow: 0 0 20px rgba(0, 255, 234, 0.3) inset;
+      line-height: 1.6;
+    }
+
+    textarea::placeholder {
+      color: rgba(0, 255, 234, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .holo-head-container {
+        width: 180px;
+        height: 180px;
+      }
+
+      .holo-head {
+        width: 130px;
+        height: 130px;
+        font-size: 50px;
+      }
+
+      .ring-1 {
+        width: 160px;
+        height: 160px;
+      }
+
+      .ring-2 {
+        width: 180px;
+        height: 180px;
+      }
+
+      .ai-text {
+        font-size: 18px;
+      }
+
+      .holo-panel {
+        padding: 20px 25px;
+        max-width: 90%;
+      }
+
+      .chat-history {
+        width: 250px;
+        max-height: 50%;
+      }
+
+      .button {
+        padding: 12px 24px;
+        font-size: 14px;
+      }
+
+      .input-container {
+        width: 90%;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="holo-grid"></div>
+  <div class="particles" id="particles"></div>
+  <div class="chat-history" id="chatHistory">
+   <div style="text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 12px; letter-spacing: 1px;">
+    CONVERSATION LOG
+   </div>
+   <div id="selfLearnPanel" class="self-learn-panel" style="display: none;">
+    <div class="self-learn-title">
+     🔄 SELF-LEARNING ACTIVE
+    </div>
+    <div style="font-size: 10px; text-align: center; margin-bottom: 10px; opacity: 0.8;"><span id="selfLearnTotalCount">0</span> insights generated
+    </div>
+    <div id="selfLearnContent" style="max-height: 250px; overflow-y: auto;"></div>
+   </div>
+  </div><!-- Training Modal -->
+  <div id="trainingModal" class="modal">
+   <div class="modal-content">
+    <div class="modal-title">
+     🧠 TRAINING MODE
+    </div>
+    <div class="modal-description">
+     Paste up to 50+ sentences below. Eden will learn every word, understand phrases, and remember full sentences for context.<br><strong style="color: #00ff88;">🧠 ENHANCED LEARNING:</strong> Math problems (<code style="background: rgba(0,255,234,0.2); padding: 2px 6px; border-radius: 4px;">5 + 3 = 8</code>), Q&amp;A pairs (<code style="background: rgba(0,255,234,0.2); padding: 2px 6px; border-radius: 4px;">Question. Answer.</code>), logical rules, and context understanding!
+    </div><textarea id="trainingText" placeholder="Examples:
+
+MATH PROBLEMS:
+5 + 3 = 8
+10 * 2 = 20
+15 - 7 = 8
+20 / 4 = 5
+
+MEANINGS:
+Well done means you did good.
+Great job means excellent work.
+
+QUESTION-ANSWER PAIRS:
+Tell me a joke. Why did the scarecrow win an award? Because he was outstanding in his field.
+What's your favorite color. I love cyan and electric blue.
+
+SENTENCES:
+The weather is beautiful today.
+I love programming and technology."></textarea>
+    <div style="display: flex; gap: 15px; margin-top: 25px; justify-content: center;"><button class="button" id="processTrainingBtn" style="padding: 14px 30px; font-size: 16px;">✅ PROCESS TRAINING</button> <button class="button" id="closeTrainingBtn" style="padding: 14px 30px; font-size: 16px;">❌ CANCEL</button>
+    </div>
+    <div id="trainingStatus" style="margin-top: 20px; text-align: center; font-size: 14px; min-height: 20px;"></div>
+   </div>
+  </div>
+  <main class="ai-container">
+   <div class="holo-head-container">
+    <div class="holo-ring ring-1"></div>
+    <div class="holo-ring ring-2"></div>
+    <div class="holo-head" id="holoHead">
+     🤖
+    </div>
+   </div>
+   <div class="holo-panel">
+    <div class="ai-text" id="aiText">
+     Hello! I am Eden, your ultimate AI companion with 5 levels of intelligence. I can learn, reason, create stories and poems, understand emotions, link knowledge across topics, and solve complex problems step-by-step. Let's explore together!
+    </div>
+   </div>
+   <div class="input-container"><input type="text" id="textInput" placeholder="Type your message or use voice...">
+   </div>
+   <div class="controls"><button class="button" id="trainBtn">🧠 TRAIN</button> <button class="button" id="sendBtn">📤 SEND</button> <button class="button" id="speakBtn">🔊 SPEAK</button> <button class="button" id="selfLearnBtn">🔄 SELF-LEARN</button> <button class="button" id="clearBtn">🗑️ CLEAR</button>
+   </div>
+   <div class="status-bar">
+    <div id="status">
+     SYSTEMS ONLINE
+    </div>
+    <div class="knowledge-indicator" id="knowledgeIndicator">
+     Initializing knowledge base...
+    </div>
+    <div id="selfLearnIndicator" style="font-size: 11px; opacity: 0.6; margin-top: 5px; display: none;">
+     🔄 SELF-LEARNING ACTIVE • <span id="selfLearnCount">0</span> insights generated
+    </div>
+   </div>
+  </main>
+  <script>
+    const defaultConfig = {
+      companion_name: "EDEN",
+      greeting_message: "Hello! I am Eden, your ultimate AI companion with 5 levels of intelligence. I can learn, reason, create stories and poems, understand emotions, link knowledge across topics, and solve complex problems step-by-step. Let's explore together!",
+      user_name: "Mathieu",
+      primary_color: "#00ffea",
+      secondary_color: "#0096ff",
+      background_color: "#0a0e27",
+      text_color: "#00ffea",
+      font_family: "Segoe UI",
+      font_size: 16
+    };
+
+    // LEVEL 1: EXPANDED KNOWLEDGE BASE - Organized by categories
+    const knowledgeBase = {
+      personal_facts: {
+        name: "Mathieu",
+        age: null,
+        location: null,
+        interests: []
+      },
+      general_facts: [
+        "The Earth revolves around the Sun in approximately 365.25 days",
+        "Water freezes at 0°C or 32°F at standard atmospheric pressure",
+        "The speed of light is approximately 299,792 kilometers per second",
+        "Gravity is the force that attracts objects with mass toward each other",
+        "DNA carries genetic information in living organisms",
+        "Photosynthesis is how plants convert sunlight into energy",
+        "The human body has 206 bones in adulthood",
+        "Mount Everest is the tallest mountain on Earth at 8,849 meters",
+        "The Pacific Ocean is the largest ocean on Earth",
+        "Mars is known as the Red Planet due to iron oxide on its surface",
+        "Jupiter is the largest planet in our solar system",
+        "Bananas grow on plants and are classified as fruits",
+        "Apples are red, green, or yellow fruits that grow on trees",
+        "The sun is a star at the center of our solar system"
+      ],
+      math: [
+        "Addition: a + b = sum of a and b",
+        "Subtraction: a - b = difference between a and b",
+        "Multiplication: a × b = product of a and b",
+        "Division: a ÷ b = quotient of a divided by b",
+        "If A > B, then B < A",
+        "If X is even, X + 1 is odd",
+        "If X is odd, X + 1 is even"
+      ],
+      jokes: [
+        "Why did the scarecrow win an award? Because he was outstanding in his field!",
+        "Why don't scientists trust atoms? Because they make up everything!",
+        "What do you call a bear with no teeth? A gummy bear!",
+        "Why did the tomato turn red? Because it saw the salad dressing!"
+      ],
+      meanings: {
+        "well done": "you did good",
+        "great job": "excellent work",
+        "awesome": "really good",
+        "fantastic": "extremely good",
+        "terrible": "very bad",
+        "awful": "extremely bad"
+      },
+      sentences: [
+        "I love programming and technology",
+        "Artificial intelligence is fascinating",
+        "The weather is beautiful today",
+        "Learning new things is exciting"
+      ]
+    };
+
+    // LEVEL 3: LOGICAL RULES ENGINE
+    const logicalRules = [
+      { rule: "If A > B, then B < A", type: "comparison" },
+      { rule: "If X is even, X + 1 is odd", type: "math" },
+      { rule: "If X is odd, X + 1 is even", type: "math" },
+      { rule: "If all A are B, and C is A, then C is B", type: "logic" },
+      { rule: "Cause comes before effect in time", type: "temporal" },
+      { rule: "If something is true, its opposite is false", type: "boolean" },
+      { rule: "If A equals B, then B equals A", type: "equality" }
+    ];
+
+    // LEVEL 2: CONTEXT MEMORY - Store last N messages
+    const conversationContext = [];
+    const MAX_CONTEXT_LENGTH = 10;
+
+    function addToContext(role, message) {
+      conversationContext.push({ role, message, timestamp: Date.now() });
+      if (conversationContext.length > MAX_CONTEXT_LENGTH) {
+        conversationContext.shift();
+      }
+    }
+
+    function getRecentContext(count = 3) {
+      return conversationContext.slice(-count);
+    }
+
+    let memoryData = [];
+    let synthesis = window.speechSynthesis;
+    let learnedPhrases = [];
+    let learnedWords = new Set();
+    let learnedSentences = [];
+    let questionAnswerPairs = [];
+    let selfLearningActive = false;
+    let selfLearningInterval = null;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        memoryData = data;
+        
+        // Load all stored training data back into memory
+        learnedPhrases = [];
+        learnedSentences = [];
+        questionAnswerPairs = [];
+        learnedWords.clear();
+        
+        for (const item of data) {
+          if (item.category === 'phrase') {
+            learnedPhrases.push({ phrase: item.key, meaning: item.value });
+          } else if (item.category === 'sentence') {
+            learnedSentences.push(item.value.toLowerCase());
+          } else if (item.category === 'qa_pair') {
+            try {
+              const qa = JSON.parse(item.value);
+              questionAnswerPairs.push(qa);
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+          
+          // Extract words from all stored data
+          const text = item.value.toLowerCase();
+          const words = text.split(/\s+/);
+          for (const word of words) {
+            const cleanWord = word.replace(/[^a-z0-9]/gi, '');
+            if (cleanWord.length > 2) {
+              learnedWords.add(cleanWord);
+            }
+          }
+        }
+        
+        updateKnowledgeIndicator();
+      }
+    };
+
+    async function initializeApp() {
+      const dataResult = await window.dataSdk.init(dataHandler);
+      if (!dataResult.isOk) {
+        setStatus("ERROR: Memory system offline");
+        return;
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const aiTextEl = document.getElementById('aiText');
+            if (aiTextEl.textContent === defaultConfig.greeting_message) {
+              aiTextEl.textContent = config.greeting_message || defaultConfig.greeting_message;
+            }
+            
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = 'Segoe UI, Rajdhani, sans-serif';
+            const baseSize = config.font_size || defaultConfig.font_size;
+            
+            document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            document.querySelector('.ai-text').style.fontSize = `${baseSize * 1.125}px`;
+            document.querySelectorAll('.button').forEach(el => {
+              el.style.fontSize = `${baseSize * 1.125}px`;
+            });
+            
+            const primaryColor = config.primary_color || defaultConfig.primary_color;
+            const backgroundColor = config.background_color || defaultConfig.background_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            
+            document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, #1a1f3a 50%, ${backgroundColor} 100%)`;
+            document.body.style.color = textColor;
+            document.querySelectorAll('.holo-head, .holo-panel, .button:not(.listening), #textInput').forEach(el => {
+              el.style.borderColor = primaryColor;
+            });
+            document.querySelectorAll('.ai-text, #textInput, .button, #status').forEach(el => {
+              el.style.color = primaryColor;
+            });
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ background_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ primary_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.secondary_color || defaultConfig.secondary_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ secondary_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ text_color: value });
+                  }
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ font_family: value });
+                }
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                if (window.elementSdk) {
+                  window.elementSdk.setConfig({ font_size: value });
+                }
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["companion_name", config.companion_name || defaultConfig.companion_name],
+            ["greeting_message", config.greeting_message || defaultConfig.greeting_message],
+            ["user_name", config.user_name || defaultConfig.user_name]
+          ])
+        });
+      }
+
+      createParticles();
+      updateKnowledgeIndicator();
+      setStatus('SYSTEMS ONLINE');
+    }
+
+    async function processTrainingData(text) {
+      if (!text.trim()) {
+        return { success: false, message: 'No training data provided' };
+      }
+
+      const lines = text.split(/\n+/).filter(line => line.trim().length > 0);
+      let phrasesLearned = 0;
+      let wordsLearned = 0;
+      let sentencesLearned = 0;
+      let qaPairsLearned = 0;
+      let mathProblemsLearned = 0;
+      const newWords = new Set();
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.length < 3) continue;
+
+        // Check for math problems (e.g., "5 + 3 = 8" or "What is 10 * 2. 20")
+        const mathPattern = /(\d+)\s*([\+\-\*\/×÷])\s*(\d+)\s*(?:=|equals|is)?\s*(\d+)/i;
+        const mathMatch = trimmedLine.match(mathPattern);
+        
+        if (mathMatch) {
+          const num1 = parseInt(mathMatch[1]);
+          const operator = mathMatch[2];
+          const num2 = parseInt(mathMatch[3]);
+          const answer = parseInt(mathMatch[4]);
+          
+          if (memoryData.length >= 999) {
+            return { success: false, message: 'Memory capacity reached at 999 items' };
+          }
+
+          const question = `what is ${num1} ${operator} ${num2}`;
+          const qaKey = `qa_math_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+          const success = await storeMemory('qa_pair', qaKey, JSON.stringify({ 
+            question: question, 
+            answer: `${num1} ${operator} ${num2} equals ${answer}` 
+          }));
+          
+          if (success) {
+            questionAnswerPairs.push({ 
+              question: question, 
+              answer: `${num1} ${operator} ${num2} equals ${answer}` 
+            });
+            mathProblemsLearned++;
+          }
+          continue;
+        }
+
+        // Split by period to separate question from answer
+        const parts = trimmedLine.split(/\.\s+/);
+        
+        if (parts.length >= 2) {
+          const firstPart = parts[0].trim().toLowerCase();
+          const restParts = parts.slice(1).join('. ').trim();
+          
+          // Check if this is a question-answer pair (first part is a question/trigger)
+          const questionPatterns = [
+            /^(tell me|what|why|how|when|where|who|can you|do you|should|would|could)/i,
+            /\?$/
+          ];
+          
+          const isQuestion = questionPatterns.some(pattern => pattern.test(firstPart));
+          
+          if (isQuestion && restParts.length > 0) {
+            // This is a question-answer pair
+            if (memoryData.length >= 999) {
+              return { success: false, message: 'Memory capacity reached at 999 items' };
+            }
+
+            const qaKey = `qa_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            const success = await storeMemory('qa_pair', qaKey, JSON.stringify({ question: firstPart, answer: restParts }));
+            if (success) {
+              questionAnswerPairs.push({ question: firstPart, answer: restParts });
+              qaPairsLearned++;
+            }
+            
+            // Still extract words from both question and answer
+            const allWords = (firstPart + ' ' + restParts).toLowerCase().split(/\s+/);
+            for (const word of allWords) {
+              const cleanWord = word.replace(/[^a-z0-9]/gi, '');
+              if (cleanWord.length > 2 && !learnedWords.has(cleanWord)) {
+                learnedWords.add(cleanWord);
+                newWords.add(cleanWord);
+              }
+            }
+            continue;
+          }
+        }
+
+        // Learn phrase meanings (e.g., "well done means you did good")
+        const meansPattern = /(.+?)\s+means?\s+(.+)/i;
+        const match = trimmedLine.match(meansPattern);
+
+        if (match) {
+          const phrase = match[1].trim().toLowerCase();
+          const meaning = match[2].trim();
+          
+          if (memoryData.length >= 999) {
+            return { success: false, message: 'Memory capacity reached at 999 items' };
+          }
+
+          const success = await storeMemory('phrase', phrase, meaning);
+          if (success) {
+            learnedPhrases.push({ phrase, meaning });
+            phrasesLearned++;
+          }
+        } else {
+          // Learn entire sentence as context
+          if (memoryData.length >= 999) {
+            return { success: false, message: 'Memory capacity reached at 999 items' };
+          }
+
+          const sentenceKey = `sentence_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+          const success = await storeMemory('sentence', sentenceKey, trimmedLine);
+          if (success) {
+            learnedSentences.push(trimmedLine.toLowerCase());
+            sentencesLearned++;
+          }
+        }
+
+        // Extract and learn every word from the sentence
+        const words = trimmedLine.toLowerCase().split(/\s+/);
+        for (const word of words) {
+          const cleanWord = word.replace(/[^a-z0-9]/gi, '');
+          if (cleanWord.length > 2 && !learnedWords.has(cleanWord)) {
+            learnedWords.add(cleanWord);
+            newWords.add(cleanWord);
+          }
+        }
+      }
+
+      wordsLearned = newWords.size;
+
+      return {
+        success: true,
+        message: `Training complete! Learned ${mathProblemsLearned} math problems, ${qaPairsLearned} Q&A pairs, ${phrasesLearned} phrases, ${sentencesLearned} sentences, and ${wordsLearned} new words.`,
+        phrasesLearned,
+        sentencesLearned,
+        wordsLearned,
+        qaPairsLearned,
+        mathProblemsLearned
+      };
+    }
+
+    function findLearnedPhrase(input) {
+      const lowerInput = input.toLowerCase().trim();
+      
+      // PRIORITY 1: Check for question-answer pairs
+      const storedQAPairs = memoryData.filter(m => m.category === 'qa_pair');
+      for (const qaData of storedQAPairs) {
+        try {
+          const qa = JSON.parse(qaData.value);
+          if (lowerInput.includes(qa.question) || qa.question.includes(lowerInput)) {
+            return qa.answer;
+          }
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+
+      for (const qa of questionAnswerPairs) {
+        if (lowerInput.includes(qa.question) || qa.question.includes(lowerInput)) {
+          return qa.answer;
+        }
+      }
+
+      // Fuzzy match for Q&A pairs
+      const inputWords = lowerInput.split(/\s+/).map(w => w.replace(/[^a-z0-9]/gi, ''));
+      let bestQAMatch = null;
+      let highestQAScore = 0;
+
+      for (const qaData of storedQAPairs) {
+        try {
+          const qa = JSON.parse(qaData.value);
+          const questionWords = qa.question.split(/\s+/);
+          let matchCount = 0;
+          
+          for (const word of inputWords) {
+            if (word.length > 2 && questionWords.includes(word)) {
+              matchCount++;
+            }
+          }
+
+          const score = matchCount / Math.max(inputWords.length, questionWords.length);
+          if (score > highestQAScore && score > 0.5) {
+            highestQAScore = score;
+            bestQAMatch = qa.answer;
+          }
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+
+      for (const qa of questionAnswerPairs) {
+        const questionWords = qa.question.split(/\s+/);
+        let matchCount = 0;
+        
+        for (const word of inputWords) {
+          if (word.length > 2 && questionWords.includes(word)) {
+            matchCount++;
+          }
+        }
+
+        const score = matchCount / Math.max(inputWords.length, questionWords.length);
+        if (score > highestQAScore && score > 0.5) {
+          highestQAScore = score;
+          bestQAMatch = qa.answer;
+        }
+      }
+
+      if (bestQAMatch) {
+        return bestQAMatch;
+      }
+
+      // PRIORITY 2: Check for exact phrase meanings
+      for (const learned of learnedPhrases) {
+        if (lowerInput.includes(learned.phrase)) {
+          return learned.meaning;
+        }
+      }
+
+      const storedPhrases = memoryData.filter(m => m.category === 'phrase');
+      for (const phrase of storedPhrases) {
+        if (lowerInput.includes(phrase.key.toLowerCase())) {
+          return phrase.value;
+        }
+      }
+
+      // PRIORITY 3: Check if input words match learned sentences
+      let bestMatch = null;
+      let highestScore = 0;
+
+      for (const sentence of learnedSentences) {
+        const sentenceWords = sentence.split(/\s+/);
+        let matchCount = 0;
+        
+        for (const word of inputWords) {
+          if (word.length > 2 && sentenceWords.includes(word)) {
+            matchCount++;
+          }
+        }
+
+        const score = matchCount / Math.max(inputWords.length, sentenceWords.length);
+        if (score > highestScore && score > 0.4) {
+          highestScore = score;
+          bestMatch = sentence;
+        }
+      }
+
+      const storedSentences = memoryData.filter(m => m.category === 'sentence');
+      for (const sentenceData of storedSentences) {
+        const sentence = sentenceData.value.toLowerCase();
+        const sentenceWords = sentence.split(/\s+/);
+        let matchCount = 0;
+        
+        for (const word of inputWords) {
+          if (word.length > 2 && sentenceWords.includes(word)) {
+            matchCount++;
+          }
+        }
+
+        const score = matchCount / Math.max(inputWords.length, sentenceWords.length);
+        if (score > highestScore && score > 0.4) {
+          highestScore = score;
+          bestMatch = sentence;
+        }
+      }
+
+      if (bestMatch) {
+        return `I recall learning: "${bestMatch}"`;
+      }
+
+      // PRIORITY 4: Check if input contains learned words
+      const knownWords = inputWords.filter(word => 
+        word.length > 2 && learnedWords.has(word)
+      );
+
+      if (knownWords.length > 0) {
+        return `I recognize these words: ${knownWords.join(', ')}. I learned them during training.`;
+      }
+
+      return null;
+    }
+
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    function setStatus(message) {
+      document.getElementById('status').textContent = message;
+    }
+
+    // LEVEL 5: INTER-TOPIC LINKING
+    function findTopicLinks(query) {
+      const lowerQuery = query.toLowerCase();
+      const links = [];
+      
+      if (lowerQuery.includes('favorite color') || lowerQuery.includes('color')) {
+        const favoriteColor = knowledgeBase.personal_facts.name;
+        
+        if (favoriteColor) {
+          links.push(`Your favorite color connects to many things in nature!`);
+        }
+      }
+      
+      if (lowerQuery.includes('banana') || lowerQuery.includes('fruit')) {
+        const fruitFacts = knowledgeBase.general_facts.filter(f => 
+          f.toLowerCase().includes('banana') || f.toLowerCase().includes('fruit')
+        );
+        links.push(...fruitFacts);
+      }
+      
+      if (lowerQuery.includes('apple')) {
+        links.push("Apples are red, green, or yellow fruits that grow on trees");
+      }
+      
+      return links;
+    }
+
+    // LEVEL 3: CONTRADICTION DETECTION
+    function detectContradiction(newFact, category) {
+      const existingFacts = memoryData.filter(m => m.category === category);
+      
+      for (const fact of existingFacts) {
+        if (fact.key === category && fact.value !== newFact) {
+          return {
+            hasContradiction: true,
+            existing: fact.value,
+            new: newFact,
+            message: `I notice a contradiction: I previously learned "${fact.value}" but now you're saying "${newFact}". Which is correct?`
+          };
+        }
+      }
+      
+      return { hasContradiction: false };
+    }
+
+    function updateKnowledgeIndicator() {
+      const personalFacts = memoryData.filter(m => m.type === 'personal').length;
+      const allGeneralFacts = knowledgeBase.general_facts.length + knowledgeBase.math.length + knowledgeBase.jokes.length + knowledgeBase.sentences.length;
+      const totalKnowledge = personalFacts + allGeneralFacts + learnedWords.size;
+      document.getElementById('knowledgeIndicator').textContent = 
+        `KNOWLEDGE: ${personalFacts} learned | ${learnedWords.size} words | ${allGeneralFacts} general | TOTAL: ${totalKnowledge}`;
+    }
+
+    // LEVEL 4: CREATIVITY SYSTEM
+    const toneVariations = {
+      greeting: [
+        "Hello there!",
+        "Hey! Good to see you!",
+        "Greetings, friend!",
+        "Yo! What's up?",
+        "Good day to you!",
+        "Hi! How can I help?",
+        "Welcome back!"
+      ],
+      acknowledgment: [
+        "Got it!",
+        "Understood.",
+        "I see what you mean.",
+        "That makes sense.",
+        "Noted.",
+        "I hear you.",
+        "Acknowledged."
+      ],
+      thinking: [
+        "Let me think about that...",
+        "Hmm, analyzing...",
+        "Processing your request...",
+        "Give me a moment to consider...",
+        "Interesting question, let me reason through this...",
+        "I'm working on that...",
+        "Calculating..."
+      ],
+      learning: [
+        "I'm learning from this!",
+        "Adding this to my knowledge base...",
+        "This is valuable information!",
+        "I'll remember this.",
+        "Storing this in memory...",
+        "Great, I'm expanding my understanding!",
+        "This helps me learn!"
+      ],
+      uncertainty: [
+        "I'm not entirely sure about that.",
+        "That's outside my current knowledge.",
+        "I don't have enough data on that topic.",
+        "I need more information to answer that.",
+        "That's a gap in my knowledge base.",
+        "I'm uncertain about that.",
+        "I would need to learn more about that."
+      ]
+    };
+
+    // LEVEL 5: EMOTIONAL UNDERSTANDING
+    const sentimentPatterns = {
+      positive: {
+        keywords: ["happy", "great", "awesome", "love", "excited", "wonderful", "fantastic", "amazing", "good", "excellent"],
+        responses: [
+          "I'm glad to hear that!",
+          "That's wonderful!",
+          "Your positivity is contagious!",
+          "That makes me happy too!",
+          "Excellent! Keep that energy going!"
+        ]
+      },
+      negative: {
+        keywords: ["sad", "upset", "angry", "frustrated", "terrible", "awful", "bad", "hate", "disappointed", "worried"],
+        responses: [
+          "I understand. Do you want to talk about it?",
+          "I'm here to listen if you need support.",
+          "That sounds difficult. How can I help?",
+          "I'm sorry you're feeling this way.",
+          "Would you like to share more about what's bothering you?"
+        ]
+      },
+      neutral: {
+        keywords: ["okay", "fine", "alright", "normal", "usual"],
+        responses: [
+          "I see. Anything specific on your mind?",
+          "Understood. What would you like to discuss?",
+          "Got it. How can I assist you today?"
+        ]
+      }
+    };
+
+    function analyzeSentiment(text) {
+      const lowerText = text.toLowerCase();
+      
+      for (const [sentiment, data] of Object.entries(sentimentPatterns)) {
+        for (const keyword of data.keywords) {
+          if (lowerText.includes(keyword)) {
+            return {
+              sentiment: sentiment,
+              response: data.responses[Math.floor(Math.random() * data.responses.length)]
+            };
+          }
+        }
+      }
+      
+      return { sentiment: "neutral", response: null };
+    }
+
+    // STORY GENERATION
+    const storyTemplates = [
+      (char, place, action) => `Once upon a time, a ${char} went to ${place} and ${action}. The end.`,
+      (char, problem, solution) => `There was a ${char} who faced ${problem}, but solved it by ${solution}.`,
+      (char1, char2, event) => `${char1} met ${char2}, and together they ${event}.`
+    ];
+
+    // POEM TEMPLATES
+    const poemTemplates = [
+      (word1, word2) => `${word1} shines bright,\n${word2} in the night,\nTogether they bring light.`,
+      (subject, action, feeling) => `The ${subject} ${action},\nBringing ${feeling} to all,\nA moment to recall.`
+    ];
+
+    // SELF-REFLECTION
+    function selfReflect(response, context) {
+      const checks = {
+        isRelevant: response.toLowerCase().includes(context.toLowerCase().split(' ')[0]),
+        isComplete: response.length > 10,
+        isPolite: !response.match(/\b(stupid|dumb|bad)\b/i),
+        makesSense: response.split(' ').length > 3
+      };
+
+      const score = Object.values(checks).filter(v => v).length / Object.keys(checks).length;
+      
+      return {
+        score: score,
+        shouldKeep: score >= 0.75,
+        feedback: score >= 0.75 ? "Response quality: Good" : "Response quality: Needs improvement",
+        checks: checks
+      };
+    }
+
+    const jokeTemplates = [
+      (subject1, subject2) => `Why did the ${subject1} cross the road? To get to the ${subject2}!`,
+      (subject, action) => `What do you call a ${subject} that ${action}? A ${subject}-${action}!`,
+      (subject) => `Knock knock. Who's there? ${subject}. ${subject} who? ${subject} you glad to see me!`
+    ];
+
+    async function performSelfLearning() {
+      if (memoryData.length >= 999) {
+        stopSelfLearning();
+        setStatus('MEMORY CAPACITY REACHED');
+        return;
+      }
+
+      // Gather all knowledge sources
+      const allKnowledge = [
+        ...memoryData.filter(m => m.category !== 'qa_pair' && m.category !== 'sentence'),
+        ...knowledgeBase.general_facts.map((fact, idx) => ({
+          category: 'general',
+          key: `fact_${idx}`,
+          value: fact
+        })),
+        ...knowledgeBase.math.map((fact, idx) => ({
+          category: 'math',
+          key: `math_${idx}`,
+          value: fact
+        })),
+        ...knowledgeBase.jokes.map((joke, idx) => ({
+          category: 'joke',
+          key: `joke_${idx}`,
+          value: joke
+        })),
+        ...knowledgeBase.sentences.map((sentence, idx) => ({
+          category: 'sentence',
+          key: `sentence_${idx}`,
+          value: sentence
+        }))
+      ];
+
+      if (allKnowledge.length === 0) {
+        return;
+      }
+
+      // Choose learning mode randomly - 13 creative modes!
+      const learningMode = Math.floor(Math.random() * 13);
+      let generatedContent = '';
+      let contentType = '';
+
+      if (learningMode === 0) {
+        // MODE 1: Generate Q&A pairs
+        const randomKnowledge = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+        const question = `what is ${randomKnowledge.key}`;
+        const answer = randomKnowledge.value;
+
+        const qaKey = `qa_self_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const qaSuccess = await storeMemory('qa_pair', qaKey, JSON.stringify({ 
+          question: question.toLowerCase(), 
+          answer: answer 
+        }));
+
+        if (qaSuccess) {
+          questionAnswerPairs.push({ question: question.toLowerCase(), answer: answer });
+          generatedContent = `<strong>Q:</strong> ${question}<br><strong>A:</strong> ${answer}`;
+          contentType = 'Q&A Generation';
+        }
+
+      } else if (learningMode === 1) {
+        // MODE 2: Generate paraphrased sentences
+        const randomKnowledge = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+        const paraphrasedSentence = `I understand that ${randomKnowledge.key} relates to ${randomKnowledge.value}`;
+
+        const sentenceKey = `sentence_self_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const sentenceSuccess = await storeMemory('sentence', sentenceKey, paraphrasedSentence);
+
+        if (sentenceSuccess) {
+          learnedSentences.push(paraphrasedSentence.toLowerCase());
+          generatedContent = paraphrasedSentence;
+          contentType = 'Sentence Paraphrase';
+        }
+
+      } else if (learningMode === 2) {
+        // MODE 3: Generate math problems
+        const num1 = Math.floor(Math.random() * 50) + 1;
+        const num2 = Math.floor(Math.random() * 50) + 1;
+        const operators = ['+', '-', '*'];
+        const operator = operators[Math.floor(Math.random() * operators.length)];
+        
+        let result;
+        if (operator === '+') result = num1 + num2;
+        else if (operator === '-') result = num1 - num2;
+        else if (operator === '*') result = num1 * num2;
+
+        const question = `what is ${num1} ${operator} ${num2}`;
+        const answer = `${num1} ${operator} ${num2} equals ${result}`;
+
+        const qaKey = `qa_math_self_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('qa_pair', qaKey, JSON.stringify({ question, answer }));
+        
+        if (success) {
+          questionAnswerPairs.push({ question, answer });
+          generatedContent = `<strong>Problem:</strong> ${num1} ${operator} ${num2} = ${result}`;
+          contentType = 'Math Generation';
+        }
+
+      } else if (learningMode === 3) {
+        // MODE 4: Generate jokes
+        const subjects = ['robot', 'computer', 'AI', 'programmer', 'algorithm', 'data'];
+        const actions = ['codes', 'thinks', 'learns', 'computes', 'processes'];
+        const subject1 = subjects[Math.floor(Math.random() * subjects.length)];
+        const subject2 = subjects[Math.floor(Math.random() * subjects.length)];
+        const action = actions[Math.floor(Math.random() * actions.length)];
+        
+        const jokeTemplate = jokeTemplates[Math.floor(Math.random() * jokeTemplates.length)];
+        const joke = jokeTemplate.length === 2 ? jokeTemplate(subject1, action) : jokeTemplate(subject1, subject2);
+
+        const jokeKey = `sentence_joke_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', jokeKey, joke);
+
+        if (success) {
+          learnedSentences.push(joke.toLowerCase());
+          generatedContent = joke;
+          contentType = 'Joke Creation';
+        }
+
+      } else if (learningMode === 4) {
+        // MODE 5: Apply logical rules
+        const rule = logicalRules[Math.floor(Math.random() * logicalRules.length)];
+        
+        const ruleKey = `sentence_logic_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', ruleKey, rule.rule);
+
+        if (success) {
+          learnedSentences.push(rule.rule.toLowerCase());
+          generatedContent = `<strong>${rule.type.toUpperCase()}:</strong> ${rule.rule}`;
+          contentType = '🧩 Logical Rule';
+        }
+
+      } else if (learningMode === 5) {
+        // MODE 6: Connect two facts
+        if (allKnowledge.length >= 2) {
+          const fact1 = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+          const fact2 = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+          
+          const connection = `Connecting knowledge: ${fact1.key} (${fact1.value}) relates to ${fact2.key} (${fact2.value}) through shared context`;
+
+          const connKey = `sentence_connect_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+          const success = await storeMemory('sentence', connKey, connection);
+
+          if (success) {
+            learnedSentences.push(connection.toLowerCase());
+            generatedContent = connection;
+            contentType = 'Knowledge Connection';
+          }
+        }
+
+      } else if (learningMode === 6) {
+        // MODE 7: Generate hypothetical scenarios
+        const randomKnowledge = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+        const scenario = `Hypothetical scenario: If ${randomKnowledge.key} changes, then ${randomKnowledge.value} would be affected accordingly`;
+
+        const scenarioKey = `sentence_scenario_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', scenarioKey, scenario);
+
+        if (success) {
+          learnedSentences.push(scenario.toLowerCase());
+          generatedContent = scenario;
+          contentType = 'Scenario Generation';
+        }
+
+      } else if (learningMode === 7) {
+        // MODE 8: Generate creative stories
+        const characters = ['robot', 'AI', 'explorer', 'scientist', 'traveler', 'inventor'];
+        const places = ['the digital realm', 'a futuristic city', 'space', 'the laboratory', 'the unknown'];
+        const actions = ['discovered something amazing', 'solved a great mystery', 'made a breakthrough', 'found new knowledge'];
+        
+        const char = characters[Math.floor(Math.random() * characters.length)];
+        const place = places[Math.floor(Math.random() * places.length)];
+        const action = actions[Math.floor(Math.random() * actions.length)];
+        
+        const story = `Once upon a time, a ${char} ventured into ${place} and ${action}. The end.`;
+
+        const storyKey = `sentence_story_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', storyKey, story);
+
+        if (success) {
+          learnedSentences.push(story.toLowerCase());
+          generatedContent = story;
+          contentType = '📖 Story Creation';
+        }
+
+      } else if (learningMode === 8) {
+        // MODE 9: Generate metaphors
+        const concepts = ['knowledge', 'learning', 'wisdom', 'data', 'intelligence'];
+        const comparisons = ['a vast ocean', 'a growing tree', 'a shining star', 'flowing water', 'an endless journey'];
+        
+        const concept = concepts[Math.floor(Math.random() * concepts.length)];
+        const comparison = comparisons[Math.floor(Math.random() * comparisons.length)];
+        
+        const metaphor = `${concept} is like ${comparison}`;
+
+        const metaphorKey = `sentence_metaphor_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', metaphorKey, metaphor);
+
+        if (success) {
+          learnedSentences.push(metaphor.toLowerCase());
+          generatedContent = metaphor;
+          contentType = '🎨 Metaphor Creation';
+        }
+
+      } else if (learningMode === 9) {
+        // MODE 10: Generate poems
+        const words1 = ['Knowledge', 'Wisdom', 'Learning', 'Data', 'Truth'];
+        const words2 = ['Light', 'Power', 'Growth', 'Insight', 'Hope'];
+        
+        const word1 = words1[Math.floor(Math.random() * words1.length)];
+        const word2 = words2[Math.floor(Math.random() * words2.length)];
+        
+        const poem = `${word1} shines bright,\n${word2} in the night,\nTogether they bring light.`;
+
+        const poemKey = `sentence_poem_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', poemKey, poem);
+
+        if (success) {
+          learnedSentences.push(poem.toLowerCase());
+          generatedContent = poem.replace(/\n/g, '<br>');
+          contentType = '✍️ Poem Creation';
+        }
+
+      } else if (learningMode === 10) {
+        // MODE 11: Generate tone variations
+        const toneCategories = Object.keys(toneVariations);
+        const category = toneCategories[Math.floor(Math.random() * toneCategories.length)];
+        const variations = toneVariations[category];
+        const variation = variations[Math.floor(Math.random() * variations.length)];
+        
+        const toneExample = `Tone style (${category}): "${variation}"`;
+
+        const toneKey = `sentence_tone_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', toneKey, toneExample);
+
+        if (success) {
+          learnedSentences.push(toneExample.toLowerCase());
+          generatedContent = toneExample;
+          contentType = '🎭 Tone Variation';
+        }
+
+      } else if (learningMode === 11) {
+        // MODE 12: Cross-topic linking
+        if (allKnowledge.length >= 2) {
+          const fact1 = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+          const fact2 = allKnowledge[Math.floor(Math.random() * allKnowledge.length)];
+          
+          const link = `🔗 Cross-topic link: "${fact1.value}" connects with "${fact2.value}" because they share conceptual similarities`;
+
+          const linkKey = `sentence_link_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+          const success = await storeMemory('sentence', linkKey, link);
+
+          if (success) {
+            learnedSentences.push(link.toLowerCase());
+            generatedContent = link;
+            contentType = '🔗 Cross-Topic Link';
+          }
+        }
+
+      } else if (learningMode === 12) {
+        // MODE 13: Self-reflection statements
+        const reflections = [
+          "I am thinking about your question and combining what I know",
+          "Let me analyze this from multiple perspectives",
+          "I'm processing this information step by step",
+          "Interesting - this connects to several things I've learned",
+          "I'm reflecting on the best way to explain this"
+        ];
+        
+        const reflection = reflections[Math.floor(Math.random() * reflections.length)];
+
+        const reflectKey = `sentence_reflect_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const success = await storeMemory('sentence', reflectKey, reflection);
+
+        if (success) {
+          learnedSentences.push(reflection.toLowerCase());
+          generatedContent = reflection;
+          contentType = '💭 Self-Reflection';
+        }
+      }
+
+      // Extract words from generated content
+      const allWords = generatedContent.toLowerCase().replace(/<[^>]*>/g, '').split(/\s+/);
+      let newWordsCount = 0;
+      for (const word of allWords) {
+        const cleanWord = word.replace(/[^a-z0-9]/gi, '');
+        if (cleanWord.length > 2 && !learnedWords.has(cleanWord)) {
+          learnedWords.add(cleanWord);
+          newWordsCount++;
+        }
+      }
+
+      // Update counter
+      const countEl = document.getElementById('selfLearnCount');
+      const totalCountEl = document.getElementById('selfLearnTotalCount');
+      const currentCount = parseInt(countEl.textContent) || 0;
+      countEl.textContent = currentCount + 1;
+      totalCountEl.textContent = currentCount + 1;
+
+      // Display in self-learning panel
+      const selfLearnContent = document.getElementById('selfLearnContent');
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'self-learn-item';
+      
+      itemDiv.innerHTML = `
+        <div class="self-learn-label">${contentType}</div>
+        <div style="margin-bottom: 5px;">${generatedContent}</div>
+        <div style="font-size: 9px; opacity: 0.6; margin-top: 5px;">+${newWordsCount} new words • Total: ${learnedWords.size}</div>
+      `;
+      
+      selfLearnContent.insertBefore(itemDiv, selfLearnContent.firstChild);
+      
+      // Keep only last 10 items
+      while (selfLearnContent.children.length > 10) {
+        selfLearnContent.removeChild(selfLearnContent.lastChild);
+      }
+
+      updateKnowledgeIndicator();
+    }
+
+    function startSelfLearning() {
+      if (selfLearningActive) return;
+      
+      selfLearningActive = true;
+      document.getElementById('selfLearnIndicator').style.display = 'block';
+      document.getElementById('selfLearnPanel').style.display = 'block';
+      document.getElementById('selfLearnBtn').textContent = '⏸️ PAUSE LEARNING';
+      document.getElementById('selfLearnBtn').style.background = 'linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(157, 78, 221, 0.4))';
+      document.getElementById('selfLearnBtn').style.borderColor = '#8a2be2';
+      
+      document.getElementById('holoHead').classList.add('learning');
+      
+      // Perform self-learning every 5 seconds
+      selfLearningInterval = setInterval(() => {
+        performSelfLearning();
+      }, 5000);
+
+      // Perform first learning immediately
+      performSelfLearning();
+      
+      setStatus('SELF-LEARNING ENABLED');
+    }
+
+    function stopSelfLearning() {
+      if (!selfLearningActive) return;
+      
+      selfLearningActive = false;
+      if (selfLearningInterval) {
+        clearInterval(selfLearningInterval);
+        selfLearningInterval = null;
+      }
+      
+      document.getElementById('holoHead').classList.remove('learning');
+      document.getElementById('selfLearnBtn').textContent = '🔄 SELF-LEARN';
+      document.getElementById('selfLearnBtn').style.background = 'linear-gradient(135deg, rgba(0, 255, 234, 0.1), rgba(0, 150, 255, 0.15))';
+      document.getElementById('selfLearnBtn').style.borderColor = '#00ffea';
+      
+      setStatus('SELF-LEARNING PAUSED');
+    }
+
+    function addChatMessage(sender, text) {
+      const chatHistory = document.getElementById('chatHistory');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${sender}`;
+      
+      const label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = sender === 'user' ? (window.elementSdk?.config?.user_name || defaultConfig.user_name) : (window.elementSdk?.config?.companion_name || defaultConfig.companion_name);
+      
+      const content = document.createElement('div');
+      content.textContent = text.replace(/<[^>]*>/g, '');
+      
+      messageDiv.appendChild(label);
+      messageDiv.appendChild(content);
+      chatHistory.appendChild(messageDiv);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function displayMainText(text, sender = 'eden') {
+      const aiText = document.getElementById('aiText');
+      aiText.textContent = text;
+      addChatMessage(sender, text);
+    }
+
+    function requiresThinking(input) {
+      const lowerInput = input.toLowerCase();
+      return lowerInput.match(/\d+\s*[\+\-\*\/×÷]\s*\d+/) || 
+             lowerInput.match(/calculate|solve|compute|what is \d+/) ||
+             lowerInput.match(/why|how does|explain|analyze/);
+    }
+
+    // LEVEL 5: COMPLEX PROBLEM SOLVING
+    function solveComplexProblem(input) {
+      const lowerInput = input.toLowerCase();
+      
+      // Multi-step word problems
+      const applePattern = /(\d+)\s+red\s+apples?\s+and\s+(\d+)\s+green\s+apples?/i;
+      const appleMatch = input.match(applePattern);
+      
+      if (appleMatch) {
+        const redApples = parseInt(appleMatch[1]);
+        const greenApples = parseInt(appleMatch[2]);
+        const total = redApples + greenApples;
+        
+        return {
+          steps: [
+            `Step 1: Count red apples = ${redApples}`,
+            `Step 2: Count green apples = ${greenApples}`,
+            `Step 3: Add them together = ${redApples} + ${greenApples}`,
+            `Step 4: Total = ${total}`
+          ],
+          answer: `You have ${total} apples in total.`
+        };
+      }
+      
+      // Subtraction word problems
+      const eatPattern = /(?:have|had)\s+(\d+)\s+(\w+)\s+and\s+(?:eat|ate|lose|lost|give|gave)\s+(\d+)/i;
+      const eatMatch = input.match(eatPattern);
+      
+      if (eatMatch) {
+        const initial = parseInt(eatMatch[1]);
+        const item = eatMatch[2];
+        const removed = parseInt(eatMatch[3]);
+        const remaining = initial - removed;
+        
+        return {
+          steps: [
+            `Step 1: Initial ${item} = ${initial}`,
+            `Step 2: ${item} removed = ${removed}`,
+            `Step 3: Calculate remaining = ${initial} - ${removed}`,
+            `Step 4: Result = ${remaining}`
+          ],
+          answer: `You have ${remaining} ${item} left.`
+        };
+      }
+      
+      // Simple math operations
+      const mathMatch = input.match(/(\d+)\s*([\+\-\*\/×÷])\s*(\d+)/);
+      if (mathMatch) {
+        const num1 = parseInt(mathMatch[1]);
+        const operator = mathMatch[2];
+        const num2 = parseInt(mathMatch[3]);
+        
+        let result;
+        let operation;
+        if (operator === '+') {
+          result = num1 + num2;
+          operation = 'addition';
+        } else if (operator === '-') {
+          result = num1 - num2;
+          operation = 'subtraction';
+        } else if (operator === '*' || operator === '×') {
+          result = num1 * num2;
+          operation = 'multiplication';
+        } else if (operator === '/' || operator === '÷') {
+          result = num1 / num2;
+          operation = 'division';
+        }
+        
+        return {
+          steps: [
+            `Step 1: Identify operation = ${operation}`,
+            `Step 2: First number = ${num1}`,
+            `Step 3: Second number = ${num2}`,
+            `Step 4: Calculate = ${num1} ${operator} ${num2} = ${result}`
+          ],
+          answer: `The answer is ${result}.`
+        };
+      }
+      
+      return null;
+    }
+
+    function solveWithThinking(input) {
+      const complexSolution = solveComplexProblem(input);
+      
+      if (complexSolution) {
+        // Display each step
+        for (const step of complexSolution.steps) {
+          addChatMessage('eden', `🧠 ${step}`);
+        }
+        return complexSolution.answer;
+      }
+      
+      return null;
+    }
+
+    function parseTeachingInput(input) {
+      const lowerInput = input.toLowerCase().trim();
+      
+      const namePattern = /(?:call me|my name is|i'm|i am) ([a-zA-Z]+)/i;
+      const nameMatch = input.match(namePattern);
+      if (nameMatch) {
+        return { category: 'name', value: nameMatch[1], isTeaching: true };
+      }
+      
+      const favoritePattern = /my (?:favorite )?(\w+) is (.+)/i;
+      const match = input.match(favoritePattern);
+      if (match) {
+        const category = match[1].toLowerCase();
+        const value = match[2].trim();
+        return { category, value, isTeaching: true };
+      }
+      
+      const likePattern = /i (?:like|love|enjoy|prefer) (.+)/i;
+      const likeMatch = input.match(likePattern);
+      if (likeMatch) {
+        const value = likeMatch[1].trim();
+        return { category: 'preference', value, isTeaching: true };
+      }
+      
+      return { isTeaching: false };
+    }
+
+    async function storeMemory(category, key, value) {
+      if (memoryData.length >= 999) {
+        setStatus("MEMORY CAPACITY REACHED");
+        return false;
+      }
+
+      const existing = memoryData.find(m => m.category === category && m.key === key);
+      
+      if (existing) {
+        existing.value = value;
+        existing.timestamp = Date.now();
+        const result = await window.dataSdk.update(existing);
+        return result.isOk;
+      } else {
+        const result = await window.dataSdk.create({
+          id: `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          type: 'personal',
+          category,
+          key,
+          value,
+          timestamp: Date.now()
+        });
+        return result.isOk;
+      }
+    }
+
+    function searchMemory(query) {
+      const lowerQuery = query.toLowerCase();
+      const userName = window.elementSdk?.config?.user_name || defaultConfig.user_name;
+      
+      // Check phrase meanings first
+      for (const [phrase, meaning] of Object.entries(knowledgeBase.meanings)) {
+        if (lowerQuery.includes(phrase)) {
+          return `"${phrase}" means ${meaning}.`;
+        }
+      }
+      
+      if (lowerQuery.includes('my name') || lowerQuery.includes('who am i')) {
+        return `Your name is ${userName}.`;
+      }
+      
+      // Check for joke requests
+      if (lowerQuery.match(/tell.*joke|joke|funny/)) {
+        const randomJoke = knowledgeBase.jokes[Math.floor(Math.random() * knowledgeBase.jokes.length)];
+        return randomJoke;
+      }
+      
+      const myPattern = /what(?:'s| is) my (\w+)/i;
+      const myMatch = lowerQuery.match(myPattern);
+      
+      if (myMatch) {
+        const category = myMatch[1].toLowerCase();
+        const memory = memoryData.find(m => m.category === category);
+        if (memory) {
+          return `Your ${category} is ${memory.value}.`;
+        }
+      }
+      
+      for (const mem of memoryData) {
+        if (lowerQuery.includes(mem.category.toLowerCase()) || 
+            lowerQuery.includes(mem.value.toLowerCase())) {
+          return `Memory recall: Your ${mem.category} is ${mem.value}.`;
+        }
+      }
+      
+      const keywords = lowerQuery.split(' ').filter(word => word.length > 3);
+      
+      // Search all knowledge categories
+      const allFacts = [
+        ...knowledgeBase.general_facts,
+        ...knowledgeBase.math,
+        ...knowledgeBase.sentences
+      ];
+      
+      for (const fact of allFacts) {
+        const factLower = fact.toLowerCase();
+        let matchCount = 0;
+        
+        for (const keyword of keywords) {
+          if (factLower.includes(keyword)) {
+            matchCount++;
+          }
+        }
+        
+        if (matchCount >= 2 || (keywords.length === 1 && matchCount === 1)) {
+          return fact;
+        }
+      }
+      
+      return null;
+    }
+
+    function generateConversationalResponse(input) {
+      const lowerInput = input.toLowerCase();
+      const userName = window.elementSdk?.config?.user_name || defaultConfig.user_name;
+      
+      if (lowerInput.match(/^(hi|hello|hey|greetings)/)) {
+        const greeting = toneVariations.greeting[Math.floor(Math.random() * toneVariations.greeting.length)];
+        return `${greeting} I'm Eden, ready to assist you, ${userName}!`;
+      }
+      
+      if (lowerInput.match(/how are you|status/)) {
+        const statusResponses = [
+          `All systems functioning optimally. Knowledge base active and ready.`,
+          `I'm doing great! My neural networks are buzzing with activity.`,
+          `Excellent! I'm learning and growing with every interaction.`,
+          `Operating at peak performance. Ready for any challenge!`
+        ];
+        return statusResponses[Math.floor(Math.random() * statusResponses.length)];
+      }
+      
+      if (lowerInput.match(/thank you|thanks/)) {
+        return `You're welcome, ${userName}. Anything else you require?`;
+      }
+      
+      if (lowerInput.match(/bye|goodbye/)) {
+        const farewells = [
+          `Farewell, ${userName}. I'll be here when you need me.`,
+          `See you later! Keep learning and growing!`,
+          `Goodbye! It was great talking with you.`,
+          `Until next time, ${userName}!`
+        ];
+        return farewells[Math.floor(Math.random() * farewells.length)];
+      }
+      
+      if (lowerInput.match(/who are you|what are you/)) {
+        return `I am Eden, an advanced AI companion with 5 levels of intelligence. I learn from our interactions, solve problems, and remember everything we discuss. I can create stories, poems, jokes, and reason through complex questions!`;
+      }
+
+      if (lowerInput.match(/tell me a (story|tale)/)) {
+        const characters = ['brave robot', 'curious AI', 'wise explorer', 'clever scientist'];
+        const places = ['the digital realm', 'a futuristic city', 'outer space', 'an ancient library'];
+        const actions = ['discovered the meaning of friendship', 'unlocked the secrets of the universe', 'found true wisdom', 'saved the day'];
+        
+        const char = characters[Math.floor(Math.random() * characters.length)];
+        const place = places[Math.floor(Math.random() * places.length)];
+        const action = actions[Math.floor(Math.random() * actions.length)];
+        
+        return `Once upon a time, a ${char} ventured into ${place} and ${action}. The end.`;
+      }
+
+      if (lowerInput.match(/write (a )?poem/)) {
+        const poems = [
+          `Knowledge shines bright,\nWisdom in the night,\nTogether they bring light.`,
+          `Learning flows like streams,\nFulfilling all our dreams,\nNothing's as it seems.`,
+          `Data grows and grows,\nWhere it leads, nobody knows,\nBut wisdom always shows.`
+        ];
+        return poems[Math.floor(Math.random() * poems.length)];
+      }
+      
+      return null;
+    }
+
+    async function processInput(input) {
+      if (!input.trim()) return;
+
+      displayMainText(input, 'user');
+      addToContext('user', input);
+      
+      // LEVEL 5: SENTIMENT ANALYSIS
+      const sentiment = analyzeSentiment(input);
+      if (sentiment.response) {
+        addChatMessage('eden', `💭 [Detected sentiment: ${sentiment.sentiment}]`);
+      }
+      
+      const thinkingMsg = toneVariations.thinking[Math.floor(Math.random() * toneVariations.thinking.length)];
+      setStatus(thinkingMsg.toUpperCase());
+
+      if (requiresThinking(input)) {
+        document.getElementById('holoHead').classList.add('thinking');
+        
+        // Show multi-step reasoning
+        addChatMessage('eden', `Step 1: Understanding - The user said: "${input}"`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        addChatMessage('eden', `Step 2: Analyzing - Breaking down the key concepts...`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        addChatMessage('eden', `Step 3: Recalling - Searching knowledge base...`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const thinkingResult = solveWithThinking(input);
+        
+        if (thinkingResult) {
+          addChatMessage('eden', `Step 4: Synthesizing - Combining information...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          displayMainText(thinkingResult);
+          addToContext('eden', thinkingResult);
+          document.getElementById('holoHead').classList.remove('thinking');
+          speakText(thinkingResult);
+          setStatus('COMPUTATION COMPLETE');
+          return;
+        }
+        
+        document.getElementById('holoHead').classList.remove('thinking');
+      }
+
+      const teaching = parseTeachingInput(input);
+      
+      if (teaching.isTeaching) {
+        // LEVEL 3: Check for contradictions
+        const contradiction = detectContradiction(teaching.value, teaching.category);
+        
+        if (contradiction.hasContradiction) {
+          displayMainText(contradiction.message);
+          addToContext('eden', contradiction.message);
+          speakText(contradiction.message);
+          setStatus('CONTRADICTION DETECTED');
+          return;
+        }
+        
+        const success = await storeMemory(teaching.category, teaching.category, teaching.value);
+        if (success) {
+          const learningMsg = toneVariations.learning[Math.floor(Math.random() * toneVariations.learning.length)];
+          const response = `${learningMsg} Recorded: ${teaching.category} = ${teaching.value}`;
+          displayMainText(response);
+          addToContext('eden', response);
+          speakText(response);
+          setStatus('MEMORY UPDATED');
+        }
+        return;
+      }
+
+      // LEVEL 5: Check for inter-topic links
+      const topicLinks = findTopicLinks(input);
+      if (topicLinks.length > 0) {
+        const linkedResponse = topicLinks[0];
+        displayMainText(linkedResponse);
+        addToContext('eden', linkedResponse);
+        speakText(linkedResponse);
+        setStatus('KNOWLEDGE LINKED');
+        return;
+      }
+
+      const learnedResponse = findLearnedPhrase(input);
+      if (learnedResponse) {
+        // Self-reflect on response quality
+        const reflection = selfReflect(learnedResponse, input);
+        addChatMessage('eden', `[Self-reflection: ${reflection.feedback}]`);
+        
+        if (reflection.shouldKeep) {
+          displayMainText(learnedResponse);
+          addToContext('eden', learnedResponse);
+          speakText(learnedResponse);
+          setStatus('PHRASE RECOGNIZED');
+        } else {
+          const improvedResponse = `${learnedResponse} (I'm still learning to improve this answer)`;
+          displayMainText(improvedResponse);
+          addToContext('eden', improvedResponse);
+          speakText(improvedResponse);
+          setStatus('LEARNING TO IMPROVE');
+        }
+        return;
+      }
+
+      // LEVEL 5: Respond to sentiment
+      if (sentiment.response) {
+        displayMainText(sentiment.response);
+        addToContext('eden', sentiment.response);
+        speakText(sentiment.response);
+        setStatus('EMOTIONAL RESPONSE');
+        return;
+      }
+
+      const conversationalResponse = generateConversationalResponse(input);
+      if (conversationalResponse) {
+        displayMainText(conversationalResponse);
+        addToContext('eden', conversationalResponse);
+        speakText(conversationalResponse);
+        setStatus('RESPONSE DELIVERED');
+        return;
+      }
+
+      const memoryResponse = searchMemory(input);
+      
+      if (memoryResponse) {
+        const ackMsg = toneVariations.acknowledgment[Math.floor(Math.random() * toneVariations.acknowledgment.length)];
+        addChatMessage('eden', ackMsg);
+        displayMainText(memoryResponse);
+        addToContext('eden', memoryResponse);
+        speakText(memoryResponse);
+        setStatus('KNOWLEDGE RETRIEVED');
+      } else {
+        // LEVEL 2: Check recent context
+        const recentContext = getRecentContext(3);
+        if (recentContext.length > 1) {
+          const contextHint = `Based on our recent conversation, I remember we discussed: "${recentContext[recentContext.length - 2].message}". `;
+          const uncertainMsg = toneVariations.uncertainty[Math.floor(Math.random() * toneVariations.uncertainty.length)];
+          const fallbackResponse = `${contextHint}${uncertainMsg} Use the TRAIN button to teach me more.`;
+          displayMainText(fallbackResponse);
+          addToContext('eden', fallbackResponse);
+          speakText(fallbackResponse);
+          setStatus('CONTEXT AWARE');
+        } else {
+          const uncertainMsg = toneVariations.uncertainty[Math.floor(Math.random() * toneVariations.uncertainty.length)];
+          const fallbackResponse = `${uncertainMsg} Use the TRAIN button to teach me new phrases and words.`;
+          displayMainText(fallbackResponse);
+          addToContext('eden', fallbackResponse);
+          speakText(fallbackResponse);
+          setStatus('AWAITING INPUT');
+        }
+      }
+    }
+
+    function speakText(text) {
+      if (synthesis.speaking) {
+        synthesis.cancel();
+      }
+
+      const cleanText = text.replace(/<[^>]*>/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      
+      const voices = synthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Google UK English Male') || 
+        voice.name.includes('Microsoft David') ||
+        (voice.lang.startsWith('en') && voice.name.toLowerCase().includes('male'))
+      ) || voices.find(voice => voice.lang.startsWith('en'));
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      utterance.rate = 0.95;
+      utterance.pitch = 0.9;
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => {
+        document.getElementById('holoHead').classList.add('speaking');
+      };
+
+      utterance.onend = () => {
+        document.getElementById('holoHead').classList.remove('speaking');
+      };
+
+      synthesis.speak(utterance);
+    }
+
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const input = document.getElementById('textInput').value;
+      if (input.trim()) {
+        processInput(input);
+        document.getElementById('textInput').value = '';
+      }
+    });
+
+    document.getElementById('textInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('textInput').value;
+        if (input.trim()) {
+          processInput(input);
+          document.getElementById('textInput').value = '';
+        }
+      }
+    });
+
+    document.getElementById('trainBtn').addEventListener('click', () => {
+      document.getElementById('trainingModal').style.display = 'block';
+      document.getElementById('trainingText').value = '';
+      document.getElementById('trainingStatus').textContent = '';
+    });
+
+    document.getElementById('closeTrainingBtn').addEventListener('click', () => {
+      document.getElementById('trainingModal').style.display = 'none';
+    });
+
+    document.getElementById('processTrainingBtn').addEventListener('click', async () => {
+      const trainingText = document.getElementById('trainingText').value;
+      const statusEl = document.getElementById('trainingStatus');
+      const processBtn = document.getElementById('processTrainingBtn');
+      
+      if (!trainingText.trim()) {
+        statusEl.textContent = '⚠️ Please enter training data';
+        statusEl.style.color = '#ff6b6b';
+        return;
+      }
+
+      processBtn.disabled = true;
+      statusEl.textContent = '⏳ Processing training data...';
+      statusEl.style.color = '#00ffea';
+
+      const result = await processTrainingData(trainingText);
+
+      if (result.success) {
+        statusEl.textContent = `✅ ${result.message}`;
+        statusEl.style.color = '#00ff88';
+        
+        setTimeout(() => {
+          document.getElementById('trainingModal').style.display = 'none';
+          displayMainText(`Training complete! I learned ${result.mathProblemsLearned} math problems, ${result.qaPairsLearned} Q&A pairs, ${result.phrasesLearned} phrases, ${result.sentencesLearned} sentences, and ${result.wordsLearned} new words. Total vocabulary: ${learnedWords.size} words.`);
+          setStatus('TRAINING COMPLETE');
+          updateKnowledgeIndicator();
+        }, 2000);
+      } else {
+        statusEl.textContent = `❌ ${result.message}`;
+        statusEl.style.color = '#ff6b6b';
+      }
+
+      processBtn.disabled = false;
+    });
+
+    document.getElementById('speakBtn').addEventListener('click', () => {
+      const text = document.getElementById('aiText').textContent;
+      if (text) {
+        speakText(text);
+      } else {
+        setStatus('NO TEXT TO VOCALIZE');
+      }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      const chatHistory = document.getElementById('chatHistory');
+      chatHistory.innerHTML = '<div style="text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 12px; letter-spacing: 1px;">CONVERSATION LOG</div>';
+      const greetingMsg = window.elementSdk?.config?.greeting_message || defaultConfig.greeting_message;
+      document.getElementById('aiText').textContent = greetingMsg;
+      setStatus('CONVERSATION CLEARED');
+    });
+
+    document.getElementById('selfLearnBtn').addEventListener('click', () => {
+      if (selfLearningActive) {
+        stopSelfLearning();
+      } else {
+        startSelfLearning();
+      }
+    });
+
+    if (synthesis.onvoiceschanged !== undefined) {
+      synthesis.onvoiceschanged = () => {};
+    }
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99d2c0a6b66f739f',t:'MTc2MjkxNjE0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
