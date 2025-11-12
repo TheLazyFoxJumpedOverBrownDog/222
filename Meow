@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For my coder <3</title>
+
+<!-- Cursive font -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #ffeef2; /* pastel pink */
+    --heart: #ff6b94;
+  }
+  html,body{height:100%;margin:0;font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    background: radial-gradient(circle at 10% 10%, #fff0f6 0%, var(--bg) 50%, #ffdfe8 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    color:#222;
+  }
+
+  /* Floating hearts container */
+  .hearts{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+  }
+  .hearts i{
+    position:absolute;
+    font-style:normal;
+    opacity:0.9;
+    transform-origin:center;
+    animation: float 8s linear infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+  }
+  @keyframes float {
+    0%{ transform: translateY(20vh) scale(0.6); opacity:0.0;}
+    10%{ opacity:0.8;}
+    50%{ transform: translateY(-40vh) rotate(10deg) scale(1.0);}
+    100%{ transform: translateY(-120vh) scale(0.8); opacity:0;}
+  }
+
+  /* center card */
+  .card{
+    position:relative;
+    z-index:2;
+    width: min(420px, 92vw);
+    min-height: 420px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.35));
+    border-radius:22px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    padding:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:18px;
+    text-align:center;
+  }
+
+  h1{ margin:0; font-size:20px; color:#77334f; font-weight:600; }
+  p.lead{ margin:0; color:#77495f; font-size:14px; opacity:0.95; }
+
+  /* envelope */
+  .envelope{
+    position:relative;
+    width:220px;
+    height:140px;
+    background: linear-gradient(180deg,#fff3f7,#fff9fc);
+    border-radius:10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: transform .28s cubic-bezier(.2,.9,.3,1);
+  }
+  .envelope:hover{ transform: translateY(-6px) }
+
+  .env-flap{
+    position:absolute;
+    top:-34px;
+    width:220px;
+    height:120px;
+    left:0;
+    background: linear-gradient(180deg,#ffdfe8,#fff2f7);
+    border-radius:8px;
+    transform-origin: center bottom;
+    transition: transform .6s cubic-bezier(.2,.9,.3,1);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#8b2d4f;
+    font-weight:600;
+  }
+
+  .envelope .note{
+    opacity:0;
+    transform: translateY(10px) scale(.98);
+    transition: all .45s cubic-bezier(.2,.9,.3,1);
+    padding:10px 14px;
+    font-size:18px;
+    color:#6b2340;
+    font-family: 'Great Vibes', cursive;
+  }
+
+  .open .env-flap{ transform: rotateX(180deg) translateY(-10px); }
+  .open .note{ opacity:1; transform: translateY(0) scale(1); }
+
+  /* "Click to open" badge */
+  .hint{
+    margin-top:12px;
+    font-size:13px;
+    color:#933a60;
+    background: rgba(255,255,255,0.6);
+    padding:8px 12px;
+    border-radius:999px;
+    box-shadow: 0 6px 14px rgba(147,58,96,0.08);
+    cursor:default;
+    user-select:none;
+  }
+
+  /* revealed message card */
+  .message{
+    margin-top:14px;
+    width:100%;
+    max-width:360px;
+    background: rgba(255,255,255,0.9);
+    border-radius:12px;
+    padding:18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    transform: translateY(6px);
+    opacity:0;
+    pointer-events:none;
+    transition: all .45s ease;
+  }
+  .open + .message{ opacity:1; transform: translateY(0); pointer-events:auto; }
+
+  .message p{
+    margin:0;
+    font-family: 'Great Vibes', cursive;
+    font-size:26px;
+    color:#8b2546;
+    line-height:1.05;
+    letter-spacing:0.6px;
+  }
+
+  footer.small{
+    font-size:12px; color:#6f3b51; opacity:0.8; margin-top:8px;
+  }
+
+  /* mobile tweaks */
+  @media (max-width:420px){
+    .envelope{ width:88vw; height:120px }
+    .env-flap{ width:88vw }
+    .card{ padding:22px }
+    .message p{ font-size:22px }
+  }
+</style>
+</head>
+<body>
+  <div class="hearts" aria-hidden="true"></div>
+
+  <div class="card" role="main" aria-live="polite">
+    <h1>For my little angry coder 🖤</h1>
+    <p class="lead">a tiny surprise — open the envelope</p>
+
+    <div id="envelope" class="envelope" role="button" aria-pressed="false" tabindex="0" title="Click to open">
+      <div class="env-flap">💌 Click to open 💌</div>
+      <div class="note" aria-hidden="true">Open me!</div>
+    </div>
+
+    <div class="hint">(tap the envelope)</div>
+
+    <div class="message" id="message" aria-hidden="true">
+      <p id="cuteText">my kuchu puchuuu modakk I meowwww yaaa shoo mwuchh 💞</p>
+    </div>
+
+    <footer class="small">Made with ♥ just for him</footer>
+  </div>
+
+<script>
+/* ========== floating hearts generator ========== */
+(function makeHearts(){
+  const cont = document.querySelector('.hearts');
+  const heartIcons = ['💗','💓','💖','💕','💞'];
+  const count = 14;
+  for(let i=0;i<count;i++){
+    const el = document.createElement('i');
+    el.textContent = heartIcons[Math.floor(Math.random()*heartIcons.length)];
+    const size = (Math.random()*14)+18; // px
+    el.style.fontSize = size + 'px';
+    el.style.left = (Math.random()*100) + '%';
+    el.style.top = (70 + Math.random()*30) + 'vh';
+    el.style.animationDuration = (8 + Math.random()*8) + 's';
+    el.style.opacity = (0.6 + Math.random()*0.4);
+    el.style.transform = 'translateY(0) rotate(' + (Math.random()*30-15) + 'deg)';
+    cont.appendChild(el);
+  }
+})();
+
+/* ========== click-to-open handling ========== */
+const env = document.getElementById('envelope');
+const messageBox = document.getElementById('message');
+
+let opened = false;
+env.addEventListener('click', openMagic);
+env.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key===' ') openMagic(); });
+
+function openMagic(){
+  if(opened) return;
+  opened = true;
+  env.classList.add('open');
+  env.setAttribute('aria-pressed','true');
+  messageBox.setAttribute('aria-hidden','false');
+
+  // update envelope text
+  const flap = env.querySelector('.env-flap');
+  flap.textContent = '💘 Here we go...';
+
+  // Play lo-fi tune
+  startLoFi();
+}
+
+/* ========== gentle lo-fi-ish synth (WebAudio) ========== */
+function startLoFi(){
+  if(window.__lofi_started) return; // prevent double
+  window.__lofi_started = true;
+
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+
+    // master with gentle gain
+    const master = ctx.createGain(); master.gain.value = 0.12; master.connect(ctx.destination);
+
+    // subtle vinyl noise
+    const bufferSize = 2 * ctx.sampleRate;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * 0.04;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    noise.loop = true;
+    const noiseGain = ctx.createGain(); noiseGain.gain.value = 0.04;
+    const noiseFilter = ctx.createBiquadFilter(); noiseFilter.type='lowpass'; noiseFilter.frequency.value = 1500;
+    noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(master);
+    noise.start();
+
+    // soft pad (two detuned saws + lowpass)
+    const pad = ctx.createOscillator();
+    pad.type = 'sawtooth';
+    const pad2 = ctx.createOscillator();
+    pad2.type = 'sawtooth';
+    pad.frequency.value = 220;
+    pad2.frequency.value = 220 * 1.01;
+    const padGain = ctx.createGain(); padGain.gain.value = 0.0;
+    const padFilter = ctx.createBiquadFilter(); padFilter.type='lowpass'; padFilter.frequency.value = 900;
+    pad.connect(padFilter); pad2.connect(padFilter); padFilter.connect(padGain); padGain.connect(master);
+
+    pad.start();
+    pad2.start();
+
+    // gently ramp pad in
+    padGain.gain.linearRampToValueAtTime(0.018, now + 0.2);
+
+    // warm pluck (simple)
+    function pluck(time, freq){
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      const g = ctx.createGain(); g.gain.value = 0.0;
+      osc.connect(g); g.connect(master);
+      osc.start(time);
+      g.gain.cancelScheduledValues(time);
+      g.gain.setValueAtTime(0.0001, time);
+      g.gain.exponentialRampToValueAtTime(0.028, time + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + 1.2);
+      osc.stop(time + 1.4);
+    }
+
+    // mellow chord progression schedule (loop)
+    const chordNotes = [
+      [220, 277.18, 329.63],  // A minor-ish
+      [196, 246.94, 311.13],  // G
+      [164.81, 207.65, 246.94], // E
+      [185, 233.08, 293.66]   // Bm-ish
+    ];
+
+    let bar = 0;
+    function scheduleBar(){
+      const t0 = ctx.currentTime + 0.02;
+      const chord = chordNotes[bar % chordNotes.length];
+      // detune pad slightly each bar
+      pad.frequency.setValueAtTime(chord[0]*0.5, t0);
+      pad2.frequency.setValueAtTime(chord[0]*0.5 * 1.01, t0);
+      // gentle plucks on top notes
+      pluck(t0 + 0.12, chord[2]*1.0);
+      pluck(t0 + 0.6, chord[1]*0.5);
+      // small filter movement
+      padFilter.frequency.cancelScheduledValues(t0);
+      padFilter.frequency.linearRampToValueAtTime(1200, t0 + 0.2);
+      padFilter.frequency.linearRampToValueAtTime(700, t0 + 2.8);
+
+      bar++;
+      window.__lofi_timeout = setTimeout(scheduleBar, 3000);
+    }
+
+    scheduleBar();
+
+    // light vinyl crackle (random pops)
+    function pop(){
+      const s = ctx.createBufferSource();
+      const b = ctx.createBuffer(1, 2200, ctx.sampleRate);
+      const d = b.getChannelData(0);
+      for(let i=0;i<d.length;i++){
+        d[i] = (Math.random()*2-1)*Math.exp(-i/300);
+      }
+      s.buffer = b;
+      const g = ctx.createGain(); g.gain.value = 0.02 + Math.random()*0.02;
+      s.connect(g); g.connect(master);
+      s.start();
+      if(Math.random() < 0.6) setTimeout(pop, 400 + Math.random()*1400);
+      else setTimeout(pop, 600 + Math.random()*3000);
+    }
+    setTimeout(pop, 900);
+
+    // fade out on page hide/unload
+    function stopAll(){
+      try{ padGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8); }catch(e){}
+      if(window.__lofi_timeout) clearTimeout(window.__lofi_timeout);
+    }
+    window.addEventListener('pagehide', stopAll);
+    window.addEventListener('beforeunload', stopAll);
+
+  }catch(err){
+    console.warn('Audio start error', err);
+  }
+}
+</script>
+</body>
+</html>
