@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chowk Restaurant POS</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e2f url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #f0f0f0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    background: rgba(20,20,30,0.95);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+  }
+  h1, h2 { text-align: center; color: #ffd700; margin-bottom: 20px; }
+  .tables { display: grid; grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); gap: 15px; margin-bottom: 20px; }
+  .table-card { background: #2a2a3d; padding: 25px; text-align: center; font-size: 18px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; transition: 0.3s; color: #fff; }
+  .table-card:hover { background: #44446e; transform: translateY(-3px); }
+  .menu-items, .order-items { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+  .menu-item-btn { padding: 10px 20px; border: none; border-radius: 10px; background: #ff9800; color: #fff; cursor: pointer; transition: 0.3s; flex: 1 1 140px; text-align: center; position: relative; }
+  .menu-item-btn:hover { background: #ffc107; }
+  .menu-item-actions { position: absolute; top: 5px; right: 5px; display:flex; gap:5px; }
+  .menu-item-actions button { padding: 3px 5px; font-size:12px; border:none; border-radius:5px; cursor:pointer; color:#fff; }
+  .menu-item-actions .edit-btn { background:#4caf50; } 
+  .menu-item-actions .delete-btn { background:#f44336; }
+  .order-item { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #555; align-items: center; }
+  .order-item button { background: #4caf50; border: none; border-radius: 6px; padding: 3px 8px; margin-left: 5px; cursor: pointer; color: #fff; }
+  .order-item button:hover { background: #45a049; }
+  .payment-btn { padding: 10px 20px; border-radius: 10px; border: none; margin: 5px; background: #2196f3; color: #fff; cursor: pointer; transition: 0.3s; }
+  .payment-btn:hover { background: #0b7dda; }
+  .total { font-size: 22px; font-weight: bold; margin-bottom: 10px; text-align: right; }
+  .order-items { max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #555; padding: 8px; text-align: left; color: #fff; }
+  th { background: #333366; }
+  input, label { display:block; margin-bottom:5px; }
+  .item-adder { background:#2a2a3d; padding:15px; border-radius:10px; margin-bottom:20px; }
+  @media(max-width:600px){ .menu-item-btn{ flex:1 1 100%; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Chowk Restaurant POS</h1>
+
+  <div id="table-selection">
+    <h2>Select Table</h2>
+    <div class="tables" id="tables"></div>
+    <button class="payment-btn" onclick="showReport()">View Daily Report</button>
+  </div>
+
+  <div id="order-screen" style="display:none;">
+    <h2 id="table-title"></h2>
+
+    <!-- Item Adder -->
+    <div class="item-adder">
+      <h3>Add New Menu Item</h3>
+      <label>Item Name:</label>
+      <input type="text" id="new-item-name" placeholder="Samosa">
+      <label>Price (₹):</label>
+      <input type="number" id="new-item-price" placeholder="15">
+      <button class="payment-btn" onclick="addNewMenuItem()">Add Item</button>
+    </div>
+
+    <div class="menu-items" id="menu-items"></div>
+
+    <h3>Order</h3>
+    <div class="order-items" id="order-items"></div>
+
+    <div class="total" id="total">Total: ₹0</div>
+
+    <div>
+      <button class="payment-btn" onclick="pay('Cash')">Pay Cash</button>
+      <button class="payment-btn" onclick="pay('Card')">Pay Card</button>
+      <button class="payment-btn" onclick="pay('UPI')">Pay UPI</button>
+      <button class="payment-btn" onclick="printReceipt()">Print Receipt</button>
+      <button class="payment-btn" onclick="backToTables()">Back</button>
+    </div>
+  </div>
+
+  <div id="report-screen" style="display:none;">
+    <h2>Daily Sales Report</h2>
+    <div id="report-content"></div>
+    <button class="payment-btn" onclick="backToTables()">Back</button>
+  </div>
+</div>
+
+<script>
+let menuItems = [
+  {name:"Veg Thali", price:120, quantity:0},
+  {name:"Chicken Thali", price:180, quantity:0},
+  {name:"Tea", price:20, quantity:0},
+  {name:"Coffee", price:25, quantity:0},
+  {name:"Paneer Butter Masala", price:150, quantity:0},
+  {name:"Samosa", price:15, quantity:0},
+  {name:"Cold Drink", price:30, quantity:0},
+  {name:"French Fries", price:60, quantity:0}
+];
+
+let orders = [];
+let currentTable = 0;
+let currentOrder = [];
+
+function generateTables(){
+  let tablesDiv = document.getElementById('tables');
+  for(let i=1;i<=10;i++){
+    let div = document.createElement('div');
+    div.className = 'table-card';
+    div.innerText = 'Table ' + i;
+    div.onclick = ()=> selectTable(i);
+    tablesDiv.appendChild(div);
+  }
+}
+
+function selectTable(num){
+  currentTable = num;
+  currentOrder = [];
+  document.getElementById('table-selection').style.display='none';
+  document.getElementById('order-screen').style.display='block';
+  document.getElementById('table-title').innerText='Table '+num;
+  renderMenu();
+  renderOrder();
+}
+
+function backToTables(){
+  document.getElementById('table-selection').style.display='block';
+  document.getElementById('order-screen').style.display='none';
+  document.getElementById('report-screen').style.display='none';
+}
+
+function renderMenu(){
+  let menuDiv = document.getElementById('menu-items');
+  menuDiv.innerHTML='';
+  menuItems.forEach((item,index)=>{
+    let btn = document.createElement('div');
+    btn.className='menu-item-btn';
+    btn.innerHTML=`${item.name} ₹${item.price}
+    <div class="menu-item-actions">
+      <button class="edit-btn" onclick="editMenuItem(${index})">Edit</button>
+      <button class="delete-btn" onclick="deleteMenuItem(${index})">Delete</button>
+    </div>`;
+    btn.onclick=()=> addItem(index);
+    menuDiv.appendChild(btn);
+  });
+}
+
+function addNewMenuItem(){
+  let name = document.getElementById('new-item-name').value.trim();
+  let price = parseFloat(document.getElementById('new-item-price').value);
+  if(name && price>0){
+    menuItems.push({name, price, quantity:0});
+    renderMenu();
+    document.getElementById('new-item-name').value='';
+    document.getElementById('new-item-price').value='';
+  } else {
+    alert("Please enter valid name and price!");
+  }
+}
+
+function editMenuItem(index){
+  let name = prompt("Enter new name:", menuItems[index].name);
+  if(name===null) return;
+  let price = prompt("Enter new price:", menuItems[index].price);
+  if(price===null || isNaN(price)) return;
+  menuItems[index].name = name.trim();
+  menuItems[index].price = parseFloat(price);
+  renderMenu();
+}
+
+function deleteMenuItem(index){
+  if(confirm("Are you sure you want to delete "+menuItems[index].name+"?")){
+    menuItems.splice(index,1);
+    renderMenu();
+  }
+}
+
+function renderOrder(){
+  let orderDiv = document.getElementById('order-items');
+  orderDiv.innerHTML='';
+  currentOrder.forEach((item,index)=>{
+    let div=document.createElement('div');
+    div.className='order-item';
+    div.innerHTML=`<span>${item.name}</span>
+    <span>
+      <button onclick="subtractQuantity(${index})">-</button>
+      ${item.quantity}
+      <button onclick="addQuantity(${index})">+</button>
+    </span>
+    <span>₹${item.price*item.quantity}</span>`;
+    orderDiv.appendChild(div);
+  });
+  let total = currentOrder.reduce((sum,i)=>sum+i.price*i.quantity,0);
+  document.getElementById('total').innerText='Total: ₹'+total;
+}
+
+function addItem(index){
+  let found=currentOrder.find(o=>o.name==menuItems[index].name);
+  if(found) found.quantity++;
+  else currentOrder.push({...menuItems[index], quantity:1});
+  renderOrder();
+}
+
+function addQuantity(index){ currentOrder[index].quantity++; renderOrder(); }
+function subtractQuantity(index){ 
+  currentOrder[index].quantity--; 
+  if(currentOrder[index].quantity<=0) currentOrder.splice(index,1);
+  renderOrder();
+}
+
+function pay(method){
+  let total = currentOrder.reduce((sum,i)=>sum+i.price*i.quantity,0);
+  alert('Payment of ₹'+total+' done via '+method);
+  saveOrder();
+  currentOrder=[];
+  renderOrder();
+}
+
+function saveOrder(){
+  orders.push({table:currentTable, items:[...currentOrder]});
+  currentOrder.forEach(item=>{
+    let menuItem = menuItems.find(m=>m.name===item.name);
+    if(menuItem) menuItem.quantity += item.quantity;
+  });
+}
+
+function printReceipt(){
+  let receiptContent = `<h2>Chowk Restaurant</h2>
+  <p>${new Date().toLocaleString()}</p>
+  <table style="width:100%;border-collapse:collapse;color:#000;background:#fff">
+  <tr><th style="text-align:left;border-bottom:1px solid #000;">Item</th>
+  <th style="text-align:center;border-bottom:1px solid #000;">Qty</th>
+  <th style="text-align:right;border-bottom:1px solid #000;">Amount</th></tr>`;
+  currentOrder.forEach(item=>{
+    receiptContent+=`<tr>
+    <td>${item.name}</td>
+    <td style="text-align:center">${item.quantity}</td>
+    <td style="text-align:right">₹${item.quantity*item.price}</td>
+    </tr>`;
+  });
+  let total = currentOrder.reduce((sum,i)=>sum+i.price*i.quantity,0);
+  receiptContent+=`<tr><td colspan="2"><strong>Total</strong></td><td style="text-align:right"><strong>₹${total}</strong></td></tr>`;
+  receiptContent+='</table>';
+  let printWindow = window.open('','', 'height=600,width=400');
+  printWindow.document.write('<html><head><title>Receipt</title></head><body>'+receiptContent+'</body></html>');
+  printWindow.document.close();
+  printWindow.print();
+}
+
+function showReport(){
+  document.getElementById('table-selection').style.display='none';
+  document.getElementById('order-screen').style.display='none';
+  document.getElementById('report-screen').style.display='block';
+
+  let reportDiv = document.getElementById('report-content');
+  reportDiv.innerHTML='';
+
+  let totalRevenue = 0;
+  let itemSummary = {};
+  let tableSummary = {};
+
+  orders.forEach(order=>{
+    tableSummary[order.table] = tableSummary[order.table] || 0;
+    order.items.forEach(item=>{
+      totalRevenue += item.price*item.quantity;
+      tableSummary[order.table] += item.price*item.quantity;
+      itemSummary[item.name] = itemSummary[item.name] || {quantity:0, amount:0};
+      itemSummary[item.name].quantity += item.quantity;
+      itemSummary[item.name].amount += item.price*item.quantity;
+    });
+  });
+
+  let html = '<h3>Item-wise Sales</h3><table><tr><th>Item</th><th>Quantity Sold</th><th>Amount</th></tr>';
+  for(let key in itemSummary){
+    html += `<tr><td>${key}</td><td>${itemSummary[key].quantity}</td><td>₹${itemSummary[key].amount}</td></tr>`;
+  }
+  html += '</table>';
+
+  html += '<h3>Table-wise Sales</h3><table><tr><th>Table</th><th>Total Amount</th></tr>';
+  for(let key in tableSummary){
+    html += `<tr><td>Table ${key}</td><td>₹${tableSummary[key]}</td></tr>`;
+  }
+  html += '</table>';
+
+  html += `<h3>Total Revenue: ₹${totalRevenue}</h3>`;
+  reportDiv.innerHTML = html;
+}
+
+generateTables();
+</script>
+</body>
+</html>
