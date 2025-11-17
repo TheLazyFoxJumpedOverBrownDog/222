@@ -1,0 +1,387 @@
+/**
+ * VibeWave Music - All-in-one single-file starter for demo, learning, and prototyping
+ * BACKEND: Node.js/Express (API for auth, artist/listener logic, mock music upload, mock payments)
+ * FRONTEND: Embedded React components via CDN in a single HTML served at the root
+ * Payments: Example stub for Flutterwave/Paystack mobile money endpoint
+ * To run: `node fullstack_vibewave.js` (in your terminal)
+ * Email for contact: quavamarlon2577@gmail.com
+ *
+ * Expand: Replace the stubs/upload logic with production-grade file storage and real payments
+ ************************************/
+
+const express = require('express')
+const multer = require('multer') // For music uploads
+const path = require('path')
+const bodyParser = require('body-parser')
+const fs = require('fs')
+const app = express()
+
+// Simple in-memory storage for users, songs, and mock stats
+const USERS = []
+const SONGS = []
+const ARTIST_STATS = {}
+const LISTENER_DOWNLOADS = {}
+
+// Setup file upload (songs go to ./uploads for demo)
+if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads')
+const upload = multer({ dest: './uploads/' })
+
+app.use(bodyParser.json())
+
+// Serve the frontend at /
+app.get('/', (req, res) => {
+  res.type('html').send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>VibeWave Music</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap">
+        <style>
+          body { margin: 0; background: #f5f6fa; font-family: Inter, Arial, sans-serif; }
+          a { color: #1db954; text-decoration:none; }
+          .center { display: flex; justify-content: center; align-items: center; }
+        </style>
+      </head>
+      <body>
+        <div id="root"></div>
+        <!-- React + Babel from CDN -->
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        <!-- App Code (see below) -->
+        <script type="text/babel">
+
+          // === REACT APP START ===
+
+          function Homepage({ moveTo }) {
+            return (
+              <div>
+                <header style={{background:'#191414',color:'#fff',padding:'32px 0',textAlign:'center'}}>
+                  <h1 style={{fontWeight:800,letterSpacing:'1.5px',fontSize:'2.7rem'}}>VibeWave Music</h1>
+                  <p style={{fontSize:'1.2rem',margin:'14px 0 17px'}}>
+                    Stream. Upload. Earn. <span style={{color:'#20c763'}}>Experience Africa’s homegrown music wave.</span>
+                  </p>
+                  <a onClick={()=>moveTo('signup')} style={{
+                    background:'#1db954',color:'#fff',borderRadius:'25px',padding:'14px 38px',
+                    textDecoration:'none',fontWeight:'700',marginTop:'16px',display:'inline-block', cursor:'pointer'
+                  }}>Sign Up / Login</a>
+                </header>
+                <main style={{maxWidth:1100,margin:'0 auto',padding:'42px 12px'}}>
+                  <div style={{
+                    display:'flex',flexWrap:'wrap',gap:35,justifyContent:'center',marginBottom:50}}>
+                    <section style={{
+                      flex:'1 1 340px',background:'#fff',borderRadius:13,boxShadow:'0 2px 10px #19141411',
+                      padding:32,minWidth:305,maxWidth:460
+                    }}>
+                      <h2 style={{fontWeight:700,color:'#20c763'}}>For Listeners</h2>
+                      <ul style={{lineHeight:1.85,fontSize:'1.13rem',marginLeft:18}}>
+                        <li>Discover Zambia & Africa’s finest music</li>
+                        <li>Enjoy free listening—or Go Premium with <b>Mobile Money</b>/card</li>
+                        <li>Download songs & listen offline</li>
+                        <li>Regional support: ZMW, USD, ZAR, BWP, MWK & more</li>
+                      </ul>
+                    </section>
+                    <section style={{
+                      flex:'1 1 340px',background:'#fff',borderRadius:13,boxShadow:'0 2px 10px #19141411',
+                      padding:32,minWidth:305,maxWidth:460
+                    }}>
+                      <h2 style={{fontWeight:700,color:'#20c763'}}>For Artists</h2>
+                      <ul style={{lineHeight:1.85,fontSize:'1.13rem',marginLeft:18}}>
+                        <li>Upload your music, grow your fanbase & get discovered</li>
+                        <li>Earn in <b>Zambian Kwacha</b> and other currencies</li>
+                        <li>Instant payouts to <b>Mobile Money</b>, bank, or card</li>
+                        <li>Full analytics & artist wallet dashboard</li>
+                      </ul>
+                    </section>
+                  </div>
+                  <section style={{textAlign:'center',margin:'62px 0 25px',fontSize:'1.16rem'}}>
+                    <p>
+                      <b>100% Seamless Payments:</b> Receive and pay using <b>Airtel Money</b>, <b>MTN MoMo</b>, <b>Zamtel Kwacha</b>, Visa, Mastercard,
+                      and more. Artists and listeners — get paid and pay YOUR way.
+                    </p>
+                  </section>
+                  <section style={{
+                    display:'flex',flexWrap:'wrap',gap:'2em',justifyContent:'center',alignItems:'flex-start',marginTop:15
+                  }}>
+                    <div>
+                      <h3>How it Works</h3>
+                      <ol>
+                        <li><b>Sign Up:</b> Quick registration with your email or Gmail</li>
+                        <li><b>Upload/Discover:</b> Artists upload; fans stream & download music</li>
+                        <li><b>Pay Securely:</b> Choose <b>Mobile Money</b> or card, in your currency</li>
+                        <li><b>Earn & Enjoy:</b> Artists and owners get paid, fans enjoy unlimited vibes</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <h3>Ready to Join?</h3>
+                      <a onClick={()=>moveTo('signup')} style={{
+                        background:'#1db954',color:'#fff',borderRadius:'25px',padding:'15px 40px',textDecoration:'none',fontWeight:'700',fontSize:'1.17rem', cursor:'pointer'
+                      }}>Join Now</a>
+                    </div>
+                  </section>
+                </main>
+                <footer style={{background:'#191414',color:'#aaa',textAlign:'center',padding:19,marginTop:65}}>
+                  &copy; ${new Date().getFullYear()} VibeWave Music · Zambia & Africa | Contact: 
+                  <a style={{color:'#1db954'}} href="mailto:quavamarlon2577@gmail.com">quavamarlon2577@gmail.com</a>
+                </footer>
+              </div>
+            )
+          }
+
+          function Signup({ moveTo, setUser }) {
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [kind, setKind] = React.useState('listener');
+            const [err, setErr] = React.useState('');
+
+            const handleSignup = e => {
+              e.preventDefault();
+              fetch('/api/signup', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({email, password, kind})
+              })
+                .then(r => r.json())
+                .then(d => {
+                  if(d.ok) {
+                    setUser(d.user);
+                    if (d.user.kind === 'artist') moveTo('artist');
+                    else moveTo('listener');
+                  } else setErr(d.error || 'Signup failed');
+                });
+            };
+
+            return (
+              <div className="center" style={{minHeight:"100vh"}}>
+                <div style={{background:'#fff',padding:38,borderRadius:16,boxShadow:'0 2px 10px #19141411',maxWidth:410}}>
+                  <h2 style={{color:'#191414',marginBottom:26}}>Sign Up for VibeWave Music</h2>
+                  <form onSubmit={handleSignup}>
+                    <input required type="email" placeholder="Email Address"
+                      style={{width:'100%',padding:'10px 12px',marginBottom:16,borderRadius:6,border:'1px solid #ccc'}}
+                      value={email} onChange={e=>setEmail(e.target.value)} />
+                    <input required type="password" placeholder="Password"
+                      style={{width:'100%',padding:'10px 12px',marginBottom:16,borderRadius:6,border:'1px solid #ccc'}}
+                      value={password} onChange={e=>setPassword(e.target.value)} />
+                    <select value={kind} onChange={e=>setKind(e.target.value)} style={{marginBottom: 16, width:'100%',padding:'10px 12px',borderRadius:6}}>
+                      <option value="listener">Listener</option>
+                      <option value="artist">Artist</option>
+                    </select>
+                    <button style={{
+                      width:'100%',background:'#1db954',color:'#fff',border:'none',padding:'12px 0',
+                      borderRadius:6,fontWeight:700
+                    }}>Sign Up</button>
+                  </form>
+                  {err && <div style={{color:'crimson',marginTop:12}}>{err}</div>}
+                  <hr style={{margin:'30px 0'}} />
+                  <button onClick={()=>alert('Simulate Google Sign-in')} style={{
+                    width:'100%',background:'#fff',color:'#191414',border:'1px solid #191414',padding:'10px 0',borderRadius:6,fontWeight:700
+                  }}>
+                    Sign up with Google (demo)
+                  </button>
+                  <div style={{marginTop:18,fontSize:'1rem'}}>Already have an account? <a style={{cursor:'pointer'}} onClick={()=>moveTo('signin')}>Sign in</a></div>
+                </div>
+              </div>
+            )
+          }
+
+          function Signin({ moveTo, setUser }) {
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [err, setErr] = React.useState('');
+
+            const handleSignin = e => {
+              e.preventDefault();
+              fetch('/api/signin', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({email, password})
+              })
+                .then(r => r.json())
+                .then(d => {
+                  if(d.ok) {
+                    setUser(d.user);
+                    if (d.user.kind === 'artist') moveTo('artist');
+                    else moveTo('listener');
+                  } else setErr(d.error || 'Signin failed');
+                });
+            };
+
+            return (
+              <div className="center" style={{minHeight:"100vh"}}>
+                <div style={{background:'#fff',padding:38,borderRadius:16,boxShadow:'0 2px 10px #19141411',maxWidth:410}}>
+                  <h2 style={{color:'#191414',marginBottom:26}}>Sign In</h2>
+                  <form onSubmit={handleSignin}>
+                    <input required type="email" placeholder="Email Address"
+                      style={{width:'100%',padding:'10px 12px',marginBottom:16,borderRadius:6,border:'1px solid #ccc'}}
+                      value={email} onChange={e=>setEmail(e.target.value)} />
+                    <input required type="password" placeholder="Password"
+                      style={{width:'100%',padding:'10px 12px',marginBottom:16,borderRadius:6,border:'1px solid #ccc'}}
+                      value={password} onChange={e=>setPassword(e.target.value)} />
+                    <button style={{
+                      width:'100%',background:'#1db954',color:'#fff',border:'none',padding:'12px 0',borderRadius:6,fontWeight:700
+                    }}>Sign In</button>
+                  </form>
+                  {err && <div style={{color:'crimson',marginTop:12}}>{err}</div>}
+                  <div style={{marginTop:18,fontSize:'1rem'}}>New user? <a style={{cursor:'pointer'}} onClick={()=>moveTo('signup')}>Sign up</a></div>
+                </div>
+              </div>
+            )
+          }
+
+          // --- Artist Dashboard (music upload, earnings, stats) ---
+          function ArtistDashboard({user, moveTo}) {
+            const [stats, setStats] = React.useState({});
+            const [songs, setSongs] = React.useState([]);
+            const [songFile, setSongFile] = React.useState();
+            const [uploadResult, setUploadResult] = React.useState('');
+
+            React.useEffect(()=>{
+              fetch('/api/artist-stats?email='+encodeURIComponent(user.email)).then(r=>r.json()).then(setStats);
+              fetch('/api/artist-songs?email='+encodeURIComponent(user.email)).then(r=>r.json()).then(d=>setSongs(d.songs));
+            },[user.email]);
+
+            const handleUpload = e => {
+              e.preventDefault();
+              if (!songFile) return;
+              const formData = new FormData();
+              formData.append('artist', user.email);
+              formData.append('file', songFile);
+              fetch('/api/upload-song', {
+                method: 'POST',
+                body: formData
+              })
+                .then(r=>r.json()).then(d=>{
+                  setUploadResult(d.ok ? 'Song uploaded!' : ('Failed: '+(d.error||'upload error')));
+                  setTimeout(()=>setUploadResult(''),2000);
+                  fetch('/api/artist-songs?email='+encodeURIComponent(user.email)).then(r=>r.json()).then(d=>setSongs(d.songs));
+                });
+            };
+
+            const handleWithdraw = () => {
+              alert('Demo: Normally you would trigger a payout using Mobile Money via Flutterwave/Paystack here. Expand with your business logic!');
+            };
+
+            return (
+              <div style={{margin:'32px auto',maxWidth:800,fontFamily:"Inter,Arial,sans-serif"}}>
+                <h1 style={{color:"#20c763",fontWeight:"bold"}}>Artist Dashboard</h1>
+                <div style={{display:"flex",gap:30,margin:"24px 0"}}>
+                  <div style={{flex:1}}>
+                    <h3>Total Streams</h3>
+                    <p style={{fontSize:"2rem",fontWeight:800}}>{stats.streams||0}</p>
+                  </div>
+                  <div style={{flex:1}}>
+                    <h3>Downloads</h3>
+                    <p style={{fontSize:"2rem",fontWeight:800}}>{stats.downloads||0}</p>
+                  </div>
+                  <div style={{flex:1}}>
+                    <h3>Revenue</h3>
+                    <p style={{fontSize:"2rem",fontWeight:800}}>{stats.revenue||"0 ZMW"}</p>
+                  </div>
+                  <div style={{flex:1}}>
+                    <h3>Available to Withdraw</h3>
+                    <p style={{fontSize:"2rem",fontWeight:600,color:"#1db954"}}>{stats.withdrawable||"0 ZMW"}</p>
+                  </div>
+                </div>
+                <button onClick={handleWithdraw} style={{
+                  background:'#1db954',color:'#fff',borderRadius:'25px',
+                  padding:'11px 32px',textDecoration:'none',fontWeight:'bold',display:'inline-block',border:'none'
+                }}>Withdraw via Mobile Money</button>
+                <hr />
+                <section>
+                  <h2>Upload Music</h2>
+                  <form onSubmit={handleUpload}>
+                    <input type="file" accept="audio/*" onChange={e=>setSongFile(e.target.files[0])}/>
+                    <button>Upload Song</button>
+                  </form>
+                  {uploadResult}
+                </section>
+                <section>
+                  <h2>Your Songs</h2>
+                  <ul>
+                    {songs.map(song=>
+                      <li key={song.file}><a href={"/songs/"+song.file} download>{song.originalname}</a></li>
+                    )}
+                  </ul>
+                </section>
+                <div style={{marginTop:22}}><a href="#" onClick={()=>moveTo('home')}>Back to Home</a></div>
+              </div>
+            )
+          }
+
+          // --- Listener Dashboard (listening, downloads) ---
+          function ListenerDashboard({user, moveTo}) {
+            const [downloads, setDownloads] = React.useState([]);
+
+            React.useEffect(()=>{
+              fetch('/api/listener-downloads?email='+encodeURIComponent(user.email))
+                .then(r=>r.json()).then(d=>setDownloads(d.downloads||[]));
+            },[user.email]);
+
+            return (
+              <div style={{margin:'32px auto',maxWidth:600,fontFamily:"Inter,Arial,sans-serif"}}>
+                <h1 style={{color:"#20c763",fontWeight:"bold"}}>Your VibeWave Music</h1>
+                <h3>Downloaded Tracks</h3>
+                <ul>
+                  {downloads.map(song=><li key={song.file}><a href={"/songs/"+song.file} download>{song.originalname}</a> <span style={{fontWeight:700}}>by {song.artist||'VibeWave'}</span></li>)}
+                </ul>
+                <div style={{marginTop:32}}>
+                  <a href="#" style={{
+                    background:"#191414",color:"#fff",borderRadius:"25px",
+                    padding:"11px 32px",textDecoration:"none",fontWeight:"bold",display:"inline-block"
+                  }} onClick={()=>moveTo('explore')}>Explore More Music</a>
+                </div>
+                <div style={{marginTop:18}}><a href="#" onClick={()=>moveTo('home')}>Back to Home</a></div>
+              </div>
+            )
+          }
+
+          // --- Explore: Demo of downloading ---
+          function ExplorePage({user, moveTo}) {
+            const [songs, setSongs] = React.useState([]);
+            React.useEffect(()=>{
+              fetch('/api/all-songs').then(r=>r.json()).then(d=>setSongs(d.songs));
+            },[]);
+
+            // Simulate payment/download; mark the song as downloaded for user
+            const handleDownload = file => {
+              fetch('/api/download-song', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({file, email:user.email})
+              })
+                .then(()=>moveTo('listener'));
+            };
+
+            return (
+              <div style={{margin:'32px auto',maxWidth:600,fontFamily:"Inter,Arial,sans-serif"}}>
+                <h1 style={{color:"#191414",fontWeight:"bold"}}>Explore Music</h1>
+                <ul>
+                  {songs.map(song=>
+                    <li key={song.file}>
+                      <a href={"/songs/"+song.file} onClick={e=>{e.preventDefault(); if(window.confirm('Demo: Pay to download?')) handleDownload(song.file)}} download>
+                        {song.originalname}</a> <span style={{fontWeight:700}}>by {song.artist||'VibeWave'}</span>
+                    </li>
+                  )}
+                </ul>
+                <div style={{marginTop:18}}><a href="#" onClick={()=>moveTo('listener')}>Back to Dashboard</a></div>
+              </div>
+            )
+          }
+
+          // App Controller
+          function App() {
+            const [page, setPage] = React.useState('home');
+            const [user, setUser] = React.useState(null);
+
+            return (
+              <div>
+                {page==='home' && <Homepage moveTo={setPage} />}
+                {page==='signup' && <Signup moveTo={setPage} setUser={setUser} />}
+                {page==='signin' && <Signin moveTo={setPage} setUser={setUser} />}
+                {user && user.kind==='artist' && page==='artist' && <ArtistDashboard user={user} moveTo={setPage} />}
+                {user && user.kind==='listener' && page==='listener' && <ListenerDashboard user={user} moveTo={setPage} />}
+                {user && user.kind==='listener' && page==='explore' && <ExplorePage user={user} moveTo={setPage} />}
+              </div
