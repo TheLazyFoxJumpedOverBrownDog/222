@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Алма арқылы кері байланыс</title>
+
+<style>
+  body {
+    text-align: center;
+    font-family: sans-serif;
+    background: #e8f7ff;
+  }
+
+  h1 { margin-top: 15px; }
+
+  .tree-container {
+    position: relative;
+    width: 300px;
+    margin: 0 auto;
+  }
+
+  .tree {
+    font-size: 220px;
+  }
+
+  /* Алма анимациясы */
+  @keyframes grow {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .spot {
+    position: absolute;
+    font-size: 38px;
+    animation: grow 0.25s ease-out;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    font-size: 22px;
+    margin: 10px;
+    border-radius: 10px;
+    border: 2px solid #333;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<h1>Алма арқылы кері байланыс</h1>
+
+<div class="tree-container">
+  <div class="tree">🌳</div>
+  <div id="spots"></div>
+</div>
+
+<!-- Алма батырмалары -->
+<button class="btn" onclick="addApple('🍏')">Жасыл – Түсіндім</button>
+<button class="btn" onclick="addApple('🍎')">Қызыл – Түсінбедім</button>
+<button class="btn" onclick="addApple('🍋')">Сары – Сұрағым бар</button>
+
+<script>
+const positions = [
+  {x:140, y:40}, {x:110, y:70}, {x:170, y:70},
+  {x:80, y:110}, {x:200, y:110},
+  {x:60, y:150}, {x:140, y:150}, {x:220, y:150},
+  {x:40, y:190}, {x:100, y:190}, {x:180, y:190}, {x:240, y:190},
+  {x:70, y:230}, {x:140, y:230}, {x:210, y:230},
+  {x:100, y:270}, {x:170, y:270},
+  {x:140, y:310}, {x:90, y:340}, {x:190, y:340},
+  {x:40, y:260}, {x:240, y:260}, {x:40, y:310}, {x:240, y:310},
+  {x:140, y:360}
+];
+
+let appleCount = 0;
+
+function addApple(emoji){
+  if(appleCount >= 25) return alert("Ағаштағы барлық алма орындары толды!");
+
+  const spot = document.createElement("div");
+  spot.className = "spot";
+  spot.style.left = positions[appleCount].x + "px";
+  spot.style.top = positions[appleCount].y + "px";
+  spot.textContent = emoji;
+
+  document.getElementById("spots").appendChild(spot);
+  appleCount++;
+}
+</script>
+
+</body>
+</html>
