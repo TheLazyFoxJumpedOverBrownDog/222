@@ -1,21 +1,168 @@
-MIT License
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocketry Flashcards</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      width: 100%;
+      max-width: 800px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 { font-size: 1.2rem; margin: 0; }
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      width: 90%;
+      max-width: 600px;
+      min-height: 200px;
+      display: none; /* hidden until Start */
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: transform 0.6s;
+      perspective: 1000px;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .inner { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; }
+    .flipped .inner { transform: rotateY(180deg); }
+    .side {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; backface-visibility: hidden; border-radius: 12px;
+    }
+    .front { background: transparent; }
+    .back { background: transparent; transform: rotateY(180deg); }
+    .controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    .game-controls { display: none; } /* hidden until Start */
+    button {
+      padding: 0.6rem 1rem; border: none; border-radius: 8px;
+      cursor: pointer; font-size: 1rem;
+    }
+    .btn-correct { background: #29d37a; color: #000; }
+    .btn-wrong { background: #ff6b6b; color: #fff; }
+    .btn-next { background: #444; color: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚀 Rocketry Flashcards</h1>
+    <div id="score">Score: 0</div>
+  </header>
+  <!-- Start button controls -->
+  <div class="controls" id="startControls">
+    <button id="startBtn">Start</button>
+  </div>
 
-Copyright (c) 2025 Glitch
+  <!-- Flashcard -->
+  <div class="card" id="card">
+    <div class="inner">
+      <div class="side front" id="front"></div>
+      <div class="side back" id="back"></div>
+    </div>
+  </div>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+  <!-- Game controls -->
+  <div class="controls game-controls" id="gameControls">
+    <button class="btn-correct" id="correctBtn">I knew it</button>
+    <button class="btn-wrong" id="wrongBtn">I didn’t</button>
+    <button class="btn-next" id="nextBtn">Next</button>
+  </div>
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  <script>
+    const CARD_DATA = [
+      ["Who proposed the rocket equation linking exhaust velocity and mass ratio?", "Konstantin Tsiolkovsky"],
+      ["Who launched the first liquid-fueled rocket in 1926?", "Robert Goddard"],
+      ["Which scientist wrote 'The Rocket into Planetary Space'?", "Hermann Oberth"],
+      ["Which WWII-era rocket was the first long-range guided ballistic missile?", "V-2 rocket"],
+      ["Who led the V-2 rocket program in Germany?", "Wernher von Braun"],
+      ["What was Skylab launched by?", "A Saturn V (final flight)"],
+      ["What property does exhaust velocity (ve) affect in the rocket equation?", "Delta-v (change in velocity) capability"],
+      ["What is the simplest 'two-body' orbital parameter often used to describe orbit size?", "Semi-major axis"],
+      ["Which Soviet designer led early Soviet rocket development?", "Sergey Korolev"],
+      ["What was GIRD-09?", "An early Soviet liquid-fuel rocket (1933)"],
+      ["Which Soviet rocket family grew from the R-7 design?", "Soyuz family"],
+      ["Why use staging in rockets?", "Staging sheds dead mass to increase efficiency and achievable delta-v"],
+      ["What is thrust-to-weight ratio (T/W)?", "Thrust divided by weight; measures initial acceleration capability"],
+      ["What is payload fraction?", "Portion of total liftoff mass that is useful payload"],
+      ["Name a guidance method used on early rockets.", "Gyroscopic guidance / movable engine gimbaling"],
+      ["What is a launch window?", "The time interval when launch conditions allow reaching the desired orbit or target"],
+      ["Why was the V-2 historically important beyond its weapon role?", "It proved large liquid-fueled rockets and advanced guidance/propulsion"],
+      ["What does 'delta-v' represent?", "Total change in velocity a vehicle can achieve"],
+      ["What is atmospheric drag's effect on rockets during ascent?", "Reduces efficiency and requires additional thrust/fuel"],
+      ["Why are upper-stage engines often restarted in space?", "To perform multiple burns: circularize orbit, transfer, or injection"],
+      ["What is an inertial navigation system (INS)?", "A guidance system using accelerometers and gyros to compute position/velocity"],
+      ["Name one modern launch requirement improved since early rockets.", "Reusability, precision guidance, higher reliability, or payload capacity"],
+      ["What was a simple home 'model' rocket example mentioned in the packet?", "Matchstick/match-paper rocket or sugar/oxidizer solid rockets (DIY demonstration)"],
+      ["Why are liquid fuels favored for high-performance rockets?", "Higher specific impulse and throttle/control capability"],
+      ["Which mission first broadcast live televised images of Earth from lunar distance?", "Apollo 8"]
+    ];
+    let index = 0;
+    let score = 0;
+    const frontEl = document.getElementById('front');
+    const backEl = document.getElementById('back');
+    const cardEl = document.getElementById('card');
+    const scoreEl = document.getElementById('score');
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    const startBtn = document.getElementById('startBtn');
+    const startControls = document.getElementById('startControls');
+    const gameControls = document.getElementById('gameControls');
+
+    function showCard() {
+      const [q, a] = CARD_DATA[index];
+      frontEl.textContent = q;
+      backEl.textContent = a;
+      cardEl.classList.remove('flipped');
+    }
+
+    function startGame() {
+      index = 0;
+      score = 0;
+      scoreEl.textContent = "Score: 0";
+      showCard();
+      cardEl.style.display = "flex"; // show card
+      gameControls.style.display = "flex"; // show controls
+      startControls.style.display = "none"; // hide start button
+    }
+
+    cardEl.addEventListener('click', () => {
+      cardEl.classList.toggle('flipped');
+    });
+
+    document.getElementById('correctBtn').addEventListener('click', () => {
+      score++;
+      scoreEl.textContent = `Score: ${score}`;
+    });
+
+    document.getElementById('wrongBtn').addEventListener('click', () => {
+      scoreEl.textContent = `Score: ${score}`;
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      index = (index + 1) % CARD_DATA.length;
+      showCard();
+    });
+
+    startBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
