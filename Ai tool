@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cartoon Chat AI</title>
+<style>
+  body { text-align: center; font-family: Arial; margin-top: 50px; }
+  #cartoon { width: 200px; height: 200px; margin: 20px auto; }
+  #response { margin-top: 20px; font-size: 18px; }
+</style>
+</head>
+<body>
+  <h1>Cartoon Chat AI 🤖</h1>
+  <img id="cartoon" src="cartoon.png" alt="Cartoon">
+  <p id="response">Hello! Speak to me 🎤</p>
+  <button id="startBtn">Start Talking</button>
+
+<script>
+const startBtn = document.getElementById('startBtn');
+const responseEl = document.getElementById('response');
+
+// Speech Recognition
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US';
+
+startBtn.onclick = () => {
+  recognition.start();
+};
+
+recognition.onresult = async (event) => {
+  const userText = event.results[0][0].transcript;
+  responseEl.textContent = "You: " + userText;
+
+  // Send to AI (replace with your own API call)
+  const aiReply = await getAIResponse(userText);
+
+  // Display AI response
+  responseEl.textContent = "AI: " + aiReply;
+
+  // Text-to-Speech
+  const utterance = new SpeechSynthesisUtterance(aiReply);
+  speechSynthesis.speak(utterance);
+};
+
+// Dummy AI response function
+async function getAIResponse(text) {
+  // You can replace this with OpenAI API call
+  if(text.toLowerCase().includes("hi")) return "Hello! How are you?";
+  return "I am a cartoon bot, nice to meet you!";
+}
+</script>
+</body>
+</html>
