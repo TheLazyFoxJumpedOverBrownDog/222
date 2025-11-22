@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Impostor — Juego Online</title>
+  <style>
+    :root{--bg:#061226;--panel:#0b1726;--accent:#6bd4ff;--text:#e8eef7;--muted:#94a3b8}
+    body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:18px}
+    .card{width:100%;max-width:980px;background:var(--panel);padding:16px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+    h1{margin:0 0 12px 0;text-align:center}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .panel{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+    input,select,button,textarea{width:100%;padding:10px;border-radius:8px;border:none;background:#0f2130;color:var(--text)}
+    button.primary{background:var(--accent);color:#001624;font-weight:700}
+    .playersGrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .playerBox{background:#092033;padding:8px;border-radius:8px;width:140px;text-align:left;display:flex;gap:8px;align-items:center}
+    .avatar{font-size:20px; width:36px; text-align:center}
+    .clueItem{background:#0a2636;padding:8px;border-radius:6px;margin-bottom:6px}
+    .chatBox{height:160px;overflow:auto;padding:8px;border-radius:8px;background:#02151f}
+    .chatRow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+    .small{font-size:13px;color:var(--muted)}
+    .hidden{display:none}
+    a.link{color:var(--accent);text-decoration:underline}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+<div class="card">
+  <h1>Impostor — Juego Online</h1>
+
+  <div class="row">
+    <div class="col panel" style="max-width:320px">
+      <label>Tu nombre</label>
+      <input id="myName" placeholder="Tu nombre (opcional)" />
+
+      <label style="margin-top:8px">Avatar (emoji)</label>
+      <select id="avatarSelect"></select>
+
+      <label style="margin-top:8px">Jugadores objetivo (3–12)</label>
+      <input id="playersNum" type="number" min="3" max="12" value="6" />
+
+      <label style="margin-top:8px">Categoría</label>
+      <select id="categorySelect">
+        <option value="futbol">Fútbol</option>
+        <option value="animales">Animales</option>
+        <option value="objetos">Objetos</option>
+        <option value="paises">Países</option>
+      </select>
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="btnCreateOnline" class="primary">Crear sala</button>
+        <button id="btnJoinOnline">Unirse</button>
+      </div>
+
+      <div style="margin-top:10px" class="small">
+        Código: <span id="onlineCode">—</span><br>
+        Estado: <span id="onlineState">offline</span>
+      </div>
+
+      <div style="margin-top:10px">
+        <button id="hostStartBtn" class="hidden primary">Iniciar ronda (host)</button>
+        <button id="newRoundBtn" class="hidden">Nueva ronda</button>
+      </div>
+
+      <div style="margin-top:10px" class="small">
+        <b>Nota:</b> Si es la primera vez, asegurate de crear la tabla <code>rooms</code> en Supabase.
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="small">Jugadores</div>
+          <div class="small">Tiempo pista: <span id="clueTimer">—</span></div>
+        </div>
+        <div id="playersArea" class="playersGrid" style="margin-top:8px"></div>
+      </div>
+
+      <div class="panel" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="small">Pistas anónimas</div>
+          <div class="small">Votos: <span id="votesCount">0</span></div>
+        </div>
+        <div id="cluesList" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px" class="row">
+    <div class="col" style="max-width:420px">
+      <div class="small">Chat interno</div>
+      <div id="chatBox" class="chatBox"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="chatInput" placeholder="Escribí y presioná Enter" />
+        <button id="sendChat">Enviar</button>
+      </div>
+      <div style="margin-top:8px" class="small">Puntos: <span id="scoreBoard">—</span></div>
+    </div>
+
+    <div class="col">
+      <div id="actionsArea" class="panel small">Estado del juego</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ------------------ CONFIG SUPABASE ------------------ */
+const SUPABASE_URL = "https://spjbphyudtopnouqdpyx.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwamJwaHl1ZHRvcG5vdXFkcHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3NzUyNjgsImV4cCI6MjA3OTM1MTI2OH0.X-0VCOVAcUypFcxiTmrv5ASN33hbPOTQ5EgpA0lU_HM";
+
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const categories = {
+  futbol:["Messi","Maradona","Neymar","Cristiano","Mbappé","Ronaldo"],
+  animales:["Gato","Perro","Tigre","Ballena","Tortuga","León"],
+  objetos:["Mesa","Silla","Celular","Lámpara","Computadora","Reloj"],
+  paises:["Argentina","Brasil","España","Japón","México","Francia"]
+};
+const avatars = ["😎","🦊","🐼","🦁","🐵","🦄","🐯","🦅","🐍","🐸","🐙","⚡"];
+
+/* ------------------ UI ELEMENTS ------------------ */
+const myNameInput = document.getElementById('myName');
+const avatarSelect = document.getElementById('avatarSelect');
+const btnCreateOnline = document.getElementById('btnCreateOnline');
+const btnJoinOnline = document.getElementById('btnJoinOnline');
+const onlineCodeEl = document.getElementById('onlineCode');
+const onlineStateEl = document.getElementById('onlineState');
+const playersArea = document.getElementById('playersArea');
+const cluesList = document.getElementById('cluesList');
+const actionsArea = document.getElementById('actionsArea');
+const chatBox = document.getElementById('chatBox');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChat');
+const hostStartBtn = document.getElementById('hostStartBtn');
+const newRoundBtn = document.getElementById('newRoundBtn');
+const votesCountEl = document.getElementById('votesCount');
+const clueTimerEl = document.getElementById('clueTimer');
+const scoreBoard = document.getElementById('scoreBoard');
+
+let online = { roomCode:null, isHost:false };
+let myId = Math.random().toString(36).substr(2,9);
+let myName = null;
+let myAvatar = avatars[0];
+
+/* ------------------ helpers ------------------ */
+avatars.forEach(a=>{ const o=document.createElement('option'); o.value=a;o.textContent=a;avatarSelect.appendChild(o); });
+
+function addChatRow(name, avatar, text){
+  const row = document.createElement('div');
+  row.className='chatRow';
+  row.innerHTML = `<div class="avatar">${avatar}</div><div><strong>${name}</strong><div style="font-size:13px">${text}</div></div>`;
+  chatBox.appendChild(row); chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function updatePlayersUI(players){
+  playersArea.innerHTML='';
+  players.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='playerBox';
+    div.innerHTML=`<div class="avatar">${p.avatar}</div><div>${p.name}</div>`;
+    playersArea.appendChild(div);
+  });
+}
+
+function updateCluesUI(clues){
+  cluesList.innerHTML='';
+  clues.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='clueItem';
+    div.textContent=c;
+    cluesList.appendChild(div);
+  });
+}
+
+/* ------------------ Sala ------------------ */
+async function createRoom(){
+  myName = myNameInput.value || "Jugador";
+  myAvatar = avatarSelect.value;
+
+  const code = Math.random().toString(36).substr(2,5).toUpperCase();
+  online.roomCode = code;
+  online.isHost = true;
+
+  await supabase.from('rooms').insert([{code, host:myId, players:JSON.stringify([{id:myId,name:myName,avatar:myAvatar}]), state:'waiting'}]);
+
+  onlineCodeEl.textContent = code;
+  onlineStateEl.textContent = 'Esperando jugadores...';
+  hostStartBtn.classList.remove('hidden');
+  listenRoom(code);
+}
+
+async function joinRoom(){
+  myName = myNameInput.value || "Jugador";
+  myAvatar = avatarSelect.value;
+  const code = prompt("Ingresa código de la sala").toUpperCase();
+  online.roomCode = code;
+  online.isHost = false;
+
+  const {data} = await supabase.from('rooms').select('*').eq('code', code).single();
+  if(!data){ alert("Sala no encontrada"); return; }
+
+  const players = JSON.parse(data.players);
+  players.push({id:myId,name:myName,avatar:myAvatar});
+  await supabase.from('rooms').update({players:JSON.stringify(players)}).eq('code', code);
+
+  onlineCodeEl.textContent = code;
+  onlineStateEl.textContent = 'Unido a sala';
+  listenRoom(code);
+}
+
+async function listenRoom(code){
+  supabase.from(`rooms:code=eq.${code}`).on('UPDATE', payload=>{
+    const room = payload.new;
+    const players = JSON.parse(room.players || "[]");
+    updatePlayersUI(players);
+    votesCountEl.textContent = room.votes || 0;
+    clueTimerEl.textContent = room.timer || '—';
+    updateCluesUI(room.pistas ? JSON.parse(room.pistas) : []);
+  }).subscribe();
+}
+
+/* ------------------ Chat ------------------ */
+sendChatBtn.addEventListener('click', ()=>{
+  const msg = chatInput.value;
+  if(!msg) return;
+  addChatRow(myName,myAvatar,msg);
+  chatInput.value='';
+});
+
+/* ------------------ Botones ------------------ */
+btnCreateOnline.addEventListener('click', createRoom);
+btnJoinOnline.addEventListener('click', joinRoom);
+
+hostStartBtn.addEventListener('click', async ()=>{
+  const code = online.roomCode;
+  const {data} = await supabase.from('rooms').select('*').eq('code', code).single();
+  if(!data) return;
+
+  const players = JSON.parse(data.players);
+  onlineStateEl.textContent='Ronda iniciada';
+  const cat = document.getElementById('categorySelect').value;
+  const pista = categories[cat][Math.floor(Math.random()*categories[cat].length)];
+
+  await supabase.from('rooms').update({state:'playing',pistas:JSON.stringify([pista])}).eq('code', code);
+  updateCluesUI([pista]);
+});
+
+newRoundBtn.addEventListener('click', ()=>{
+  hostStartBtn.classList.remove('hidden');
+  newRoundBtn.classList.add('hidden');
+  cluesList.innerHTML='';
+});
+</script>
+</body>
+</html>
