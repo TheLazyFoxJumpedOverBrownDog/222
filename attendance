@@ -1,0 +1,100 @@
+import React, { useState } from "react";
+
+export default function AttendancePatternDetector() {
+  const [fileData, setFileData] = useState(null);
+  const [report, setReport] = useState(null);
+
+  const readCSV = (text) => {
+    const lines = text.trim().split("\n");
+    const headers = lines[0].split(",");
+    const rows = lines.slice(1).map((line) => {
+      const values = line.split(",");
+      return {
+        date: values[0],
+        status: values[1],
+      };
+    });
+    return rows;
+  };
+
+  const analyzeAttendance = (data) => {
+    let present = 0,
+      absent = 0,
+      streak = 0,
+      maxStreak = 0;
+    let absenceDays = [];
+
+    data.forEach((d) => {
+      const isPresent = d.status.toLowerCase().trim() === "present";
+      const dayName = new Date(d.date).toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+
+      if (isPresent) {
+        present++;
+        streak = 0;
+      } else {
+        absent++;
+        streak++;
+        absenceDays.push(dayName);
+        if (streak > maxStreak) maxStreak = streak;
+      }
+    });
+
+    const freq = {};
+    absenceDays.forEach((d) => (freq[d] = (freq[d] || 0) + 1));
+    const mostAbsent = absenceDays.length
+      ? Object.keys(freq).reduce((a, b) => (freq[a] > freq[b] ? a : b))
+      : "None";
+
+    const percent = ((present / data.length) * 100).toFixed(2);
+
+    setReport({
+      total: data.length,
+      present,
+      absent,
+      percent,
+      maxStreak,
+      mostAbsent,
+    });
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const rows = readCSV(text);
+      setFileData(rows);
+      analyzeAttendance(rows);
+    };
+
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Attendance Pattern Detector</h1>
+
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleFileUpload}
+        className="mb-4"
+      />
+
+      {report && (
+        <div className="mt-6 p-4 border rounded-xl shadow">
+          <h2 className="text-xl font-semibold mb-3">Report</h2>
+          <p>Total Days: {report.total}</p>
+          <p>Present: {report.present}</p>
+          <p>Absent: {report.absent}</p>
+          <p>Attendance %: {report.percent}%</p>
+          <p>Longest Absence Streak: {report.maxStreak} days</p>
+          <p>Most Absent On: {report.mostAbsent}</p>
+        </div>
+      )}
+    </div>
+  );
+}
