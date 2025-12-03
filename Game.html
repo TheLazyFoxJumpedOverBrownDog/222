@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تپ کوین</title>
+    <style>
+        /* استایل‌ها و ظاهر برنامه */
+        body {
+            background-color: #000; /* پس‌زمینه مشکی */
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* جلوگیری از اسکرول */
+            user-select: none; /* جلوگیری از انتخاب متن */
+        }
+
+        .header {
+            position: absolute;
+            top: 50px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #888;
+            margin: 0;
+        }
+
+        #score {
+            font-size: 60px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); /* درخشش طلایی */
+        }
+
+        .coin-container {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, #ffd700, #b8860b);
+            border-radius: 50%;
+            border: 10px solid #4a3805;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s; /* انیمیشن نرم */
+            position: relative;
+        }
+
+        /* وقتی کلیک شد کمی کوچک شود */
+        .coin-container:active {
+            transform: scale(0.95);
+        }
+
+        .coin-logo {
+            font-size: 100px;
+        }
+
+        /* انیمیشن عدد مثبت */
+        .plus-one {
+            position: absolute;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>موجودی شما:</h1>
+        <div id="score">0</div>
+    </div>
+
+    <div class="coin-container" onclick="clickCoin(event)">
+        <span class="coin-logo">💰</span>
+    </div>
+
+    <script>
+        // منطق بازی (جاوااسکریپت)
+        
+        let score = 0;
+        // گرفتن امتیاز از حافظه گوشی (اگر قبلا بازی کرده باشد)
+        if(localStorage.getItem('myScore')) {
+            score = parseInt(localStorage.getItem('myScore'));
+        }
+
+        const scoreElement = document.getElementById('score');
+        scoreElement.innerText = score;
+
+        function clickCoin(event) {
+            // ۱. اضافه کردن امتیاز
+            score++;
+            scoreElement.innerText = score;
+            
+            // ۲. ذخیره در حافظه مرورگر که با رفرش پاک نشود
+            localStorage.setItem('myScore', score);
+
+            // ۳. نمایش انیمیشن +1
+            showFloatingText(event.clientX, event.clientY);
+            
+            // ۴. ویبره زدن گوشی (فقط روی موبایل کار میکند)
+            if (navigator.vibrate) {
+                navigator.vibrate(50); 
+            }
+        }
+
+        function showFloatingText(x, y) {
+            const plusOne = document.createElement('div');
+            plusOne.className = 'plus-one';
+            plusOne.innerText = '+1';
+            plusOne.style.left = x + 'px';
+            plusOne.style.top = y + 'px';
+            document.body.appendChild(plusOne);
+
+            // حذف المنت بعد از ۱ ثانیه
+            setTimeout(() => {
+                plusOne.remove();
+            }, 1000);
+        }
+    </script>
+
+</body>
+</html>
