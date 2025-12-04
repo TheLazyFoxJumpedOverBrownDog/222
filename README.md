@@ -1,143 +1,68 @@
-# Your New Website 🤩
+# Project Reflection
 
-Oh hi! Welcome to your new website. 🛼
+Throughout this project, my main goal was to design a website that was simple, organised, and easy for users to navigate. My original low-fidelity sketches focused on having a clear header, a slideshow, obvious navigation, content / gallery, and a clean footer. These ideas stayed important throughout the development process, but I needed to adjust many parts once I turned the sketches into an actual website. 
 
-With this project you can make a website and preview it in your browser, then deploy it for free – you don't even need a host!
 
-**In this guide we'll learn how to deploy your project to <a href="https://www.fastly.com/products/edge-compute" target="_blank">Fastly Compute</a> – your deployment will automatically handle things like 404 errors, and your beautiful website will immediately be available for everyone, everywhere all at once. 🪄**
+## Reflection on Development Process
 
-> You can alternatively deploy your blog to other platforms, like <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
+One of the first decisions I made was keeping the layout minimal, because my sketches showed that I wanted the user to immediately recognise the sections like ‘Home’, and ‘Content’, but due to recent feedback, instead of calling it ‘Content’, ‘Gallery’ was the right name as my content page is a gallery page. When I started building, I realised that some elements, especially the slideshow and arrows, and the ‘Discover’ section, were harder to align then I expected. To fix this, I looked at Youtube tutorials or W3Schools to get consistent spacing. This taught me that needing help can make things look easier, but in real development you often need to adapt your design so the website stays functional.
 
-## In this doc
+## What Went Well
 
-* [Fork your own site](#fork-your-own-site)
-* [Get to know your website](#get-to-know-your-website)
-  * [Share your draft site](#share-your-draft-site)
-* [Deploy your site to Fastly Compute](#deploy-your-site-to-fastly-compute)
-* [Save your edits to GitHub](#save-your-edits-to-github)
-* [How this project works](#how-this-project-works-)
-  * [Extensions](#extensions)
-* [Keep going! 🚀](#keep-going-)
+- In my footer, I included social media icons, and the navigation links to their about, support, and contact. This translated nicely into the final build, and it made the bottom of the site look professional 
+- Another element that worked effectively was the main logo replacement. Keeping it in the top left corner of my website helped with branding and made the site feel consistent across pages
+- I used JavaScript to make the slideshow autoplay, as it makes the website more engaging
+- All the buttons I have added in my website have a hyperlink that when the user clicks on something, it takes them to the related page.
 
-## Fork your own site
+## What Didn’t Work Well
 
-**Fork** [this repository](https://github.com/glitchdotcom/website-to-compute/) to create your own copy of the site.
+- The elements that I drew for the ‘Content’ page, I didn’t add most of it as it would be and looked overcrowded, so instead I only added the game image, the name, the information, and the button name and repeated it several times. For additional coding, I added a ‘More Games’ section for the users who don’t have interest in games above.
+- Most of the time, the arrows are for the user to click on the games that are shown in the slideshow, there were times where I couldn’t align it properly to the center, and I couldn’t place them near the slideshow. 
+- The time when I added my custom logo, I wanted to add a link that takes the user back to the home page. I tried several times, but couldn’t get the right result.
 
-In your fork, open the site in a codespace by clicking **Code** > **Codespaces** and creating a new codespace on your main branch. 
+## How to carry this into Future Projects
+This project taught me skills I can use in future work. I learned that sketches are helpful, but designs usually need changes once you start building, so I'll create quick digital wireframes next time to test ideas earlier. I also realised the value of keeping layouts simple and making small adjustments as I go instead of trying to fix everything at the end. Working with flexbox and grid improved my confidence with layout tools, which will help me build cleaner and more responsive pages in the future. Overall, this project showed me how to plan better, stay flexible, and focus on usability, things I will continue using in my next projects.
 
-<img alt="Create codespace" src="https://github.com/user-attachments/assets/cb29a8da-d1ac-42f5-962c-7d43b8011324" width="400px"/><br/>
+## Overall Summary
 
-Give the codespace a minute or two to start up – it'll automatically build and preview your new website! 
+Overall, my final website is similar to my sketches in structure, but the proportions, spacing, and interactions are cleaner and more polished. The development process helped me understand how design decisions affect usability and how important it is to adjust your ideas once you see them in a real website environment.
 
-![this project in a codespace](https://github.com/user-attachments/assets/308941a8-ddbe-48f6-a8f0-c23cc615ed01)
+---
 
-* When your website preview opens, click the **🔎 Split** button at the bottom so that you can see the site side by side with your code.
-* _You can close [x] the **Terminal** while you work._
+## Original Low-Fidelity Prototypes
 
-Make sure you [save your changes to GitHub](#save-your-edits-to-github).
+![alt text](prototype.png)
 
-## Get to know your website
+---
 
-You can make edits in the files by opening them from the left sidebar. Your website preview will update as you edit!
+## Comparison: Sketches vs. Final Site
 
-💡 Try opening `index.html` and making a change.
+![alt text](home_prototype.png) 
+![alt text](home.png)
 
-🎨 Change your site style rules in `style.css`.
+---
 
-🖼️ Add images in the `public` folder – you'll find an example of including an image in the HTML.
+(content_prototype.png)
+![alt text](content.png)
 
-> 🚨⚠️ Danger zone: There are directories in the project that might break your site... 😱😈
->
-> * The `.devcontainer` folder includes the configuration that creates the experience in your codespace.
-> * The `helpers` folder contains some bash scripts that run when your project starts and when you hit the **🚀 Publish** button.
+1. The final website especially the home page, has the same structure (header, slideshow, discover, and footer)
+2. Spacing, alignment, and number of content boxes changed to improve clarity
+3. Navigation and footer match the sketches but look cleaner in the final version without adding the logo
+4. Some sections in the ‘Content’ page were simplified to avoid overcrowding
 
-### Share your draft site 
+---
 
-You can share links to your draft site with collaborators – click **🔗 Share** at the bottom of the editor. The terminal output will include a link you can right-click and copy to share with anyone you like! 
+## Annotated List of Helpful Resources
 
-> This project includes a handy shortcut button for grabbing your preview URL but it might be a wee bit error prone 😅 you can also access these details in **💻 Terminal** > **PORTS** or by clicking the little Forwarded Ports icon: <img src="https://github.com/user-attachments/assets/6bfc0238-a0a8-434f-9188-ff1d45df0ca0" style="height:1em" alt="ports icon"/>
->
-> Change `private` to `public` by right-clicking your running port and choosing from the options.
->
-> Copy the URL to your clipboard and share it 📋.
+### **W3Schools – HTML & CSS Documentation**
+Helped me understand layout basics such as slideshows, hover effects, and general HTML/CSS structure.  
+https://www.w3schools.com/html/default.asp
 
-## Deploy your site to Fastly Compute
+### **Google FX**
+Used for creating custom logo designs.  
+https://labs.google/fx/
 
-Ready to unveil your site to the world? Deploy it to Fastly!
-
-Grab a Fastly API key from your account and add it to your GitHub repo:
-
-- Sign up for a <strong><a href="https://www.fastly.com/signup/" target="_blank">free Fastly developer account</a></strong>
-- Grab an **API Token** from **Account** > **API Tokens** > **Personal Tokens** > **Create Token**
-  - _Type_: Automation
-  - _Role_: Engineer
-  - _Scope_: Global (deselect the _Read-only access_ box)
-  - _Access_: All services
-  - _Expiration_: Never expire
-- **Copy the token value into GitHub**
-  - Back in your codespace, click into the textfield at the top of the editor and type `>` to access the command palette
-  - Type `secret` and select **Codespaces: Manage user secrets**
-    - <img alt="Secret command" src="https://github.com/user-attachments/assets/a6cfeac8-2aca-40a4-ab41-d207733b61cc" width="300px"/>
-  - Click **+ Add a new secret**
-    - <img alt="Add new secret" src="https://github.com/user-attachments/assets/350e545c-0073-4327-ac99-3663049e7aad" width="400px"/>
-  - Enter the name `FASTLY_API_TOKEN`
-    - <img alt="Fastly token" src="https://github.com/user-attachments/assets/536d1b2a-bf62-4085-aac4-ade7d2898583" width="400px"/>
-  - Paste your token value and enter
-
-In the notifications area at the bottom right of your codespace, you should see a prompt to **reload** for the new environment variable, so go ahead and click that (otherwise click the little bell 🔔 icon to check for the message).
-
-Hit the **🚀 Publish** button at the bottom of the editor, enter `y` and watch the **Terminal** output for your new site address! It might take a couple of minutes... 🥁
-
-![New Compute app address in the Terminal](https://github.com/user-attachments/assets/0a5a8f84-4907-4d60-83da-d3b90e745562)
-
-You'll see your new `*.edgecompute.app` address in the output. Open it in a new tab and tell everyone you know about your new site. 📣
-
-🎢 Whenever you update your content, hit the **🚀 Publish** button again to go live!
-
-## Save your edits to GitHub
-
-GitHub will keep the edits you make in the codespace only for a limited time, so it's a good idea to commit your work to a repo regularly. Use the **Source Control** button on the left of the editor – you can make commits, open and merge pull requests right inside the codespace. 
-
-<img alt="source control" src="https://github.com/user-attachments/assets/a5160b08-4f80-4a5f-af76-bde18a43427d" width="300px"/>
-
-> GitHub will notify you if any of your codespaces are about to expire. If you have changes you want to keep, you can use the **Export changes to a branch** option.
-> 
-> <img alt="export to branch" width="500px" src="https://github.com/user-attachments/assets/c7815347-3e5a-4e34-97f2-db58343acaa4"/>
-
-## How this project works 🧐
-
-This project uses the <a href="https://github.com/fastly/compute-js-static-publish" target="_blank">Fastly JavaScript Static Publisher</a> to turn your blog into a serverless app that runs at the network edge, near your users. 
-
-* The project uses [Vite](https://vite.dev/) to build your site for deployment, placing files in the `deploy/_site` folder.
-* The Static Publisher uses those files to scaffold a Compute app that compiles into Webassembly (Wasm) to run fast and securely on the Fastly network – you'll find the Compute code in `deploy/_app` after you deploy.
-* When you publish, the project deploys the app to Fastly, creating a service and uploading the Wasm to it.
-* It then then publishes your content to a KV Store – a key-value store that also runs on Fastly and that your app can talk to.
-
-_The app itself only needs deployed to Fastly once, when you click the **🚀 Publish** button after that, we just update the content in your KV Store and your Compute app will pull your assets from there._
-
-📝 Your Fastly service and KV Store will include your GitHub username and repo in their names, so you'll only be able to deploy one Compute app per repo unless you tweak the scripts.
-
-⚙️ The settings we use to create the guided experience in the codespace are in the `.devcontainer/` folder.
-
-🧰 You'll find the Fastly CLI commands we use under the hood in the `helpers/publish.sh` script.
-
-💻 If you check the right-hand side of the **Terminal** you'll find multiple processes – this is to run the vite and Fastly commands.
-
-### Extensions
-
-This project uses the following extensions from the dev community! 🙌
-
-* [VSCode Action Buttons Ext](https://marketplace.visualstudio.com/items?itemName=jkearins.action-buttons-ext)
-* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-
-## Keep going! 🛸
-
-**Don't stop there, <a href="https://www.fastly.com/documentation/solutions/tutorials/deliver-your-site/#sending-domain-traffic-to-fastly" target="_blank">add a domain to your new site</a>.**
-
-You'll find your service in your Fastly account control panel – check out the **Observability** stats! 📊
-
-Check out more tips on using the <a href="https://github.com/fastly/compute-js-static-publish" target="_blank">Static Publisher</a> in its `README`. Note that if you change the Compute code, you'll need to run a separate deploy command to push your changes to Fastly as the **🚀 Publish** button only deploys once, after that it just updates your KV content.
-
-🛟 Get help on the <a href="https://community.fastly.com" target="_blank">community forum</a>.
-
-<img src="https://github.com/user-attachments/assets/17a8af4a-100f-416d-a1cf-f84174262138" width="100px"/>
+### **Google Fonts & Boxicons**
+Used for typography and clean icon design for social media links.  
+- https://fonts.google.com/  
+- https://boxicons.com/

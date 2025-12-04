@@ -1,133 +1,210 @@
-/* A set of default styles */
-:root {
-  /* Generic sizing for the page */
-  --wrapper-height: 100vh;
-
-  /* Fonts for different elements */
-  --font-family: sans-serif;
-  --font-family-list: monospace;
-
-  /* Colors you'll see cascade through the elements */
-  --color-bg: #99ddff; /* Used for the page body background */
-  --color-bg-alt: #33b1ff; /* Used for social icons on hover */
-  --color-text-main: #004099; /* List text ann social icons on hover */
-  --color-primary: #006aff; /* Headers and borders */
-  --color-highlight: #e7f7fe; /* Highlights */
+.press-start-2p-regular {
+    font-family: "Press Start 2P", system-ui;
+    font-weight: 400;
+    font-style: normal;
 }
 
-/* Basic page style resets */
-* {
-  box-sizing: border-box;
-}
-[hidden] {
-  display: none !important;
-}
-
-/* Page structure */
 body {
-  font-family: var(--font-family);
-  background-color: var(--color-bg);
-  text-align: center;
-  margin: 0;
-  font-size:large;
-}
-/* Page structure */
-.wrapper {
-  min-height: var(--wrapper-height);
-  display: grid;
-  place-items: center;
-  margin: 0;
-  padding:1rem 2rem;
-}
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+    font-family: "Press Start 2P", system-ui;
+    background-color: red;
+    color: white;
+    margin: 0;
+    padding: 0;
+    text-align: center;
 }
 
-.illustration {
-  max-width:30%;
-  margin:1rem 0 2rem 0;
-  animation: 1s ease-out 0s 1 spinIn;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: black;
+    padding: 15px 30px;
+    border-bottom: 3px solid red;
 }
-@keyframes spinIn {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.logo {
+    font-size: 1.5em;
+    font-weight: bold;
 }
-.illustration-404 {
-  max-width:30%;
-  margin:1rem 0 2rem 0;
-  animation: 1s ease-out 0s 1 spinUp;
-  filter: grayscale(100%);
-  animation-fill-mode: forwards;
-} 
-@keyframes spinUp {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(180deg);
-  }
+.nav-btn {
+    font-family: "Press Start 2P", system-ui;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    margin: 5px;
+    transition: background-color 0.3s;
+    }
+
+.nav-btn:hover {
+    background-color: red;
 }
 
-/* Typography */
-p {
-  margin: 1rem;
-  line-height: 1.3em;
+.nav-btn.active {
+    background-color: red;
 }
-p,
-h1,
-h2,
-h3,
-h4,
-h5 {
-  color: var(--color-text-main);
+
+
+.slides-wrapper {
+    width: 1200px;      
+    height: 650px;      
+    overflow: hidden;
+    margin: 50px auto;
+    position: relative;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
-h1 {
-  display: inline-flex;
-  color: var(--color-primary);
-  justify-content: center;
+
+.slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
 }
-/* Link styles */
-a:link,
-a:visited {
-  text-decoration: none;
-  border-bottom: 2px solid var(--color-primary);
-  color: var(--color-primary);
-  transition: background 0.2s linear;
-  font-weight: bold;
+
+.slides img {
+    width: 1200px;
+    height: 650px;   
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 20px;
 }
-a:hover,
-a:active,
-a:focus {
-  background: var(--color-primary);
-  color:var(--color-highlight);
+
+.arrow {
+    position: absolute;
+    top: 100%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    background: none;
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    padding: 10px 15px;
+    border-radius: 50%;
+    user-select: none;
+    transition: background 0.5s;
 }
-/* Navigation grid */
-.footer {
-  display: flex;
-  justify-content: space-between;
-  margin: 2rem auto 0;
-  padding: 1.5rem 0 0.5rem 0;
-  width: 100%;
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: flex-end;
+
+.arrow:hover {
+    background: none;
+    color: black;
 }
-a.remix {
-  background: var(--color-bg-alt);
-  color:var(--color-highlight);
-  border: 2px solid var(--color-highlight);
-  border-radius: 5px;
-  padding:0.5rem;
-  font-weight:bold;
+
+.arrow.left {
+    left: 15px;
 }
-a.remix:hover {
-  background: var(--color-primary);
-  color:var(--color-highlight);
+
+.arrow.right {
+    right: 15px;
+}
+
+.discover {
+    font-family: "Press Start 2P", system-ui;
+    width: 95%;
+    max-width: 1200px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+.discover h2 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    font-family: sans-serif;
+    background: #f5f5f5;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card p {
+    padding: 15px;
+    font-size: 1rem;
+    color: #555;
+}
+
+
+footer {
+    background: white;
+    color: black;
+    padding: 20px;
+    border-top: 3px solid red;
+}
+.footer-links a {
+    color: black;
+    text-decoration: none;
+    margin: 0 5px;
+}
+.footer-links a:hover {
+    color: red;
+}
+.social-icons {
+    margin-top: 10px;
+}
+.social-icons a {
+    color: black;
+    font-size: 1.5em;
+    margin: 0 8px;
+    text-decoration: none;
+}
+.social-icons a:hover {
+    color: red;
+}
+
+.main-content {
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+}
+
+.featured-box {
+    display: flex;
+    gap: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.featured-image {
+    width: 40%;
+    height: 200px;
+    gap: 20px;
+    border-radius: 8px;
+}
+
+.featured-info {
+    flex: 1;
+    color: black;
+}
+
+.meta {
+    display: contents;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.font {
+    font-family: sans-serif;
 }

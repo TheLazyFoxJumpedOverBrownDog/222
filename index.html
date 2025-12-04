@@ -1,56 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+    <meta charset="UTF-8">
+    <link rel="icon" href="gamefacts.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameFacts</title>
+    <link rel="stylesheet" href="style.css">
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
+    <link rel="stylesheet"
+        href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
 
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
 </head>
-
 <body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Welcome to my first website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
+    <header>
+        <img src="gamefacts.jpg" alt="GameFacts" width="400" height="200"><div class="logo"></div>
+        <nav>
+            <a href="index.html"><button class="nav-btn active" id="homeBtn">Home</button></a>
+            <a href="gallery.html"><button class="nav-btn" id="contentBtn">Gallery</button></a>
+            <a href="https://www.nintendo.com/au/about/"><button class="nav-btn" id="contentBtn">About</button></a>
+            
+        </nav>
+    </header>
 
-      </div>
-
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
-        </div>
-      </footer>
+    <div id="mainContent">
+    <section class="slider">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h1>LATEST Updates</h1>
+        <button class="arrow left" id="prevBtn">❮</button>
+        <div class="slides-wrapper">
+            <div class="slides" id="slides">
+                <img src="zelda2.png" alt="Hyrule Warriors">
+                <img src="dk1.jpg" alt="Donkey Kong">
+                <img src="sonic2.jpg" alt="Sonic Racing">
+                <img src="cloud1.jpg" alt="Final Fantasy">
+                </div>
+            </div>
+            <button class="arrow right" id="nextBtn">❯</button>
+        </section>
     </div>
-  </div>
-</body>
 
+    <section class="discover">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h2>Discover</h2>
+        <div class="discover-grid">
+            <div class="card">
+                <a href="https://www.nintendo.com/au/games/nintendo-switch/the-legend-of-zelda-tears-of-the-kingdom/"><img src="zelda1.jpg" alt="Game 1"></a>
+                <p>Explore the latest Zelda adventures.</p>
+            </div>
+        <div class="card">
+            <a href="https://www.nintendo.com/au/games/nintendo-switch/super-mario-galaxy-plus-super-mario-galaxy-2/"><img src="mario1.png" alt="Game 2"></a>
+            <p>Blast into Mario's space adventures.</p>
+            </div>
+        <div class="card">
+            <a href="https://www.nintendo.com/au/games/nintendo-switch/sonic-frontiers/"><img src="sonic1.webp" alt="Game 3"></a>
+            <p>Speed through Sonic's new challenges.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <footer>
+        <p>Copyright ©2025 | Made by Abbas Monshizada</p>
+        <div class="footer-links">
+            <a href="https://www.nintendo.com/au/about/" id="aboutLink">About</a> |
+            <a href="https://www.nintendo.com/au/support/" id="supportLink">Support</a> |
+            <a href="https://www.nintendo.com/au/support/contact-us/" id="contactLink">Contact</a>
+        </div>
+        <div class="social-icons">
+            <a href="https://www.facebook.com/NintendoAmerica/"><i class="bx bxl-facebook-square"></i></a>
+            <a href="https://www.instagram.com/nintendoamerica/?hl=en"><i class="bx bxl-instagram-alt"></i></a>
+            <a href="https://x.com/NintendoAmerica?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor"><i class="bx bxl-twitter"></i></a>
+            <a href="https://www.tiktok.com/@nintendo.of.america?lang=en"><i class="bx bxl-tiktok"></i></a>
+            <a href="https://www.youtube.com/@NintendoAmerica"><i class="bx bxl-youtube"></i></a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
 </html>
