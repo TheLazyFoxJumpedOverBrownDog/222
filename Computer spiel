@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Pistol — Web 3D Shooter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="overlay">
+    <div id="hud">
+      <div id="health">Health: <span id="hp">100</span></div>
+      <div id="info">Tippe/Click zum Schießen • WASD / Buttons zum Bewegen • Ziehen zum Zielen</div>
+    </div>
+
+    <div id="touch-controls">
+      <button id="btn-up">▲</button>
+      <button id="btn-left">◀</button>
+      <button id="btn-down">▼</button>
+      <button id="btn-right">▶</button>
+    </div>
+
+    <div id="shoot-btn">SCHIESS</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Pistol — Web 3D Shooter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="overlay">
+    <div id="hud">
+      <div id="health">Health: <span id="hp">100</span></div>
+      <div id="info">Tippe/Click zum Schießen • WASD / Buttons zum Bewegen • Ziehen zum Zielen</div>
+    </div>
+
+    <div id="touch-controls">
+      <button id="btn-up">▲</button>
+      <button id="btn-left">◀</button>
+      <button id="btn-down">▼</button>
+      <button id="btn-right">▶</button>
+    </div>
+
+    <div id="shoot-btn">SCHIESS</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+let scene, camera, renderer, clock;
+let player, velocity = new THREE.Vector3();
+let move = { forward:0, right:0 };
+let hp = 100;
+let bots = [];
+let projectiles = [];
+let botProjectiles = [];
+const BOT_COUNT = 4;
+const WORLD_SIZE = 200;
+
+init();
+animate();
+
+function init(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+
+  clock = new THREE.Clock();
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(50,100,50);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0x888888));
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE),
+    new THREE.MeshStandardMaterial({ color: 0x2e8b57 })
+  );
+  ground.rotation.x = -Math.PI/2;
+  scene.add(ground);
+
+  player = new THREE.Object3D();
+  player.position.set(0,1.8,0);
+  scene.add(player);
+  camera.position.set(0,0,0);
+  player.add(camera);
+
+  const gun = new THREE.Mesh(
+    new THREE.BoxGeometry(0.4,0.2,0.8),
+    new THREE.MeshStandardMaterial({color:0x333333})
+  );
+  gun.position.set(0.4,-0.2,-0.6);
+  camera.add(gun);
+
+  for(let i=0;i<30;i++){
+    const b = new THREE.Mesh(
+      new THREE.BoxGeometry(4,4,4),
+      new THREE.MeshStandardMaterial({color:Math.random()*0xffffff})
+    );
+    b.position.set((Math.random()-0.5)*WORLD_SIZE,2,(Math.random()-0.5)*WORLD_SIZE);
+    scene.add(b);
+  }
+
+  for(let i=0;i<BOT_COUNT;i++) createBot();
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  window.addEventListener('resize', ()=> {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  window.addEventListener('keydown', e=>{
+    if(e.key === 'w') move.forward = 1;
+    if(e.key === 's') move.forward = -1;
+    if(e.key === 'a') move.right = -1;
+    if(e.key === 'd') move.right = 1;
+  });
+  window.addEventListener('keyup', e=>{
+    if(e.key === 'w' || e.key === 's') move.forward = 0;
+    if(e.key === 'a' || e.key === 'd') move.right = 0;
+  });
+
+  document.getElementById('btn-up').addEventListener('touchstart', ()=> move.forward=1);
+  document.getElementById('btn-up').addEventListener('touchend', ()=> move.forward=0);
+  document.getElementById('btn-down').addEventListener('touchstart', ()=> move.forward=-1);
+  document.getElementById('btn-down').addEventListener('touchend', ()=> move.forward=0);
+  document.getElementById('btn-left').addEventListener('touchstart', ()=> move.right=-1);
+  document.getElementById('btn-left').addEventListener('touchend', ()=> move.right=0);
+  document.getElementById('btn-right').addEventListener('touchstart', ()=> move.right=1);
+  document.getElementById('btn-right').addEventListener('touchend', ()=> move.right=0);
+
+  document.getElementById('shoot-btn').addEventListener('touchstart', shoot);
+  document.getElementById('shoot-btn').addEventListener('mousedown', shoot);
+}
+
+function createBot(){
+  const bot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.8,16,16),
+    new THREE.MeshStandardMaterial({color:0xff4444})
+  );
+  bot.position.set((Math.random()-0.5)*WORLD_SIZE,0.8,(Math.random()-0.5)*WORLD_SIZE);
+  bot.userData = { hp: 60, lastShot: 0 };
+  scene.add(bot);
+  bots.push(bot);
+}
+
+function shoot(){
+  const origin = new THREE.Vector3();
+  camera.getWorldPosition(origin);
+
+  const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+
+  const proj = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1,8,8),
+    new THREE.MeshStandardMaterial({color:0xffff00})
+  );
+  proj.position.copy(origin);
+  proj.userData = { vel: dir.clone().multiplyScalar(80), ttl: 2, fromPlayer:true, damage:25 };
+  scene.add(proj);
+  projectiles.push(proj);
+}
+
+function botShoot(bot){
+  const origin = bot.position.clone();
+  origin.y += 0.8;
+
+  const dir = player.position.clone().sub(origin).normalize();
+
+  const proj = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12,8,8),
+    new THREE.MeshStandardMaterial({color:0x000000})
+  );
+  proj.position.copy(origin);
+  proj.userData = { vel: dir.multiplyScalar(40), ttl: 4, fromPlayer:false, damage:10 };
+  scene.add(proj);
+  botProjectiles.push(proj);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, clock.getDelta());
+
+  const speed = 6;
+  const forward = new THREE.Vector3(0,0,-1).applyQuaternion(player.quaternion);
+  const right = new THREE.Vector3(1,0,0).applyQuaternion(player.quaternion);
+
+  const moveVec = forward.clone().multiplyScalar(move.forward).add(right.clone().multiplyScalar(move.right));
+  player.position.add(moveVec.multiplyScalar(speed*dt));
+
+  player.position.x = Math.max(-WORLD_SIZE/2+1, Math.min(WORLD_SIZE/2-1, player.position.x));
+  player.position.z = Math.max(-WORLD_SIZE/2+1, Math.min(WORLD_SIZE/2-1, player.position.z));
+  player.position.y = 1.8;
+
+  for(let i=projectiles.length-1;i>=0;i--){
+    const p = projectiles[i];
+    p.position.add(p.userData.vel.clone().multiplyScalar(dt));
+    p.userData.ttl -= dt;
+    if(p.userData.ttl <= 0){
+      scene.remove(p);
+      projectiles.splice(i,1);
+      continue;
+    }
+
+    for(let j=bots.length-1;j>=0;j--){
+      const b = bots[j];
+      if(b.position.distanceTo(p.position) < 0.9){
+        b.userData.hp -= p.userData.damage;
+        scene.remove(p);
+        projectiles.splice(i,1);
+        if(b.userData.hp <= 0){
+          scene.remove(b);
+          bots.splice(j,1);
+        }
+        break;
+      }
+    }
+  }
+
+  for(let i=botProjectiles.length-1;i>=0;i--){
+    const p = botProjectiles[i];
+    p.position.add(p.userData.vel.clone().multiplyScalar(dt));
+    p.userData.ttl -= dt;
+    if(p.userData.ttl <= 0){
+      scene.remove(p);
+      botProjectiles.splice(i,1);
+      continue;
+    }
+    if(p.position.distanceTo(player.position) < 1.2){
+      hp -= p.userData.damage;
+      if(hp < 0) hp = 0;
+      document.getElementById("hp").innerText = hp;
+      scene.remove(p);
+      botProjectiles.splice(i,1);
+    }
+  }
+
+  bots.forEach(bot=>{
+    const dir = player.position.clone().sub(bot.position);
+    const dist = dir.length();
+    if(dist > 1.5) bot.position.add(dir.normalize().multiplyScalar(2*dt));
+
+    if(dist < 20 && (performance.now()/1000 - bot.userData.lastShot) > 1.5){
+      botShoot(bot);
+      bot.userData.lastShot = performance.now()/1000;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
