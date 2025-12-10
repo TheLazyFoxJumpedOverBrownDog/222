@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Pokémon Royale</title>
+<style>
+body { margin:0; font-family:sans-serif; background:#f0f0f0; text-align:center;}
+#gameCanvas { background:#fff; display:block; margin:auto; border:2px solid #000; }
+#cardContainer { width: 800px; margin:10px auto; text-align:center; }
+.card { display:inline-block; width:70px; height:100px; margin:5px; border:2px solid #000;
+       background:#ccc; cursor:pointer; user-select:none; line-height:100px; font-weight:bold;}
+#elixirBar { width: 800px; margin:10px auto; height:20px; background:#888; border:1px solid #000; position:relative;}
+#elixirAmount { height:100%; background:#00f; width:0%; }
+</style>
+</head>
+<body>
+
+<h2>Pokémon Royale</h2>
+<div>
+  <button onclick="startGame('easy')">Einfach</button>
+  <button onclick="startGame('medium')">Mittel</button>
+  <button onclick="startGame('hard')">Schwer</button>
+</div>
+
+<div id="elixirBar"><div id="elixirAmount"></div></div>
+<canvas id="gameCanvas" width="800" height="500"></canvas>
+<div id="cardContainer"></div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const cardContainer = document.getElementById("cardContainer");
+const elixirAmountDiv = document.getElementById("elixirAmount");
+
+const POKEMON_LIST = [
+  {name:"Bulbasaur",hp:80,atk:9,cost:3},{name:"Ivysaur",hp:100,atk:12,cost:4},{name:"Venusaur",hp:120,atk:15,cost:5},
+  {name:"Charmander",hp:60,atk:12,cost:3},{name:"Charmeleon",hp:90,atk:14,cost:4},{name:"Charizard",hp:110,atk:18,cost:5},
+  {name:"Squirtle",hp:70,atk:8,cost:3},{name:"Wartortle",hp:90,atk:11,cost:4},{name:"Blastoise",hp:120,atk:16,cost:5},
+  // ... später auf alle 150 Pokémon erweitern
+];
+
+class Pokemon {
+  constructor(name,hp,atk,x,y,color,speed=1){
+    this.name=name; this.hp=hp; this.atk=atk;
+    this.x=x; this.y=y; this.color=color; this.speed=speed; this.alive=true;
+  }
+  move(){ if(!this.alive) return; this.color==="red"?this.x+=this.speed:this.x-=this.speed; }
+  draw(){
+    if(!this.alive) return;
+    ctx.fillStyle=this.color;
+    ctx.beginPath(); ctx.arc(this.x,this.y,20,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#000"; ctx.fillText(this.name,this.x-20,this.y-25);
+  }
+  checkCollision(other){
+    if(!this.alive||!other.alive) return;
+    const dx=this.x-other.x, dy=this.y-other.y, dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<40){ this.hp-=other.atk; other.hp-=this.atk;
+                 if(this.hp<=0)this.alive=false; if(other.hp<=0)other.alive=false; }
+  }
+}
+
+let redTeam=[], blueTeam=[], difficulty=null, botSpeed=1, botSpawnRate=0.02, botAtkMultiplier=1;
+let elixir=5, maxElixir=10;
+
+// Karten ziehen
+function drawCards(){
+  cardContainer.innerHTML="";
+  const cards = [];
+  while(cards.length<4){
+    const p = POKEMON_LIST[Math.floor(Math.random()*POKEMON_LIST.length)];
+    if(!cards.includes(p)) cards.push(p);
+  }
+  cards.forEach(p=>{
+    const div=document.createElement("div");
+    div.className="card"; div.innerText=p.name;
+    div.style.backgroundColor="red";
+    div.draggable = true;
+    div.addEventListener('dragstart', e => { e.dataTransfer.setData("text/plain", JSON.stringify(p)); });
+    cardContainer.appendChild(div);
+  });
+}
+
+// Drag & Drop Spieler mit Elixier-Prüfung
+canvas.addEventListener('dragover', e => e.preventDefault());
+canvas.addEventListener('drop', e => {
+  e.preventDefault();
+  const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+  if(elixir >= data.cost){
+    redTeam.push(new Pokemon(data.name,data.hp,data.atk,100+Math.random()*50,400,"red"));
+    elixir -= data.cost;
+  } else { alert("Nicht genug Elixier!"); }
+});
+
+// Bot Pokémon spawnen abhängig von Schwierigkeit
+function spawnBot(){
+  if(Math.random()<botSpawnRate && blueTeam.length<6){
+    const p = POKEMON_LIST[Math.floor(Math.random()*POKEMON_LIST.length)];
+    blueTeam.push(new Pokemon(p.name,p.hp*botAtkMultiplier,p.atk*botAtkMultiplier,700,100+blueTeam.length*50,"blue",botSpeed));
+  }
+}
+
+// Update & Draw
+function update(){
+  [...redTeam,...blueTeam].forEach(p=>p.move());
+  redTeam.forEach(r=>blueTeam.forEach(b=>r.checkCollision(b)));
+}
+
+// Elixier-Update
+function updateElixir(){
+  elixir = Math.min(maxElixir, elixir + 0.05); // langsame Regeneration
+  elixirAmountDiv.style.width = (elixir/maxElixir*100) + "%";
+}
+
+// Zeichnen
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  [...redTeam,...blueTeam].forEach(p=>p.draw());
+}
+
+// Loop
+function gameLoop(){
+  if(!difficulty) return;
+  spawnBot();
+  update();
+  updateElixir();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// Spielstart mit Schwierigkeitswahl
+function startGame(level){
+  difficulty = level;
+  switch(level){
+    case 'easy': botSpeed=0.5; botSpawnRate=0.01; botAtkMultiplier=0.8; break;
+    case 'medium': botSpeed=1; botSpawnRate=0.02; botAtkMultiplier=1; break;
+    case 'hard': botSpeed=1.5; botSpawnRate=0.04; botAtkMultiplier=1.2; break;
+  }
+  redTeam=[]; blueTeam=[]; elixir=5;
+  drawCards();
+  gameLoop();
+}
+</script>
+</body>
+</html>
