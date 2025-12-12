@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجر الموبايلات</title>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+header {
+  background-color: #007bff;
+  color: white;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+header button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background-color: #0056b3;
+  color: white;
+  border-radius: 5px;
+}
+main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+}
+.product, .admin-product {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  margin: 15px;
+  padding: 15px;
+  width: 220px;
+  transition: transform 0.2s;
+}
+.product:hover, .admin-product:hover {
+  transform: scale(1.03);
+}
+.product img, .admin-product img {
+  width: 100%;
+  border-radius: 12px;
+}
+.product h3, .admin-product h4 {
+  margin: 10px 0 5px;
+}
+.product p, .admin-product p {
+  margin: 5px 0;
+  font-weight: bold;
+}
+button.action-btn {
+  background-color: #28a745;
+  margin-top: 10px;
+}
+button.delete-btn {
+  background-color: #dc3545;
+  margin-top: 5px;
+}
+button.edit-btn {
+  background-color: #ffc107;
+  margin-top: 5px;
+}
+#admin-panel {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #e9ecef;
+}
+#admin-panel input {
+  padding: 7px;
+  margin: 5px;
+  width: 220px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+#admin-panel h2 {
+  margin-bottom: 15px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>متجر الموبايلات</h1>
+  <button onclick="toggleAdmin()">لوحة الأدمن</button>
+</header>
+
+<main id="products-container"></main>
+
+<div id="admin-panel">
+  <h2>لوحة الأدمن</h2>
+  <input type="text" id="name" placeholder="اسم المنتج">
+  <input type="text" id="price" placeholder="السعر">
+  <input type="text" id="whatsapp" placeholder="رابط واتساب">
+  <input type="text" id="image" placeholder="صورة Base64 أو رابط">
+  <button onclick="addProduct()" class="action-btn">إضافة منتج</button>
+  <div id="admin-products"></div>
+</div>
+
+<script>
+let products = [
+  {
+    name: "iPhone 14",
+    price: "25000 جنيه",
+    image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAMAAACahl6sAAAABlBMVEX///+AAABVwtN+AAABZ0lEQVR4nO3aQQ6DMAwE0PXv/pU0X1hwKCTlkxGm+/2zsyVqNZsEAAAAAAAAAAAAAAAAgB6t3A/tm+u9zv7hOTxHplVwG4TX8nrM4QOyz91ZkgBr/UZ1X5GQDhu2NTaAujavz7s7i0Lk+8d9ynD6H9Y1+p+4drLr10e0c07p6x+ozOaVNNqfC6tqHDqT2mI3Xb1POp2x1/XokjvSfqP2dRk9J9U/3N4QzjWgAAAP//AwDdaRhY0vh7jXgAAAABJRU5ErkJggg==",
+    whatsapp: "https://wa.me/0123456789?text=مرحبا، أريد طلب iPhone 14"
+  },
+  {
+    name: "جراب شفاف iPhone",
+    price: "200 جنيه",
+    image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAMAAACahl6sAAAABlBMVEX///+AAABVwtN+AAABZ0lEQVR4nO3aQQ6DMAwE0PXv/pU0X1hwKCTlkxGm+/2zsyVqNZsEAAAAAAAAAAAAAAAAgB6t3A/tm+u9zv7hOTxHplVwG4TX8nrM4QOyz91ZkgBr/UZ1X5GQDhu2NTaAujavz7s7i0Lk+8d9ynD6H9Y1+p+4drLr10e0c07p6x+ozOaVNNqfC6tqHDqT2mI3Xb1POp2x1/XokjvSfqP2dRk9J9U/3N4QzjWgAAAP//AwDdaRhY0vh7jXgAAAABJRU5ErkJggg==",
+    whatsapp: "https://wa.me/0123456789?text=مرحبا، أريد طلب جراب شفاف iPhone"
+  },
+  {
+    name: "iPhone 13",
+    price: "20000 جنيه",
+    image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAMAAACahl6sAAAABlBMVEX///+AAABVwtN+AAABZ0lEQVR4nO3aQQ6DMAwE0PXv/pU0X1hwKCTlkxGm+/2zsyVqNZsEAAAAAAAAAAAAAAAAgB6t3A/tm+u9zv7hOTxHplVwG4TX8nrM4QOyz91ZkgBr/UZ1X5GQDhu2NTaAujavz7s7i0Lk+8d9ynD6H9Y1+p+4drLr10e0c07p6x+ozOaVNNqfC6tqHDqT2mI3Xb1POp2x1/XokjvSfqP2dRk9J9U/3N4QzjWgAAAP//AwDdaRhY0vh7jXgAAAABJRU5ErkJggg==",
+    whatsapp: "https://wa.me/0123456789?text=مرحبا، أريد طلب iPhone 13"
+  }
+];
+
+const container = document.getElementById("products-container");
+const adminPanel = document.getElementById("admin-panel");
+const adminProductsDiv = document.getElementById("admin-products");
+
+function renderProducts() {
+  container.innerHTML = "";
+  products.forEach((product, index) => {
+    const div = document.createElement("div");
+    div.classList.add("product");
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h3>${product.name}</h3>
+      <p>${product.price}</p>
+      <button onclick="window.open('${product.whatsapp}','_blank')">اطلب عبر واتساب</button>
+    `;
+    container.appendChild(div);
+  });
+  renderAdminProducts();
+}
+
+function toggleAdmin() {
+  adminPanel.style.display = adminPanel.style.display === "flex" ? "none" : "flex";
+}
+
+function addProduct() {
+  const name = document.getElementById("name").value;
+  const price = document.getElementById("price").value;
+  const whatsapp = document.getElementById("whatsapp").value;
+  const image = document.getElementById("image").value;
+  if(name && price && whatsapp && image){
+    products.push({name, price, whatsapp, image});
+    renderProducts();
+    document.getElementById("name").value="";
+    document.getElementById("price").value="";
+    document.getElementById("whatsapp").value="";
+    document.getElementById("image").value="";
+  } else {
+    alert("يرجى ملء جميع الحقول!");
+  }
+}
+
+function renderAdminProducts() {
+  adminProductsDiv.innerHTML = "";
+  products.forEach((product, index) => {
+    const div = document.createElement("div");
+    div.classList.add("admin-product");
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h4>${product.name}</h4>
+      <p>${product.price}</p>
+      <button onclick="editProduct(${index})" class="edit-btn">تعديل</button>
+      <button onclick="deleteProduct(${index})" class="delete-btn">حذف</button>
+    `;
+    adminProductsDiv.appendChild(div);
+  });
+}
+
+function editProduct(index) {
+  const product = products[index];
+  const name = prompt("اسم المنتج:", product.name);
+  const price = prompt("السعر:", product.price);
+  const whatsapp = prompt("رابط واتساب:", product.whatsapp);
+  const image = prompt("الصورة (Base64 أو رابط):", product.image);
+  if(name && price && whatsapp && image){
+    products[index] = {name, price, whatsapp, image};
+    renderProducts();
+  }
+}
+
+function deleteProduct(index) {
+  if(confirm("هل أنت متأكد من حذف المنتج؟")){
+    products.splice(index, 1);
+    renderProducts();
+  }
+}
+
+renderProducts();
+</script>
+
+</body>
+</html>
