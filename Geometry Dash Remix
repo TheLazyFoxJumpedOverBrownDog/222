@@ -1,0 +1,6 @@
+/custom-gd-website
+│
+├─ index.html        (homepage with level library)
+├─ level1.html       (level play page)
+├─ style.css         (website styling)
+└─ script.js         (optional interactivity)
