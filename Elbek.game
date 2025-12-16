@@ -1,0 +1,72 @@
+sinf = ["zufar","sarvar","latif","azamat","abdulloh","anvar","ulug'bek","nodir","abror","mirkomil","ezoz","artur","zarina","ziyoda"]
+print("Assalomu alaykum!!!")
+print("\"Hisob kitob\" o'yniga hush kelib siz!!!")
+q = input("Ismingiz nima?\n>>>")
+w = q.lower()
+if w == "elbek":
+      print("Xush kelib siz hojayin!!!")
+      aa=2011
+      q ="Hojayin"
+else:
+      if w in sinf:
+          print(f"Xush kelibsiz {q.capitalize()}, siz hojayinimizning sinfdoshi ekansiz!!!")
+          aa=2011
+      else:    
+        aa = int(input(f"{q.capitalize()} siz nechinchi yilda tug'lgansiz?>>>"))
+if 2024-aa<10:
+          print(f"Yoshingiz {2024-aa}da ekan sizga kirish mumkin emas!!!")
+if w == "elbek":
+           q="Hojayn"      
+           aa=2011
+           print(f"{q.capitalize()} sizning yoshingiz {2024-aa} da ekan sizga kirish mumkin!!!")
+a = 0
+javob = float(input("12x6 nechiga teng?>>>"))
+if javob!=72:
+                 print("Javob xato!")
+else:
+               print("Javob to'g'ri")
+               a+=1
+javo = float(input("12x10 nechiga teng?>>>"))
+if javo!=120:
+                   print("Javob xato!")
+else:
+                 print("Javob to'g'ri")
+                 a+=1
+jav = float(input("6x6 nechiga teng?>>>"))
+if jav!=36:
+                 print("Javob xato!")
+else:
+               print("Javob to'g'ri")
+               a+=1
+ja = float(input("10x6 nechiga teng?>>>"))
+if ja!=60:
+                 print("Javob xato!")
+else:
+               print("Javob to'g'ri")
+               a+=1
+j = float(input("11x8 nechiga teng?>>>"))
+if j!=88:
+                   print("Javob xato!")
+else:
+                 print("Javob to'g'ri")
+                 a+=1
+javobq = float(input("1x6 nechiga teng?>>>"))
+if javobq!=6:
+                     print("Javob xato!")
+else:
+                   print("Javob to'g'ri")
+                   a+=1
+jqavob = float(input("77x100 nechiga teng?>>>"))
+if jqavob!=7700:
+                       print("Javob xato!")
+else:
+                     print("Javob to'g'ri")
+                     a+=1
+if a>=6:
+        if w == "elbek":  
+                      print("Hojayin siz yutdingiz!!!")
+        else:
+                      print("Siz yuttingiz!")
+else:
+    print("Afsus siz yuta olmadingiz!")
+print("Yana davom etirish uchun 'Run' tug'masini bosing!")
