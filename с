@@ -1,0 +1,122 @@
+import telebot
+from telebot import types
+import time
+
+# Токен бота
+TOKEN = '8509062860:AAHxsys0uIu8W4ZQZAzfwJmvUCQA61Uz4H0'
+bot = telebot.TeleBot(TOKEN)
+
+# Команда /start с красивым приветствием
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    user = message.from_user
+    first_name = user.first_name
+    username = user.username or first_name
+    
+    # Создаём красивую клавиатуру
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    
+    # Добавляем кнопки в красивом порядке
+    btn1 = types.KeyboardButton('🧪 Формулы физики')
+    btn2 = types.KeyboardButton('🎯 Тест знаний')
+    btn3 = types.KeyboardButton('💎 Мои изумруды')
+    btn4 = types.KeyboardButton('🏆 Достижения')
+    btn5 = types.KeyboardButton('🛍️ Магазин')
+    btn6 = types.KeyboardButton('📊 Статистика')
+    btn7 = types.KeyboardButton('❓ Помощь')
+    btn8 = types.KeyboardButton('⭐ Рейтинг')
+    
+    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8)
+    
+    # Анимированное текстовое приветствие с эмодзи
+    welcome_message = f"""
+🎉 *ДОБРО ПОЖАЛОВАТЬ, {first_name}!* 🎉
+
+✨ *Физика-Бот активирован!* ✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+🎓 *Твой персональный помощник в мире физики!*
+
+⚡ *Что тебя ждет:*
+• 🧬 50+ физических формул
+• 🎯 Интерактивные тесты
+• 💎 Система изумрудов
+• 🏆 Достижения и награды
+• 📈 Личная статистика
+
+🎮 *Готов начать?*
+Выбери действие ниже! 👇
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 *Совет:* Начни с раздела "🧪 Формулы физики" 
+и получи бонусные изумруды! 💎
+    """
+    
+    # Сначала отправляем стикер-приветствие
+    try:
+        # Популярные приветственные стикеры
+        sticker_ids = [
+            'CAACAgIAAxkBAAEL6LtmUbbBcxgPcxCLI0mzEGnqmY4JLQACRhkAAh9NqUtG_GmQPPCx8TQE',  # Привет
+            'CAACAgIAAxkBAAEL6L1mUbbKNOYVjz7u6hLEv1JwKZf_XgAC6hMAAjPFoUtVgSMpSFRy5jQE',  # Радость
+            'CAACAgIAAxkBAAEL6L9mUbbNqk8n9Q7nqFl-47JQ_gmJ8wACsxQAAos9oUurw3Pzy3-EpzQE'   # Огонь
+        ]
+        bot.send_sticker(message.chat.id, sticker_ids[0])
+    except:
+        pass  # Если не отправится стикер, продолжаем
+    
+    # Отправляем основное приветствие
+    bot.send_message(
+        message.chat.id,
+        welcome_message,
+        parse_mode='Markdown',
+        reply_markup=markup
+    )
+    
+    # Пауза и отправляем дополнительную информацию
+    time.sleep(1.5)
+    
+    # Второе сообщение с инструкцией
+    instructions = f"""
+📱 *Управление ботом:*
+
+• Используй *кнопки меню* ниже
+• Или команды:
+  /start - Главное меню
+  /formulas - Формулы
+  /quiz - Тест
+  /shop - Магазин
+  /help - Помощь
+
+👤 *Твои данные:*
+Имя: *{first_name}*
+Username: @{username}
+ID: `{user.id}`
+
+🚀 *Начни обучение прямо сейчас!*
+    """
+    
+    bot.send_message(
+        message.chat.id,
+        instructions,
+        parse_mode='Markdown'
+    )
+
+# Простая обработка текста для демонстрации
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    if message.text == '🧪 Формулы физики':
+        bot.reply_to(message, "📚 *Разделы формул:*\n\n1. Механика\n2. Электричество\n3. Оптика\n\nВыбери раздел!", parse_mode='Markdown')
+    elif message.text == '🎯 Тест знаний':
+        bot.reply_to(message, "🎯 *Готов проверить знания?*\n\nСейчас задам тебе вопрос по физике! ⚡", parse_mode='Markdown')
+    elif message.text == '💎 Мои изумруды':
+        bot.reply_to(message, "💎 *Твой баланс:* *100 изумрудов*\n\n🎁 Ежедневный бонус: +20 💎", parse_mode='Markdown')
+    elif message.text == '🏆 Достижения':
+        bot.reply_to(message, "🏆 *Твои достижения:*\n\n🥇 Первый шаг - ✅\n🥈 Знаток формул - 🔄\n🥉 Мастер тестов - 🔄", parse_mode='Markdown')
+    elif message.text == '🛍️ Магазин':
+        bot.reply_to(message, "🛍️ *Магазин изумрудов:*\n\n1. Ускоритель обучения - 50 💎\n2. Формула дня - 100 💎\n3. Премиум статус - 200 💎", parse_mode='Markdown')
+    elif message.text == '📊 Статистика':
+        bot.reply_to(message, "📊 *Твоя статистика:*\n\n📅 Зарегистрирован: сегодня\n🎯 Тестов пройдено: 0\n📚 Формул изучено: 0\n💎 Всего заработано: 100", parse_mode='Markdown')
+    elif message.text == '❓ Помощь':
+        bot.reply_to(message, "❓ *Помощь:*\n\nЭто бот для изучения физики!\n\nИзучай формулы, проходи тесты, зарабатывай изумруды и покупай бонусы в магазине!\n\nПо вопросам: @username", parse_mode='Markdown')
+    elif message.text == '⭐ Рейтинг':
+        bot.reply_to(message, "⭐ *Топ игроков:*\n\n🥇 И
