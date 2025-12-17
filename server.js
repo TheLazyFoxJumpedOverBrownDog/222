@@ -1,0 +1,15 @@
+{
+  "name": "video-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "replicate": "^0.25.0"
+  },
+  "engines": {
+    "node": "14.x"
+  }
+}
