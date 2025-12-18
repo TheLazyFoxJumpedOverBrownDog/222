@@ -1,56 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
-
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
-
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
-
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muro Ciego - María José</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .m-logo {
+            background: linear-gradient(135deg, #6b21a8, #9333ea);
+            box-shadow: 0 4px 15px rgba(107, 33, 168, 0.3);
+        }
+    </style>
 </head>
+<body class="pb-20">
 
-<body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
-
-      </div>
-
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
+    <!-- Header con Logo de la M -->
+    <nav class="bg-white border-b sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="m-logo w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                M
+            </div>
+            <span class="font-bold text-purple-800 text-lg">Muro Ciego</span>
         </div>
-      </footer>
-    </div>
-  </div>
-</body>
+        <button id="btn-new-post" class="bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition">
+            <i data-lucide="plus"></i>
+        </button>
+    </nav>
 
+    <!-- Contenedor Principal -->
+    <main class="max-w-md mx-auto p-4" id="app">
+        
+        <!-- Estado de carga -->
+        <div id="loading" class="text-center py-10 text-gray-500">
+            Cargando mensajes con amor...
+        </div>
+
+        <!-- Lista de Mensajes -->
+        <div id="posts-container" class="space-y-4">
+            <!-- Los mensajes aparecerán aquí mágicamente -->
+        </div>
+
+    </main>
+
+    <!-- Modal para Nuevo Mensaje -->
+    <div id="modal-post" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Enviar al Muro</h3>
+                <button id="close-modal" class="text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            
+            <textarea id="post-text" placeholder="¿Qué quieres confesar hoy?" class="w-full border-none focus:ring-0 text-lg mb-4 resize-none" rows="4"></textarea>
+            
+            <div id="image-preview" class="hidden mb-4 relative">
+                <img src="" id="preview-img" class="w-full h-48 object-cover rounded-xl">
+                <button id="remove-img" class="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between border-t pt-4">
+                <button id="trigger-upload" class="text-purple-600 flex items-center gap-2">
+                    <i data-lucide="image"></i>
+                    <span class="text-sm font-medium">Subir foto</span>
+                </button>
+                <input type="file" id="file-input" class="hidden" accept="image/*">
+                
+                <button id="publish-btn" class="bg-purple-600 text-white px-6 py-2 rounded-full font-bold disabled:opacity-50">
+                    Publicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase y Lógica -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // CONFIGURACIÓN DE FIREBASE (María José, pega aquí tus datos si los tienes)
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = "muro-ciego-mj";
+
+        // Elementos del DOM
+        const postsContainer = document.getElementById('posts-container');
+        const loading = document.getElementById('loading');
+        const modal = document.getElementById('modal-post');
+        const btnNewPost = document.getElementById('btn-new-post');
+        const closeModal = document.getElementById('close-modal');
+        const publishBtn = document.getElementById('publish-btn');
+        const postText = document.getElementById('post-text');
+        const fileInput = document.getElementById('file-input');
+        const previewImg = document.getElementById('preview-img');
+        const imagePreview = document.getElementById('image-preview');
+
+        let selectedImageBase64 = null;
+
+        // Autenticación Anónima
+        signInAnonymously(auth).catch(console.error);
+
+        // Escuchar cambios en la base de datos
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'posts'));
+                onSnapshot(q, (snapshot) => {
+                    loading.classList.add('hidden');
+                    postsContainer.innerHTML = '';
+                    
+                    const docs = [];
+                    snapshot.forEach(doc => docs.push({id: doc.id, ...doc.data()}));
+                    
+                    // Ordenar por fecha (más reciente arriba)
+                    docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                    docs.forEach(post => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white rounded-2xl shadow-sm p-4 border border-gray-100';
+                        card.innerHTML = `
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                </div>
+                                <span class="text-xs text-gray-400">Anónimo • ${post.timestamp ? new Date(post.timestamp.seconds * 1000).toLocaleTimeString() : 'Ahora'}</span>
+                            </div>
+                            <p class="text-gray-800 mb-3">${post.text}</p>
+                            ${post.image ? `<img src="${post.image}" class="w-full h-64 object-cover rounded-xl mb-3">` : ''}
+                        `;
+                        postsContainer.appendChild(card);
+                    });
+                    lucide.createIcons();
+                }, (err) => {
+                    console.error("Error cargando mensajes:", err);
+                    loading.innerText = "Conecta tu Firebase para ver los mensajes.";
+                });
+            }
+        });
+
+        // Manejo de Modal e Imagen
+        btnNewPost.onclick = () => modal.classList.remove('hidden');
+        closeModal.onclick = () => modal.classList.add('hidden');
+
+        document.getElementById('trigger-upload').onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedImageBase64 = event.target.result;
+                    previewImg.src = selectedImageBase64;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        document.getElementById('remove-img').onclick = () => {
+            selectedImageBase64 = null;
+            imagePreview.classList.add('hidden');
+            fileInput.value = '';
+        };
+
+        // Publicar Mensaje
+        publishBtn.onclick = async () => {
+            if (!postText.value.trim() && !selectedImageBase64) return;
+            
+            publishBtn.disabled = true;
+            publishBtn.innerText = "Enviando...";
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'posts'), {
+                    text: postText.value,
+                    image: selectedImageBase64,
+                    timestamp: serverTimestamp(),
+                    userId: auth.currentUser.uid
+                });
+
+                // Limpiar todo
+                postText.value = '';
+                selectedImageBase64 = null;
+                imagePreview.classList.add('hidden');
+                modal.classList.add('hidden');
+            } catch (e) {
+                alert("Error al enviar. ¿Configuraste Firebase?");
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerText = "Publicar";
+            }
+        };
+
+        lucide.createIcons();
+    </script>
+</body>
 </html>
+
