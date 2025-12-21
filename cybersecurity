@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<title>Жасанды интеллекттің қоғамға әсері</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #333;
+}
+header {
+  background: #0a2540;
+  color: white;
+  padding: 20px;
+}
+nav a {
+  color: white;
+  margin-right: 20px;
+  text-decoration: none;
+  font-weight: bold;
+}
+section {
+  padding: 40px;
+  background: white;
+  margin: 20px;
+  border-radius: 10px;
+}
+.hero {
+  background: linear-gradient(to right, #1e3c72, #2a5298);
+  color: white;
+  text-align: center;
+}
+img {
+  max-width: 100%;
+  border-radius: 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table, th, td {
+  border: 1px solid #ccc;
+}
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+button {
+  padding: 10px 15px;
+  background: #1e88e5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+footer {
+  background: #0a2540;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+.chatbox {
+  border: 1px solid #ccc;
+  padding: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Жасанды интеллекттің қоғамға әсері</h1>
+  <nav>
+    <a href="#about">Тақырып</a>
+    <a href="#ai">AI</a>
+    <a href="#media">Медиа</a>
+    <a href="#chat">Чат-бот</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h2>AI — болашақтың негізгі технологиясы</h2>
+  <p>Білім, медицина, экономикадағы әсері</p>
+</section>
+
+<section id="about">
+  <h2>Тақырыптың аналитикалық талдауы</h2>
+  <p>
+  Жасанды интеллект қазіргі қоғамның барлық саласына еніп жатыр.
+  Ол деректерді өңдеу, шешім қабылдау және автоматтандыруда маңызды рөл атқарады.
+  AI еңбек нарығына, білім беру жүйесіне және экономикалық модельдерге тікелей әсер етеді.
+  </p>
+</section>
+
+<section>
+  <h2>AI арқылы жасалған сурет</h2>
+  <img src="https://www.krea.ai/image?preset=e387169c-7ae1-4109-b18a-85943c280aef" alt="AI image">
+</section>
+
+<section id="ai">
+  <h2>AI-агент (симуляция)</h2>
+  <p>AI агент қоғамдағы негізгі трендтерді талдайды:</p>
+  <ul id="agentResult"></ul>
+  <button onclick="runAgent()">Агентті іске қосу</button>
+</section>
+
+<section>
+  <h2>Динамикалық кесте</h2>
+  <table>
+    <tr>
+      <th>Сала</th>
+      <th>AI әсері (%)</th>
+    </tr>
+    <tr>
+      <td>Білім</td>
+      <td>70</td>
+    </tr>
+    <tr>
+      <td>Медицина</td>
+      <td>80</td>
+    </tr>
+    <tr>
+      <td>Экономика</td>
+      <td>65</td>
+    </tr>
+  </table>
+</section>
+
+<section id="media">
+  <h2>AI видео (аватар)</h2>
+  <video controls width="100%">
+    <source src="https://app.heygen.com/videos/221e050e803a42228715b8d6dabec2db" type="video/mp4">
+  </video>
+
+  <h2>AI музыка</h2>
+  <audio controls>
+    <source src="https://suno.com/s/hqb4VilpeCb5zDwk" type="audio/mpeg">
+  </audio>
+</section>
+
+<section id="chat">
+  <h2>Чат-бот</h2>
+  <div class="chatbox">
+    <p><b>Бот:</b> Сұрағыңызды жазыңыз</p>
+    <input type="text" id="userInput">
+    <button onclick="chat()">Жіберу</button>
+    <p id="botReply"></p>
+  </div>
+</section>
+
+<footer>
+  <p>Автор: Студент | Пән: АКТ | 2025</p>
+</footer>
+
+<script>
+function runAgent() {
+  let data = ["AI білімде онлайн оқытуды дамытады",
+              "Медицинада диагноз қоюды жылдамдатады",
+              "Экономикада автоматтандыруды арттырады"];
+  let ul = document.getElementById("agentResult");
+  ul.innerHTML = "";
+  data.forEach(item => {
+    let li = document.createElement("li");
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+}
+
+function chat() {
+  let input = document.getElementById("userInput").value;
+  document.getElementById("botReply").innerText =
+    "AI қоғамға әсерін күшейтіп жатыр: " + input;
+}
+</script>
+
+</body>
+</html>
