@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For You</title>
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: 'Georgia', serif; background: #0b1020; color: #e5e7eb; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { width: 100%; max-width: 500px; background: rgba(2,6,23,.95); border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+    h2 { margin-bottom: 15px; font-weight: 600; text-align:center; }
+    p { line-height: 1.8; color: #cbd5f5; margin-bottom: 25px; font-size: 17px; }
+    .btn { width: 100%; margin-top: 16px; padding: 14px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; font-size: 16px; cursor: pointer; }
+    .btn.secondary { background: transparent; border: 1px solid rgba(255,255,255,.15); color: #e5e7eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card"><!-- Page 1: Poetry -->
+<section id="s1">
+  <h2>Soft Whispers</h2>
+  <p>Your beauty is quiet, gentle, and beyond words. Even from afar, it lights up my thoughts and fills my heart with warmth. Every smile, every gentle word you share feels like a little star shining in my mind. 🌟💖</p>
+  <button class="btn" onclick="next(2)">Next</button>
+</section>
+
+<!-- Page 2: Birthday Moon -->
+<section id="s2" class="hidden">
+  <h2>29 June 2009</h2>
+  <p>Even the moon must have blushed when it saw someone as beautiful as you being born. 🌙✨ The universe itself seemed to celebrate your arrival, and I feel lucky just knowing you exist.</p>
+  <button class="btn" onclick="next(3)">Next</button>
+  <button class="btn secondary" onclick="next(1)">Back</button>
+</section>
+
+<!-- Page 3: Why You’re Special -->
+<section id="s3" class="hidden">
+  <h2>Why You’re Special</h2>
+  <p>You are special, not only for your beauty, but for the calm and joy my heart feels when I think of you. Even miles apart, your presence in my thoughts makes life brighter and gentler. 🌸💫</p>
+  <button class="btn" onclick="next(4)">Next</button>
+  <button class="btn secondary" onclick="next(2)">Back</button>
+</section>
+
+<!-- Page 4: Love Letter -->
+<section id="s4" class="hidden">
+  <h2>A Letter From My Heart</h2>
+  <p>I know I may never hold your hand or hear your words in the way I hope, but thinking of you fills me with quiet joy. My feelings are mine to cherish, and loving you from afar is a privilege I silently treasure. 💌❤️ Every thought of you makes my day brighter.</p>
+  <button class="btn" onclick="next(5)">Next</button>
+  <button class="btn secondary" onclick="next(3)">Back</button>
+</section>
+
+<!-- Page 5: Favorite Memories -->
+<section id="s5" class="hidden">
+  <h2>Little Things I Love</h2>
+  <p>Your laugh, your gentle words, the way your thoughts shine through — these small things make even distant moments feel alive and full of warmth. 😊🌼 Even the smallest gestures stay with me longer than I can explain.</p>
+  <button class="btn" onclick="next(6)">Next</button>
+  <button class="btn secondary" onclick="next(4)">Back</button>
+</section>
+
+<!-- Page 6: Astro Metaphor -->
+<section id="s6" class="hidden">
+  <h2>Stars Aligned</h2>
+  <p>The stars above seemed to celebrate the day you came into the world. Even from afar, I feel the magic of your presence every day. ✨🌌 Your existence turns ordinary days into something special.</p>
+  <button class="btn" onclick="next(7)">Next</button>
+  <button class="btn secondary" onclick="next(5)">Back</button>
+</section>
+
+<!-- Page 7: Hidden Message -->
+<section id="s7" class="hidden">
+  <h2>Secret Thought</h2>
+  <p>If you knew, even a little, how much your existence brightens my days, I hope it would make you smile. 🌷💖 Just knowing you are there makes life softer.</p>
+  <button class="btn" onclick="next(8)">Next</button>
+  <button class="btn secondary" onclick="next(6)">Back</button>
+</section>
+
+<!-- Page 8: Gratitude -->
+<section id="s8" class="hidden">
+  <h2>Thank You</h2>
+  <p>Thank you for being born, for existing, for inspiring smiles from miles away. 🌸💌 Loving you silently is my quiet gift to myself, and I treasure every thought of you deeply.</p>
+  <button class="btn" onclick="next(9)">Next</button>
+  <button class="btn secondary" onclick="next(7)">Back</button>
+</section>
+
+<!-- Page 9: Final Thoughts -->
+<section id="s9" class="hidden">
+  <h2>Final Thoughts</h2>
+  <p>Even if we never meet, even if you never know, my feelings are real, pure, and untouched by expectation. Loving you has been my silent adventure. 🌹💫 My heart holds these emotions with care and respect, only for you.</p>
+  <button class="btn" onclick="next(10)">Next</button>
+  <button class="btn secondary" onclick="next(8)">Back</button>
+</section>
+
+<!-- Page 10: Final Surprise -->
+<section id="s10" class="hidden">
+  <h2>Open Heart</h2>
+  <p>This is me, sharing a piece of my heart with you. No pressure, no expectation — just honesty and quiet admiration from afar. 💖🌸 I hope these words reach you gently, carrying the feelings I keep close every day.</p>
+  <button class="btn secondary" onclick="next(9)">Back</button>
+</section>
+
+  </div>  <script>
+    function next(n){
+      document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+      document.getElementById('s'+n).classList.remove('hidden');
+    }
+  </script></body>
+</html>
