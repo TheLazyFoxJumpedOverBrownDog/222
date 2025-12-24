@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كشف درجات</title>
+<style>
+body { font-family: Tahoma, Arial; background: #87CEEB; padding: 2mm; font-size: 7px; }
+.hidden { display: none; }
+.center { text-align: center; }
+button { padding: 2px 4px; margin: 1px; border: none; border-radius: 3px; background: #2563eb; color: #fff; font-size: 8px; font-weight: bold; cursor: pointer; }
+button.red { background: #ef4444; }
+select { font-size: 8px; }
+input { border: 1px solid #000; padding: 0 4px; text-align: center; font-size: 6px; line-height: 18px; box-sizing: border-box; }
+input.name { width: 110px; font-weight: bold; text-align:right; }
+input.tiny { width: 14px; font-weight: bold; height:18px; line-height:18px; }
+input.medium { width: 120px; height: 22px; font-weight: bold; font-size:12px; line-height:22px; text-align: center; }
+input.large { width: 100%; height: 22px; font-weight: bold; font-size:12px; line-height:22px; text-align: center; box-sizing: border-box; }
+.header-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 6px; }
+.header-grid > div { display: flex; flex-direction: column; gap: 6px; }
+.label-input { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.label-input label { font-weight: bold; font-size: 12px; text-align: right; margin: 0; width: 50px; white-space: nowrap; }
+.label-input input { flex: 1; min-width: 0; height: 22px; box-sizing: border-box; padding-left: 3px; padding-right: 3px; background-color: #fef3c7; }
+table { width: 100%; border-collapse: collapse; background: #ffffff; font-size: 6px; direction: rtl; }
+th, td { border: 1px solid #000; padding: 1px; text-align: center; }
+th { background: #dbeafe; font-weight: bold; }
+.final-low { background: #f87171; color: #fff; font-weight: bold; }
+.status-cell { background-color: #fef3c7; font-weight: bold; font-size: 14px; width: 50px; box-sizing: border-box; text-align: center; }
+#tbl input.s, #tbl input.o, #tbl input.sh, #tbl input.th, #tbl input.st, #tbl input.ot, #tbl input.total200, #tbl input.res, #tbl input.ex, #tbl input.gt, #tbl input.status { min-width: 35px; font-weight: bold; text-align: center; font-size: 14px; background-color: #fefce8; }
+#tbl td:nth-child(2) input.name { text-align: right; }
+input.name, input.tiny { font-weight: bold; }
+#tbl th, #tbl th[colspan], #tbl th[rowspan] { font-weight: bold; }
+@media print { button, select { display: none; } input { border: none; } body { padding: 3mm; } }
+</style>
+</head>
+<body>
+
+<div id="splash" class="center">
+<img src="IMG-20240617-WA0003.jpg" width="70" height="70" style="border-radius:50%">
+<br><b>المصمم: مهدي ناصر باعوضة</b><br><br>
+<button onclick="enterApp()">دخول</button>
+</div>
+
+<div id="app" class="hidden">
+<div>
+<button onclick="addStudent()">➕ إضافة</button>
+<button onclick="deleteStudent()">❌ حذف</button>
+<button onclick="toggleDirection()">↔ الاتجاه</button>
+<button onclick="toggleBold()">B</button>
+<select id="fontSize" onchange="applyStyle()">
+<option value="">حجم الخط</option>
+<option>8</option><option>10</option><option>12</option><option>14</option>
+<option>16</option><option>18</option><option>20</option>
+<option>24</option><option>28</option><option>32</option>
+<option>36</option><option>40</option>
+</select>
+<select id="fontColor" onchange="applyStyle()">
+<option value="">لون الخط</option>
+<option value="black">أسود</option>
+<option value="red">أحمر</option>
+<option value="green">أخضر</option>
+<option value="blue">أزرق</option>
+<option value="purple">بنفسجي</option>
+<option value="orange">برتقالي</option>
+<option value="pink">وردي</option>
+<option value="yellow">أصفر</option>
+<option value="brown">بني</option>
+<option value="white">أبيض</option>
+</select>
+<select id="bgColor" onchange="applyStyle()">
+<option value="">لون الخلية</option>
+<option value="white">أبيض</option>
+<option value="black">أسود</option>
+<option value="red">أحمر</option>
+<option value="green">أخضر</option>
+<option value="blue">أزرق</option>
+<option value="purple">بنفسجي</option>
+<option value="orange">برتقالي</option>
+<option value="pink">وردي</option>
+<option value="yellow">أصفر</option>
+<option value="brown">بني</option>
+</select>
+<button onclick="window.print()">🖨 طباعة</button>
+<button class="red" onclick="exitApp()">خروج</button>
+</div>
+
+<div class="center" style="margin:5px 0;">
+<input type="text" id="titleYear" value="كشف درجات أعمال السنة ٢٠٢٥-٢٠٢٦" style="font-size:10px; font-weight:bold; width:300px; text-align:center;" oninput="saveData()">
+</div>
+
+<div class="header-grid">
+<div>
+<div class="label-input"><label>الدولة:</label><input class="medium"></div>
+<div class="label-input"><label>المحافظة:</label><input class="medium"></div>
+<div class="label-input"><label>المديرية:</label><input class="medium"></div>
+</div>
+<div class="center">
+<img id="schoolLogo" src="school_logo.png" width="80" height="80" style="cursor:pointer" title="اضغط لتغيير الشعار" onclick="changeLogo()">
+</div>
+<div>
+<div class="label-input"><label>المدرسة:</label><input class="medium"></div>
+<div class="label-input"><label>المادة:</label><input class="medium"></div>
+<div class="label-input"><label>الصف:</label><input class="medium"></div>
+<div class="label-input"><label>الشعبة:</label><input class="medium"></div>
+</div>
+</div>
+
+<h4 class="center">كشف درجات أعمال السنة</h4>
+
+<table id="tbl">
+<thead>
+<tr>
+<th rowspan="2">رقم</th>
+<th rowspan="2">اسم الطالب</th>
+<th colspan="5" style="font-size:16px; font-weight:bold;">سبتمبر</th>
+<th colspan="5" style="font-size:16px; font-weight:bold;">أكتوبر</th>
+<th rowspan="2">مجموع الشهرين 200</th>
+<th rowspan="2">المحصلة 20</th>
+<th rowspan="2">الامتحان 30</th>
+<th rowspan="2">المجموع النهائي 50</th>
+<th rowspan="2">الحالة</th>
+</tr>
+<tr>
+<th>سلوك 10</th><th>مواظبة 10</th><th>شفهي 20</th><th>تحريري 60</th><th>المجموع 100</th>
+<th>سلوك 10</th><th>مواظبة 10</th><th>شفهي 20</th><th>تحريري 60</th><th>المجموع 100</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<br>
+<div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+<div class="label-input" style="gap:18px;">
+<label style="white-space: nowrap;">اسم المعلم:</label>
+<input class="large">
+</div>
+<div class="label-input" style="gap:18px;">
+<label style="white-space: nowrap;">رئيس الشعبة:</label>
+<input class="large">
+</div>
+<div class="label-input" style="gap:18px;">
+<label style="white-space: nowrap;">مدير المدرسة:</label>
+<input class="large">
+</div>
+</div>
+
+<script>
+let activeCell=null, isLTR=false;
+const STORAGE_KEY='studentsGradesData';
+document.addEventListener('focusin', e=>{if(e.target.tagName==='INPUT') activeCell=e.target;});
+
+function enterApp(){document.getElementById('splash').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); loadData();}
+function exitApp(){document.getElementById('app').classList.add('hidden'); document.getElementById('splash').classList.remove('hidden');}
+function toggleDirection(){const t=document.getElementById('tbl'); t.style.direction=isLTR?'rtl':'ltr'; isLTR=!isLTR;}
+function applyStyle(){if(!activeCell)return; if(fontSize.value) activeCell.style.fontSize=fontSize.value+'px'; if(fontColor.value) activeCell.style.color=fontColor.value; if(bgColor.value) activeCell.style.backgroundColor=bgColor.value; if(activeCell.style.fontWeight!=='bold' && activeCell.style.fontWeight!=='normal') activeCell.style.fontWeight='normal'; saveData();}
+function toggleBold(){if(!activeCell)return; activeCell.style.fontWeight=activeCell.style.fontWeight==='bold'?'normal':'bold'; saveData();}
+function changeLogo(){const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=e=>{const r=new FileReader(); r.onload=ev=>{document.getElementById('schoolLogo').src=ev.target.result; saveData();}; r.readAsDataURL(e.target.files[0]);}; i.click();}
+function arToEn(n){return n.replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);}
+function enToAr(n){return n.toString().replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);}
+
+function validateInput(cell){
+    if(cell.classList.contains('name')){
+        // اسم الطالب يقبل نصوص فقط
+        const val = cell.value.replace(/[0-9٠-٩]/g,''); // إزالة أي أرقام
+        cell.value = val;
+        return;
+    }
+    const val = cell.value.trim();
+    if(!/^[0-9٠-٩]*$/.test(val)){
+        alert("الرجاء إدخال رقم فقط.");
+        cell.value = '';
+        return;
+    }
+    let value = +arToEn(val) || 0;
+    let max = Infinity;
+    if(cell.classList.contains('s') || cell.classList.contains('o')) max = 10;
+    if(cell.classList.contains('sh')) max = 20;
+    if(cell.classList.contains('th')) max = 60;
+    if(cell.classList.contains('ex')) max = 30;
+    if(value > max){
+        alert("القيمة أكبر من الحد المسموح به: " + max);
+        cell.value = '';
+    }
+}
+
+function addStudent(){
+    const tb=document.querySelector('#tbl tbody');
+    const r=document.createElement('tr');
+    const i=tb.children.length+1;
+    r.innerHTML=`<td><input class='tiny' value='${i}'></td>
+<td><input class='name'></td>
+<td><input class='tiny s'></td><td><input class='tiny o'></td><td><input class='tiny sh'></td><td><input class='tiny th'></td><td><input class='tiny st' readonly></td>
+<td><input class='tiny s'></td><td><input class='tiny o'></td><td><input class='tiny sh'></td><td><input class='tiny th'></td><td><input class='tiny ot' readonly></td>
+<td><input class='tiny total200' readonly></td><td><input class='tiny res' readonly></td>
+<td><input class='tiny ex'></td><td><input class='tiny gt' readonly></td>
+<td><input class='tiny status status-cell' readonly></td>`;
+    tb.appendChild(r);
+    r.querySelectorAll('input').forEach(i=>{
+        i.oninput=()=>{validateInput(i); calc(); saveData();};
+        if(i.classList.contains('name')) i.style.fontSize='14px'; // ← ضبط حجم الخط تلقائيًا
+    });
+}
+
+function deleteStudent(){if(activeCell){const tr=activeCell.closest('tr');if(tr){tr.remove(); renumberStudents(); saveData();}}}
+function renumberStudents(){document.querySelectorAll('#tbl tbody tr').forEach((r,idx)=>{const numInput=r.querySelector('td:first-child input'); if(numInput) numInput.value=idx+1;});}
+
+function calc(){
+    document.querySelectorAll('#tbl tbody tr').forEach(r=>{
+        let ar=false,en=false;
+        // سبتمبر
+        const s_sept=+arToEn(r.querySelector('td:nth-child(3) input').value)||0;
+        const o_sept=+arToEn(r.querySelector('td:nth-child(4) input').value)||0;
+        const sh_sept=+arToEn(r.querySelector('td:nth-child(5) input').value)||0;
+        const th_sept=+arToEn(r.querySelector('td:nth-child(6) input').value)||0;
+        if(/[٠-٩]/.test(r.querySelector('td:nth-child(3) input').value)) ar=true;
+        if(/[0-9]/.test(r.querySelector('td:nth-child(3) input').value)) en=true;
+        const total_sept=s_sept+o_sept+sh_sept+th_sept;
+        r.querySelector('.st').value=(ar&&!en)?enToAr(total_sept):total_sept;
+        // أكتوبر
+        const s_oct=+arToEn(r.querySelector('td:nth-child(8) input').value)||0;
+        const o_oct=+arToEn(r.querySelector('td:nth-child(9) input').value)||0;
+        const sh_oct=+arToEn(r.querySelector('td:nth-child(10) input').value)||0;
+        const th_oct=+arToEn(r.querySelector('td:nth-child(11) input').value)||0;
+        const total_oct=s_oct+o_oct+sh_oct+th_oct;
+        r.querySelector('.ot').value=(ar&&!en)?enToAr(total_oct):total_oct;
+        // مجموع الشهرين
+        const total200=total_sept+total_oct;
+        r.querySelector('.total200').value=(ar&&!en)?enToAr(total200):total200;
+        // المحصلة
+        const res=Math.round(total200/10);
+        r.querySelector('.res').value=(ar&&!en)?enToAr(res):res;
+        // المجموع النهائي
+        const exVal=+arToEn(r.querySelector('.ex').value)||0;
+        const final=res+exVal;
+        r.querySelector('.gt').value=(ar&&!en)?enToAr(final):final;
+        // الحالة
+        const statusCell=r.querySelector('.status');
+        if(statusCell){statusCell.value=final<25?'راسب':'ناجح'; statusCell.style.fontWeight='bold'; statusCell.style.fontSize='14px'; statusCell.style.backgroundColor='#fef3c7'; statusCell.style.textAlign='center'; statusCell.style.width='50px';}
+        r.querySelector('.gt').classList.toggle('final-low',final<25);
+    });
+}
+
+function saveData(){
+    const tb=document.querySelector('#tbl tbody'); const students=[];
+    tb.querySelectorAll('tr').forEach(r=>{const rowData=[]; r.querySelectorAll('input').forEach(i=>{rowData.push({value:i.value,fontSize:i.style.fontSize||'',fontWeight:i.style.fontWeight||'',color:i.style.color||'',backgroundColor:i.style.backgroundColor||''});}); students.push(rowData);});
+    const fields={};
+    document.querySelectorAll('.header-grid input, .label-input input').forEach((i,k)=>{fields['field'+k]=i.value; fields['field'+k+'Font']=i.style.fontWeight||''; fields['field'+k+'Size']=i.style.fontSize||''; fields['field'+k+'Color']=i.style.color||''; fields['field'+k+'Bg']=i.style.backgroundColor||'';});
+    const title=document.getElementById('titleYear');
+    fields.titleYear=title.value; fields.titleYearFont=title.style.fontWeight||''; fields.titleYearSize=title.style.fontSize||''; fields.titleYearColor=title.style.color||''; fields.titleYearBg=title.style.backgroundColor||'';
+    const logo=document.getElementById('schoolLogo').src;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({students,fields,logo}));
+}
+
+function loadData(){
+    const data=localStorage.getItem(STORAGE_KEY); if(!data) return;
+    const obj=JSON.parse(data); const tb=document.querySelector('#tbl tbody'); tb.innerHTML='';
+    obj.students.forEach(rowData=>{
+        addStudent(); 
+        const inputs=tb.lastElementChild.querySelectorAll('input'); 
+        inputs.forEach((i,idx)=>{
+            const cell=rowData[idx]; 
+            if(cell){
+                i.value=cell.value||'';
+                i.style.fontSize=i.classList.contains('name')?'14px':(cell.fontSize||'');
+                i.style.fontWeight=cell.fontWeight||'';
+                i.style.color=cell.color||'';
+                i.style.backgroundColor=cell.backgroundColor||'';
+            }
+        });
+    });
+    document.querySelectorAll('.header-grid input, .label-input input').forEach((i,k)=>{const f=obj.fields['field'+k]; if(f) i.value=f; if(obj.fields['field'+k+'Font']) i.style.fontWeight=obj.fields['field'+k+'Font']; if(obj.fields['field'+k+'Size']) i.style.fontSize=obj.fields['field'+k+'Size']; if(obj.fields['field'+k+'Color']) i.style.color=obj.fields['field'+k+'Color']; if(obj.fields['field'+k+'Bg']) i.style.backgroundColor=obj.fields['field'+k+'Bg'];});
+    const title=document.getElementById('titleYear');
+    if(obj.fields.titleYear){title.value=obj.fields.titleYear; if(obj.fields.titleYearFont) title.style.fontWeight=obj.fields.titleYearFont; if(obj.fields.titleYearSize) title.style.fontSize=obj.fields.titleYearSize; if(obj.fields.titleYearColor) title.style.color=obj.fields.titleYearColor; if(obj.fields.titleYearBg) title.style.backgroundColor=obj.fields.titleYearBg;}
+    if(obj.logo) document.getElementById('schoolLogo').src=obj.logo;
+    calc();
+}
+
+document.querySelector('#tbl tbody').addEventListener('input',()=>{calc(); saveData();});
+document.querySelectorAll('.header-grid input, .label-input input').forEach(i=>i.addEventListener('input', saveData));
+document.getElementById('titleYear').addEventListener('input', saveData);
+</script>
+</body>
+  </html>
