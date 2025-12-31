@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لبنت خلتي (آلاءء) 😘</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#fff1f5,#f0f7ff);
+    margin:0; padding:20px; text-align:center;
+  }
+  .card{
+    background:#fff; border-radius:18px; padding:20px;
+    max-width:700px; margin:20px auto; box-shadow:0 10px 25px rgba(0,0,0,.08);
+  }
+  h1{margin-top:0}
+  .btn{
+    background:#ff5a8a; color:#fff; border:none; padding:10px 18px;
+    border-radius:10px; font-size:16px; cursor:pointer;
+  }
+  input{
+    padding:10px; border-radius:10px; border:1px solid #ddd; width:80%;
+    font-size:16px;
+  }
+  img{width:100%; max-width:500px; border-radius:15px; margin-bottom:20px;}
+</style>
+<script>
+function checkPassword(){
+  var p = document.getElementById('pass').value;
+  if(p === '752008'){
+    document.getElementById('login').style.display='none';
+    document.getElementById('content').style.display='block';
+  } else {
+    alert('الباسورد غلط 😅');
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="login" class="card">
+  <h2>🔒 الصفحة دي خاصة</h2>
+  <p>اكتبي كلمة السر</p>
+  <input type="password" id="pass" placeholder="كلمة السر">
+  <br><br>
+  <button class="btn" onclick="checkPassword()">دخول</button>
+</div>
+
+<div id="content" class="card" style="display:none;">
+  <h1>لبنت خلتي (آلاءء) 😘</h1>
+  <p>
+    كل سنه وانتى طيبه ي بنت خلتى وربنا يخليكى يارب ويجعلها سنه سعيده عليكى
+    وتحققي كل الى نفسك فيه يارب وتبقي احسن دكتوره ف الدنياا كداا 😍😘
+    ويبعد عنك ولا الحلال والحرام 😂♥
+  </p>
+
+  <h3>📸 صور حلوة</h3>
+  <img src="https://i.ibb.co/fn1zK3p/flower1.jpg" alt="صورة جميلة 1">
+  <img src="https://i.ibb.co/5x2W4v7/flower2.jpg" alt="صورة جميلة 2">
+  <img src="https://i.ibb.co/6vV6mHx/flower3.jpg" alt="صورة جميلة 3">
+
+  <h3>🎥 فيديوهات تيك توك</h3>
+  <blockquote class="tiktok-embed"
+    cite="https://vt.tiktok.com/ZS5MRPWQ7/"
+    style="max-width: 100%; min-width: 325px;">
+    <section></section>
+  </blockquote>
+
+  <blockquote class="tiktok-embed"
+    cite="https://vt.tiktok.com/ZS5M8JGXp/"
+    style="max-width: 100%; min-width: 325px;">
+    <section></section>
+  </blockquote>
+
+  <blockquote class="tiktok-embed"
+    cite="https://vt.tiktok.com/ZS5M8Jqnq/"
+    style="max-width: 100%; min-width: 325px;">
+    <section></section>
+  </blockquote>
+
+</div>
+
+<script async src="https://www.tiktok.com/embed.js"></script>
+</body>
+</html>
