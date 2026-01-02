@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gift Battle DEMO</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: radial-gradient(circle at top, #2a2f66, #0b0d1c);
+  color: #fff;
+}
+
+.container {
+  padding: 14px;
+  text-align: center;
+  position: relative;
+}
+
+.balance {
+  color: #ffd966;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.switcher button {
+  margin: 4px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  font-weight: bold;
+}
+
+.active {
+  background: #ffd84d;
+  color: #000;
+}
+
+.case-wrapper {
+  position: relative;
+  max-width: 360px;
+  height: 140px;
+  margin: 10px auto;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,.25);
+  background: #0f1230;
+}
+
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 22px solid #ff3b3b;
+  z-index: 5;
+}
+
+.items {
+  display: flex;
+  gap: 10px;
+  padding: 0 160px;
+  height: 100%;
+  align-items: center;
+  will-change: transform;
+}
+
+.item {
+  width: 110px;
+  height: 110px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: bold;
+  background: #1a1f4d;
+  border: 3px solid #555;
+  flex-shrink: 0;
+}
+
+.common { border-color: #777; }
+.uncommon { border-color: #3cff7a; }
+.rare { border-color: #4aa3ff; }
+.epic { border-color: #b56bff; }
+.legend { border-color: #ffae00; }
+
+.win {
+  box-shadow: 0 0 30px currentColor;
+  transform: scale(1.08);
+}
+
+.main-btn {
+  margin-top: 12px;
+  padding: 14px 32px;
+  border-radius: 30px;
+  border: none;
+  font-weight: bold;
+  background: linear-gradient(135deg,#ffd84d,#ff9f1c);
+  width: 100%;
+}
+
+.result {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.notice {
+  font-size: 14px;
+  color: #ffbaba;
+  margin-top: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🎁 Gift Battle (DEMO)</h2>
+
+  <div class="balance">
+    ⭐ Баланс: <span id="stars">1000</span>
+  </div>
+
+  <div class="switcher">
+    <button id="starsBtn" class="active">⭐ Звёзды</button>
+    <button id="nftBtn">💎 NFT</button>
+  </div>
+
+  <div class="case-wrapper">
+    <div class="pointer"></div>
+    <div class="items" id="items"></div>
+  </div>
+
+  <button class="main-btn" id="spinBtn">OPEN</button>
+
+  <div class="result" id="result"></div>
+  <div class="notice" id="notice"></div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let stars = 1000;
+let mode = "stars";
+
+const starsEl = document.getElementById("stars");
+const itemsEl = document.getElementById("items");
+const resultEl = document.getElementById("result");
+const noticeEl = document.getElementById("notice");
+
+const starPrizes = [
+  { name:"Ничего", chance:50, cls:"common" },
+  { name:"15 ⭐", chance:30, cls:"uncommon" },
+  { name:"50 ⭐", chance:10, cls:"rare" },
+  { name:"100 ⭐", chance:3, cls:"epic" }
+];
+
+const nftPrizes = [
+  { name:"Ничего", chance:99, cls:"common" },
+  { name:"Snoop Dogg", chance:0.2, cls:"legend" },
+  { name:"Snoop Cigar", chance:0.2, cls:"legend" },
+  { name:"Snoop Swag", chance:0.2, cls:"legend" },
+  { name:"Candy Cane", chance:0.2, cls:"legend" },
+  { name:"Lol Pop", chance:0.2, cls:"legend" }
+];
+
+function weightedPick(prizes) {
+  let r = Math.random() * 100;
+  let sum = 0;
+  for (let p of prizes) {
+    sum += p.chance;
+    if (r <= sum) return p;
+  }
+  return prizes[0];
+}
+
+function spin() {
+  const cost = mode === "stars" ? 1 : 30;
+  if (stars < cost) return;
+
+  stars -= cost;
+  starsEl.textContent = stars;
+
+  resultEl.textContent = "";
+  noticeEl.textContent = "";
+
+  const prizes = mode === "stars" ? starPrizes : nftPrizes;
+
+  itemsEl.innerHTML = "";
+  itemsEl.style.transition = "none";
+  itemsEl.style.transform = "translateX(0)";
+
+  // наполняем ленту
+  for (let i = 0; i < 40; i++) {
+    const p = weightedPick(prizes);
+    const el = document.createElement("div");
+    el.className = `item ${p.cls}`;
+    el.textContent = p.name;
+    itemsEl.appendChild(el);
+  }
+
+  // центрируем
+  const wrapper = itemsEl.parentElement;
+  const targetOffset =
+    itemsEl.scrollWidth / 2 - wrapper.clientWidth / 2;
+
+  itemsEl.offsetHeight; // фикс рендера
+
+  itemsEl.style.transition = "transform 4s cubic-bezier(.15,.6,.1,1)";
+  itemsEl.style.transform = `translateX(-${targetOffset}px)`;
+
+  // определяем элемент под стрелкой
+  setTimeout(() => {
+    const pointerX =
+      wrapper.getBoundingClientRect().left + wrapper.clientWidth / 2;
+
+    let closest = null;
+    let minDist = Infinity;
+
+    [...itemsEl.children].forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      const dist = Math.abs(center - pointerX);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = el;
+      }
+    });
+
+    closest.classList.add("win");
+    resultEl.textContent = "🎉 Выпало: " + closest.textContent;
+    noticeEl.textContent =
+      "⚠️ Внимание: это демо-режим, здесь нет вывода звёзд и подарков!";
+  }, 4200);
+}
+
+document.getElementById("spinBtn").onclick = spin;
+
+document.getElementById("starsBtn").onclick = () => {
+  mode = "stars";
+  starsBtn.classList.add("active");
+  nftBtn.classList.remove("active");
+};
+
+document.getElementById("nftBtn").onclick = () => {
+  mode = "nft";
+  nftBtn.classList.add("active");
+  starsBtn.classList.remove("active");
+};
+</script>
+
+</body>
+</html>
