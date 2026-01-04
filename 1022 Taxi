@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Taxi 1022 | Sultan Taxi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body { font-family: Arial; background:#f2f2f2; margin:0; }
+header { background:#0a7cff; color:white; padding:15px; text-align:center; }
+nav button {
+  width:50%; padding:12px; font-size:16px; border:none;
+}
+.active { background:#0a7cff; color:white; }
+.passive { background:#ddd; }
+
+.box { padding:15px; }
+input, button {
+  width:100%; padding:12px; margin-top:8px; font-size:16px;
+}
+button { background:#0a7cff; color:white; border:none; }
+.cancel { background:#d9534f; }
+.order {
+  background:white; padding:10px; margin-top:8px; border-radius:6px;
+}
+.cancelled {
+  background:#ffe6e6;
+  color:#a00;
+}
+#map { width:100%; height:250px; margin-top:10px; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>🚖 Taxi 1022</h2>
+  <div>SULTAN TAXI</div>
+</header>
+
+<nav>
+  <button id="btnClient" class="active" onclick="showClient()">Klient</button>
+  <button id="btnAdmin" class="passive" onclick="showAdmin()">Admin</button>
+</nav>
+
+<!-- KLIENT -->
+<div id="client" class="box">
+  <input id="a" placeholder="A nuqta (qayerdan)">
+  <input id="b" placeholder="B nuqta (qayerga)">
+  <input id="km" type="number" placeholder="Masofa (km)">
+  <button onclick="buyurtma()">Buyurtma berish</button>
+  <button class="cancel" onclick="cancelLast()">❌ Otmena qilish</button>
+  <div id="info"></div>
+  <div id="map"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="box" style="display:none;">
+  <h3>📋 Buyurtmalar bazasi</h3>
+  <div id="orders"></div>
+</div>
+
+<script>
+let map;
+
+function initMap(){
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 39.7747, lng: 64.4286 },
+    zoom: 12
+  });
+}
+
+function buyurtma(){
+  let a = aInput.value;
+  let b = bInput.value;
+  let km = parseFloat(kmInput.value);
+
+  if(a=="" || b=="" || isNaN(km)){
+    alert("Hamma joyni to‘ldiring");
+    return;
+  }
+
+  let narx = (km * 1500) + 5000;
+
+  let data = {
+    a, b, km, narx,
+    status: "YANGI",
+    vaqt: new Date().toLocaleString()
+  };
+
+  let list = JSON.parse(localStorage.getItem("orders") || "[]");
+  list.push(data);
+  localStorage.setItem("orders", JSON.stringify(list));
+
+  info.innerHTML =
+    "✅ Buyurtma qabul qilindi<br><b>Narx:</b> " + narx + " so‘m";
+
+  aInput.value=""; bInput.value=""; kmInput.value="";
+}
+
+function cancelLast(){
+  let list = JSON.parse(localStorage.getItem("orders") || "[]");
+  if(list.length === 0){
+    alert("Bekor qilinadigan buyurtma yo‘q
