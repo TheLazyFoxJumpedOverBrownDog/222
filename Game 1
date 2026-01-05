@@ -1,0 +1,8 @@
+let balance = 10000;
+
+function trade(type) {
+  let move = Math.random() > 0.5 ? 1 : -1;
+  let pnl = move * 100;
+  balance += pnl;
+  alert("P&L: " + pnl + " | Balance: " + balance);
+}
