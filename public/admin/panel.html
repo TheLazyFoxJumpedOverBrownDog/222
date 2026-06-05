@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Panel</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: #f5f7fb;
+            color: #111;
+        }
+
+        header {
+            padding: 20px 30px;
+            font-size: 22px;
+            font-weight: 700;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .game {
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .count {
+            font-size: 22px;
+            margin-top: 5px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #111;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    Admin Panel
+</header>
+
+<div class="wrap">
+
+    <div class="card">
+
+        <div class="topbar">
+            <h2>Live Players</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <p id="total">Total online: 0</p>
+
+        <div class="stats" id="stats"></div>
+
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+import { getFirestore, collection, onSnapshot } 
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB3pt3fBLum7MqDgxigLijqgpVQvGIFxy4",
+  authDomain: "game-site-84791.firebaseapp.com",
+  projectId: "game-site-84791",
+  storageBucket: "game-site-84791.firebasestorage.app",
+  messagingSenderId: "512529430981",
+  appId: "1:512529430981:web:a09e38bb2909382b81b3ac"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const statsEl = document.getElementById("stats");
+const totalEl = document.getElementById("total");
+
+// protect page
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "/admin/";
+    }
+});
+
+window.logout = async () => {
+    await signOut(auth);
+    window.location.href = "/admin/";
+};
+
+// LIVE DATA
+onSnapshot(collection(db, "livePlayers"), (snap) => {
+
+    const now = Date.now();
+    const counts = {};
+    let total = 0;
+
+    snap.docs.forEach(doc => {
+        const d = doc.data();
+
+        // active users only (20 sec window)
+        if (now - d.lastSeen < 20000) {
+            counts[d.game] = (counts[d.game] || 0) + 1;
+            total++;
+        }
+    });
+
+    totalEl.textContent = "Total online: " + total;
+
+    statsEl.innerHTML = Object.entries(counts)
+        .map(([game, count]) => `
+            <div class="box">
+                <div class="game">${game}</div>
+                <div class="count">${count}</div>
+            </div>
+        `)
+        .join("");
+
+});
+</script>
+
+</body>
+</html>
